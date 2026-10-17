@@ -2,10 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 import models  # noqa: F401  (registers the tables)
+from routers import auth
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="PS05 Adaptive Auth")
+app.include_router(auth.router)
 
 app.add_middleware(
     CORSMiddleware,

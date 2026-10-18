@@ -8,6 +8,8 @@ import schemas
 import security
 from database import get_db
 
+import privacy 
+
 router = APIRouter(prefix="/api/events", tags=["events"])
 
 
@@ -23,9 +25,10 @@ def record_login_event(
     event = models.LoginEvent(
         user_id=user_id,
         email_attempted=email_attempted,
-        ip_address=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent"),
+        ip_prefix=privacy.truncate_ip(privacy.get_client_ip(request)),
+        ua_summary=privacy.summarize_ua(request.headers.get("user-agent")),
         device_id=device_id,
+        country=privacy.get_country(request),
         success=success,
         failure_reason=failure_reason,
     )

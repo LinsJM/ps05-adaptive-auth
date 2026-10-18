@@ -34,9 +34,10 @@ class LoginResponse(BaseModel):
 class LoginEventOut(BaseModel):
     id: int
     email_attempted: str
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    ip_prefix: Optional[str] = None
+    ua_summary: Optional[str] = None
     device_id: Optional[str] = None
+    country: Optional[str] = None
     success: bool
     failure_reason: Optional[str] = None
     created_at: datetime

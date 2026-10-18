@@ -41,7 +41,7 @@ export default function Home() {
                 <th className="p-2">Time</th>
                 <th className="p-2">Result</th>
                 <th className="p-2">Reason</th>
-                <th className="p-2">IP</th>
+                <th className="p-2">Network</th>
                 <th className="p-2">Device</th>
               </tr>
             </thead>
@@ -53,7 +53,7 @@ export default function Home() {
                     {e.success ? "Success" : "Failed"}
                   </td>
                   <td className="p-2">{e.failure_reason || "-"}</td>
-                  <td className="p-2">{e.ip_address}</td>
+                  <td className="p-2">{e.ip_prefix}</td>
                   <td className="p-2">{e.device_id ? e.device_id.slice(0, 8) : "-"}</td>
                 </tr>
               ))}

@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import Request
+from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -68,3 +69,11 @@ def get_country(request: Request):
             return header.strip().upper()[:2]
         return DEFAULT_DEMO_COUNTRY
     return None
+
+def get_hour(request: Request) -> int:
+    """Hour of day in UTC (0-23). In demo mode an X-Demo-Hour header overrides it."""
+    if DEMO_MODE:
+        header = request.headers.get("x-demo-hour")
+        if header and header.isdigit() and 0 <= int(header) <= 23:
+            return int(header)
+    return datetime.now(timezone.utc).hour

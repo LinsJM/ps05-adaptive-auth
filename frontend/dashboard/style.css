@@ -1,44 +1,48 @@
 /* ==============================================================
-   DIGNITAS: CYBER-NEUMORPHIC (SOFT UI) DESIGN SYSTEM
-   Adaptive Authentication & SOC Gateway
+   DIGNITAS: iOS TRANSLUCENT FROSTED GLASS (GLASSMORPHISM) THEME
+   Inspired by iOS & visionOS Liquid Glass Design System
    ============================================================== */
 
 :root {
-  /* Neumorphic Dark Canvas Palette */
-  --neu-bg: #141824;
-  --neu-surface: #181d2b;
-  --neu-surface-hover: #1b2131;
-  --neu-surface-active: #131722;
+  /* Canvas & Glass Tint */
+  --bg-dark: #07090e;
+  --glass-surface: rgba(18, 24, 40, 0.48);
+  --glass-surface-hover: rgba(28, 36, 58, 0.6);
+  --glass-surface-active: rgba(38, 48, 76, 0.72);
+  --glass-deep: rgba(10, 14, 24, 0.65);
 
-  /* Dual Shadows for Extruded / Elevated Elements (Raised) */
-  --neu-raised: 8px 8px 18px #0b0d14, -8px -8px 18px #1f273b;
-  --neu-raised-sm: 4px 4px 10px #0c0e16, -4px -4px 10px #1e263a;
-  --neu-raised-lg: 14px 14px 30px #090b10, -14px -14px 30px #212a40;
+  /* iOS Glass Hairline Borders & Specular Highlights */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+  --glass-border-bright: 1px solid rgba(255, 255, 255, 0.25);
+  --glass-border-subtle: 1px solid rgba(255, 255, 255, 0.08);
 
-  /* Inset Shadows for Recessed / Engraved Elements */
-  --neu-inset: inset 4px 4px 8px #0c0e15, inset -4px -4px 8px #1e263a;
-  --neu-inset-deep: inset 6px 6px 14px #090b10, inset -6px -6px 14px #21293e;
+  /* iOS Frosted Glass Shadows & Inset Highlights */
+  --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --glass-shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --glass-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.28);
 
-  /* Borders & Highlights */
-  --neu-bevel: 1px solid rgba(255, 255, 255, 0.04);
-  --neu-bevel-bright: 1px solid rgba(255, 255, 255, 0.08);
 
-  /* Cyber Accents */
+  /* Blur Presets */
+  --blur-base: blur(26px) saturate(190%);
+  --blur-heavy: blur(36px) saturate(210%);
+  --blur-subtle: blur(14px) saturate(160%);
+
+  /* Accents */
+  --ios-blue: #007aff;
+  --ios-blue-gradient: linear-gradient(135deg, #0a84ff, #0062cc);
   --accent-cyan: #00d2ff;
-  --accent-blue: #3b82f6;
-  --accent-green: #00f59b;
-  --accent-yellow: #ffb800;
-  --accent-orange: #ff7700;
-  --accent-red: #ff3366;
-  --accent-purple: #a855f7;
+  --accent-green: #34c759;
+  --accent-yellow: #ff9f0a;
+  --accent-orange: #ff9500;
+  --accent-red: #ff3b30;
+  --accent-purple: #af52de;
 
-  /* Text Colors */
-  --text-main: #f0f4fc;
-  --text-muted: #8e9bb5;
-  --text-dim: #54627d;
+  /* Typography */
+  --text-main: #f5f7fa;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
 
-  /* Fonts */
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
@@ -50,25 +54,86 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--neu-bg);
+  background-color: var(--bg-dark);
   color: var(--text-main);
   min-height: 100vh;
   line-height: 1.5;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* ==============================================================
-   TOP NEUMORPHIC NAVBAR
+   iOS AMBIENT GLOW BACKGROUND MESH (DYNAMIC VIBRANT ORBS)
+   ============================================================== */
+
+.ambient-glow-mesh {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.62;
+  animation: orbDrift 18s ease-in-out infinite alternate;
+}
+
+.orb-blue {
+  width: 650px;
+  height: 650px;
+  background: radial-gradient(circle, #2563eb 0%, rgba(37, 99, 235, 0.55) 45%, transparent 70%);
+  top: 5%;
+  left: 5%;
+  animation-duration: 20s;
+}
+
+.orb-purple {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, #9333ea 0%, rgba(147, 51, 234, 0.5) 45%, transparent 70%);
+  top: 25%;
+  right: 5%;
+  animation-duration: 24s;
+  animation-delay: -5s;
+}
+
+.orb-cyan {
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, #0891b2 0%, rgba(6, 182, 212, 0.45) 45%, transparent 70%);
+  bottom: 5%;
+  left: 25%;
+  animation-duration: 16s;
+  animation-delay: -10s;
+}
+
+@keyframes orbDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, -40px) scale(1.12); }
+  100% { transform: translate(-40px, 50px) scale(0.92); }
+}
+
+/* ==============================================================
+   FROSTED GLASS NAVBAR (iOS DOCK FEEL)
    ============================================================== */
 
 .global-navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border-bottom: var(--neu-bevel);
+  padding: 0.9rem 2.25rem;
+  background: rgba(13, 18, 30, 0.7);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
+  border-bottom: var(--glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -77,19 +142,21 @@ body {
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 0.85rem;
 }
 
 .brand-shield {
-  font-size: 1.8rem;
+  font-size: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--glass-border);
+  backdrop-filter: var(--blur-subtle);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .brand-title {
@@ -103,13 +170,13 @@ body {
 }
 
 .badge-ps05 {
-  font-size: 0.7rem;
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-  color: #000;
+  font-size: 0.68rem;
+  background: linear-gradient(135deg, #00d2ff, #007aff);
+  color: #fff;
   font-weight: 800;
-  padding: 0.15rem 0.5rem;
+  padding: 0.15rem 0.55rem;
   border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+  box-shadow: 0 0 12px rgba(0, 210, 255, 0.45);
 }
 
 .brand-subtitle {
@@ -118,14 +185,15 @@ body {
   display: block;
 }
 
-/* Minimal App Switcher */
+/* Translucent iOS Pill Switcher */
 .app-switcher {
   display: flex;
-  background: var(--neu-bg);
-  padding: 0.4rem;
-  border-radius: 14px;
-  box-shadow: var(--neu-inset);
-  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: var(--glass-border-subtle);
+  padding: 0.3rem;
+  border-radius: 16px;
+  backdrop-filter: var(--blur-subtle);
+  gap: 0.3rem;
 }
 
 .nav-tab {
@@ -134,67 +202,66 @@ body {
   color: var(--text-muted);
   font-family: var(--font-sans);
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   padding: 0.5rem 1.25rem;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav-tab:hover {
   color: #fff;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .nav-tab.active {
-  background: var(--neu-surface);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Nav Right Controls */
 .nav-right-controls {
   display: flex;
   align-items: center;
-  gap: 1.1rem;
+  gap: 1rem;
 }
 
 .btn-inbox {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
-  color: #bfdbfe;
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
+  backdrop-filter: var(--blur-subtle);
+  color: #e2e8f0;
   font-size: 0.82rem;
   font-weight: 600;
-  padding: 0.55rem 1rem;
-  border-radius: 12px;
+  padding: 0.55rem 1.1rem;
+  border-radius: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .btn-inbox:hover {
-  box-shadow: 6px 6px 14px #0c0e16, -6px -6px 14px #20283c;
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-}
-
-.btn-inbox:active {
-  box-shadow: var(--neu-inset);
+  transform: translateY(-1px);
 }
 
 .inbox-badge {
-  background: #ef4444;
+  background: var(--accent-red);
   color: #fff;
   font-size: 0.68rem;
   font-weight: 800;
   padding: 0.12rem 0.45rem;
   border-radius: 10px;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 10px rgba(255, 59, 48, 0.6);
 }
 
 .gateway-status {
@@ -202,11 +269,12 @@ body {
   align-items: center;
   gap: 0.6rem;
   font-size: 0.82rem;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
+  background: rgba(255, 255, 255, 0.06);
+  border: var(--glass-border);
+  backdrop-filter: var(--blur-subtle);
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  border: var(--neu-bevel);
+  box-shadow: var(--glass-shadow-sm);
 }
 
 .status-dot {
@@ -227,23 +295,26 @@ body {
   font-weight: 700;
   font-size: 0.75rem;
   color: var(--accent-cyan);
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  padding: 0.2rem 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.2rem 0.55rem;
   border-radius: 6px;
+  border: 1px solid rgba(0, 210, 255, 0.2);
 }
 
 /* ==============================================================
-   TELEMETRY DRAWER BAR (MINIMAL SOFT UI)
+   TRANSLUCENT TELEMETRY BAR
    ============================================================== */
 
 .context-drawer-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 2rem;
-  background: var(--neu-bg);
-  border-bottom: var(--neu-bevel);
+  padding: 0.8rem 2.25rem;
+  background: rgba(10, 14, 24, 0.5);
+  backdrop-filter: var(--blur-subtle);
+  border-bottom: var(--glass-border-subtle);
+  position: relative;
+  z-index: 10;
 }
 
 .context-pill {
@@ -251,9 +322,11 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-inset);
-  padding: 0.4rem 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: var(--glass-border);
+  backdrop-filter: var(--blur-subtle);
+  box-shadow: var(--glass-shadow-sm);
+  padding: 0.45rem 1.15rem;
   border-radius: 20px;
 }
 
@@ -268,41 +341,41 @@ body {
 }
 
 .btn-drawer-toggle {
-  background: var(--neu-surface);
-  border: var(--neu-bevel);
-  box-shadow: var(--neu-raised-sm);
+  background: rgba(255, 255, 255, 0.07);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
+  backdrop-filter: var(--blur-subtle);
   color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.45rem 1rem;
-  border-radius: 10px;
+  padding: 0.45rem 1.1rem;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-drawer-toggle:hover {
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
-  box-shadow: 6px 6px 14px #0c0e16, -6px -6px 14px #20283c;
 }
 
-.btn-drawer-toggle:active {
-  box-shadow: var(--neu-inset);
-}
-
-/* Collapsible Context Drawer */
+/* Frosted Collapsible Drawer */
 .context-drawer {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), padding 0.35s ease;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-inset);
-  padding: 0 2rem;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
+  background: rgba(15, 22, 38, 0.8);
+  backdrop-filter: var(--blur-heavy);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  border-bottom: var(--glass-border);
+  padding: 0 2.25rem;
+  position: relative;
+  z-index: 10;
 }
 
 .context-drawer.open {
   max-height: 480px;
-  padding: 1.5rem 2rem;
-  border-bottom: var(--neu-bevel);
+  padding: 1.75rem 2.25rem;
 }
 
 .drawer-header {
@@ -319,9 +392,8 @@ body {
 }
 
 .btn-close-drawer {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-raised-sm);
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: var(--glass-border);
   color: var(--text-muted);
   width: 28px;
   height: 28px;
@@ -351,19 +423,22 @@ body {
 .form-group input[type="number"],
 .form-group input[type="email"],
 .form-group input[type="password"] {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--glass-border);
+  backdrop-filter: var(--blur-subtle);
   color: #fff;
-  padding: 0.65rem 0.85rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  padding: 0.65rem 0.95rem;
+  border-radius: 12px;
+  font-size: 0.86rem;
   font-family: inherit;
   outline: none;
+  transition: all 0.2s ease;
 }
 
 .form-group input:focus {
-  box-shadow: var(--neu-inset), 0 0 8px rgba(0, 210, 255, 0.3);
+  border-color: rgba(96, 165, 250, 0.6);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .checkbox-group label {
@@ -387,24 +462,20 @@ body {
 }
 
 .btn-preset {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.06);
+  border: var(--glass-border);
   color: var(--text-muted);
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
+  padding: 0.45rem 0.95rem;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-preset:hover {
+  background: rgba(255, 255, 255, 0.12);
   color: var(--accent-cyan);
-}
-
-.btn-preset:active {
-  box-shadow: var(--neu-inset);
 }
 
 /* ==============================================================
@@ -413,8 +484,10 @@ body {
 
 .main-container {
   max-width: 1280px;
-  margin: 2rem auto;
+  margin: 2.25rem auto 3.5rem;
   padding: 0 1.5rem;
+  position: relative;
+  z-index: 10;
 }
 
 .view-panel {
@@ -423,24 +496,24 @@ body {
 
 .view-panel.active {
   display: block;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==============================================================
-   VIEW 1: CYBER-NEUMORPHIC PORTAL & PIXEL PHONE
+   VIEW 1: iOS FROSTED GLASS SIGN IN PORTAL & PHONE
    ============================================================== */
 
 .portal-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
-  gap: 3rem;
+  gap: 3.25rem;
   align-items: start;
-  margin: 1.5rem auto 3rem;
+  margin: 1rem auto 3rem;
 }
 
 @media (max-width: 950px) {
@@ -449,14 +522,21 @@ body {
   }
 }
 
-/* Neumorphic Google Auth Card */
+/* Frosted Glass Auth Card */
 .google-auth-card {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-lg);
-  border: var(--neu-bevel);
-  border-radius: 28px;
+  background: var(--glass-surface);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
+  border-radius: 32px;
   padding: 2.75rem 2.5rem;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.google-auth-card:hover {
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .auth-card-header {
@@ -471,7 +551,7 @@ body {
 }
 
 .google-g-logo svg {
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4));
 }
 
 .auth-card-header h2 {
@@ -491,7 +571,7 @@ body {
   color: var(--accent-cyan);
 }
 
-/* Neumorphic App Chips */
+/* Glass App Chips */
 .auth-app-selector {
   display: flex;
   justify-content: center;
@@ -500,30 +580,32 @@ body {
 }
 
 .app-chip {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.06);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
+  backdrop-filter: var(--blur-subtle);
   color: var(--text-muted);
   font-size: 0.84rem;
   font-weight: 600;
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1.35rem;
   border-radius: 25px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .app-chip:hover {
   color: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .app-chip.active {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  color: var(--accent-cyan);
-  border-color: rgba(0, 210, 255, 0.3);
+  background: rgba(0, 122, 255, 0.25);
+  border: 1px solid rgba(0, 122, 255, 0.6);
+  color: #93c5fd;
+  box-shadow: 0 0 16px rgba(0, 122, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Neumorphic Floating Inputs */
+/* iOS Glass Input Fields */
 .google-input-group {
   position: relative;
   margin-bottom: 1.6rem;
@@ -531,11 +613,12 @@ body {
 
 .google-input-group input {
   width: 100%;
-  padding: 1.05rem 1.15rem;
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  border: var(--neu-bevel);
-  border-radius: 14px;
+  padding: 1.05rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--glass-border);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  backdrop-filter: var(--blur-subtle);
+  border-radius: 16px;
   color: #fff;
   font-size: 0.95rem;
   font-family: inherit;
@@ -544,21 +627,21 @@ body {
 }
 
 .google-input-group input:focus {
-  box-shadow: var(--neu-inset-deep), 0 0 14px rgba(66, 133, 244, 0.3);
-  border-color: rgba(66, 133, 244, 0.5);
+  border-color: rgba(96, 165, 250, 0.8);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 .google-input-group label {
   position: absolute;
   top: 50%;
-  left: 1.15rem;
+  left: 1.25rem;
   transform: translateY(-50%);
   color: var(--text-dim);
   font-size: 0.9rem;
   pointer-events: none;
   transition: all 0.2s ease;
-  background: var(--neu-surface);
-  padding: 0 0.4rem;
+  padding: 0 0.3rem;
   border-radius: 4px;
 }
 
@@ -568,6 +651,8 @@ body {
   font-size: 0.74rem;
   color: #60a5fa;
   font-weight: 600;
+  background: rgba(14, 20, 34, 0.85);
+  backdrop-filter: blur(8px);
 }
 
 .form-row-actions {
@@ -577,36 +662,36 @@ body {
 }
 
 .btn-google-next {
-  background: linear-gradient(135deg, #1a73e8, #1558b0);
-  box-shadow: 6px 6px 16px #0b0d14, -6px -6px 16px #1f273b;
+  background: var(--ios-blue-gradient);
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   color: #fff;
   border: none;
   font-size: 0.95rem;
   font-weight: 700;
   padding: 0.8rem 2.25rem;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-google-next:hover {
   transform: translateY(-2px);
-  box-shadow: 8px 8px 20px #090b10, -8px -8px 20px #222a40;
+  box-shadow: 0 8px 25px rgba(0, 122, 255, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-google-next:active {
   transform: translateY(0);
-  box-shadow: inset 3px 3px 6px #0d3870, inset -3px -3px 6px #2482ff;
 }
 
-/* Callout Evaluation Results */
+/* Result Evaluation Callout */
 .login-result-callout {
   margin-top: 1.5rem;
   padding: 1.25rem;
-  border-radius: 14px;
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  border: var(--neu-bevel);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: var(--blur-subtle);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
 }
 
 .login-result-callout.hidden {
@@ -623,7 +708,7 @@ body {
 
 .result-msg {
   font-size: 0.86rem;
-  color: #cbd5e1;
+  color: #e2e8f0;
   margin-bottom: 0.5rem;
 }
 
@@ -638,11 +723,11 @@ body {
   padding: 0.15rem 0;
 }
 
-/* Neumorphic 1-Click Demo Trigger Bar */
+/* 1-Click Demo Triggers */
 .demo-triggers-bar {
   margin-top: 2.25rem;
   padding-top: 1.75rem;
-  border-top: var(--neu-bevel);
+  border-top: var(--glass-border-subtle);
 }
 
 .triggers-label {
@@ -665,33 +750,30 @@ body {
   padding: 0.75rem 1rem;
   font-size: 0.8rem;
   font-weight: 600;
-  border-radius: 12px;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: var(--glass-border);
+  backdrop-filter: var(--blur-subtle);
+  box-shadow: var(--glass-shadow-sm);
   color: var(--text-main);
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .btn-demo-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 6px 6px 14px #0c0e16, -6px -6px 14px #20283c;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.btn-demo-pill:active {
-  transform: translateY(0);
-  box-shadow: var(--neu-inset);
-}
-
-.pill-green:hover { color: #86efac; border-color: rgba(34, 197, 94, 0.4); }
-.pill-yellow:hover { color: #fde047; border-color: rgba(234, 179, 8, 0.4); }
-.pill-red:hover { color: #fca5a5; border-color: rgba(239, 68, 68, 0.4); }
-.pill-pink:hover { color: #f472b6; border-color: rgba(236, 72, 153, 0.4); }
+.pill-green:hover { border-color: rgba(52, 199, 89, 0.5); color: #86efac; }
+.pill-yellow:hover { border-color: rgba(255, 159, 10, 0.5); color: #fde047; }
+.pill-red:hover { border-color: rgba(255, 59, 48, 0.5); color: #fca5a5; }
+.pill-pink:hover { border-color: rgba(236, 72, 153, 0.5); color: #f472b6; }
 
 /* ==============================================================
-   CYBER-NEUMORPHIC PHONE MOCKUP (PIXEL 8)
+   iOS FROSTED GLASS PHONE (PIXEL 8 / iOS HYBRID CHASSIS)
    ============================================================== */
 
 .device-wrapper {
@@ -705,9 +787,10 @@ body {
   font-weight: 800;
   letter-spacing: 0.07em;
   color: var(--accent-cyan);
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--glass-border);
+  backdrop-filter: var(--blur-subtle);
+  box-shadow: var(--glass-shadow-sm);
   padding: 0.35rem 1rem;
   border-radius: 20px;
   margin-bottom: 1.25rem;
@@ -716,34 +799,38 @@ body {
 .phone-frame {
   width: 320px;
   height: 620px;
-  background: var(--neu-surface);
-  border: 12px solid #10141f;
-  border-radius: 46px;
-  box-shadow: 18px 18px 40px #090b10, -18px -18px 40px #1f273c;
+  background: rgba(15, 20, 32, 0.75);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
+  border: 12px solid rgba(30, 41, 59, 0.85);
+  border-radius: 48px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+/* iOS Dynamic Notch / Island */
 .phone-notch {
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 86px;
-  height: 20px;
-  background: #10141f;
-  border-radius: 12px;
+  width: 90px;
+  height: 22px;
+  background: #000;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .notch-speaker {
-  width: 36px;
+  width: 38px;
   height: 3px;
   background: #1e2638;
   border-radius: 2px;
@@ -752,18 +839,21 @@ body {
 .notch-camera {
   width: 8px;
   height: 8px;
-  background: #090c13;
-  border: 1px solid #1e2638;
+  background: #000;
+  border: 1px solid #334155;
   border-radius: 50%;
 }
 
 .phone-screen {
   flex: 1;
-  background: #090c14;
+  background: linear-gradient(180deg, rgba(14, 20, 36, 0.72) 0%, rgba(6, 10, 20, 0.82) 100%);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
   padding: 2.2rem 1.25rem 1.25rem;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  position: relative;
 }
 
 .phone-status-bar {
@@ -772,7 +862,7 @@ body {
   align-items: center;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #94a3b8;
   margin-bottom: 1.5rem;
 }
 
@@ -793,10 +883,11 @@ body {
 }
 
 .phone-wallpaper-widget {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised);
-  border: var(--neu-bevel);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 26px;
   padding: 2.25rem 1.25rem;
   width: 100%;
 }
@@ -844,14 +935,16 @@ body {
   flex-shrink: 0;
 }
 
-/* Phone Google Prompt Active */
+/* Phone Prompt - iOS Frosted Glass Action Sheet */
 .phone-content-prompt {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised);
-  border: 1px solid rgba(66, 133, 244, 0.4);
-  border-radius: 22px;
+  background: rgba(30, 41, 59, 0.75);
+  backdrop-filter: var(--blur-heavy);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  border: var(--glass-border-bright);
+  box-shadow: var(--glass-shadow-lg);
+  border-radius: 26px;
   padding: 1.35rem;
-  animation: promptSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: promptSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .phone-content-prompt.hidden,
@@ -861,7 +954,7 @@ body {
 }
 
 @keyframes promptSlideUp {
-  from { transform: translateY(30px); opacity: 0; }
+  from { transform: translateY(40px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
@@ -893,9 +986,9 @@ body {
 }
 
 .prompt-details-card {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: var(--glass-border-subtle);
+  border-radius: 14px;
   padding: 0.85rem;
   margin-bottom: 1.15rem;
 }
@@ -930,14 +1023,14 @@ body {
 
 .number-chip {
   display: inline-block;
-  background: var(--neu-surface);
-  box-shadow: 4px 4px 10px #090c12, -4px -4px 10px #1d2539, 0 0 16px rgba(37, 99, 235, 0.4);
+  background: rgba(0, 122, 255, 0.25);
+  border: 1px solid rgba(0, 122, 255, 0.6);
+  box-shadow: 0 0 20px rgba(0, 122, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   color: #60a5fa;
   font-size: 1.45rem;
   font-weight: 800;
   padding: 0.3rem 1.4rem;
-  border-radius: 14px;
-  border: 1px solid rgba(66, 133, 244, 0.3);
+  border-radius: 16px;
 }
 
 .prompt-actions {
@@ -947,45 +1040,46 @@ body {
 
 .btn-prompt-deny {
   flex: 1;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(255, 59, 48, 0.18);
+  border: 1px solid rgba(255, 59, 48, 0.45);
   color: #fca5a5;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.75rem 0.4rem;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.btn-prompt-deny:active {
-  box-shadow: var(--neu-inset);
+.btn-prompt-deny:hover {
+  background: rgba(255, 59, 48, 0.3);
 }
 
 .btn-prompt-approve {
   flex: 1;
-  background: linear-gradient(135deg, #1a73e8, #1558b0);
-  box-shadow: 4px 4px 12px #0a0d14, -4px -4px 12px #1f273b;
+  background: var(--ios-blue-gradient);
+  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   border: none;
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.75rem 0.4rem;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.btn-prompt-approve:active {
-  box-shadow: inset 2px 2px 5px #0d3870, inset -2px -2px 5px #2482ff;
+.btn-prompt-approve:hover {
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.6);
 }
 
 /* Phone Feedback */
 .phone-content-feedback {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised);
-  border-radius: 22px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 26px;
   padding: 2.25rem 1.25rem;
   text-align: center;
 }
@@ -1009,23 +1103,18 @@ body {
 }
 
 .btn-phone-dismiss {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.12);
+  border: var(--glass-border);
   color: #fff;
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.55rem 1.6rem;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
-.btn-phone-dismiss:active {
-  box-shadow: var(--neu-inset);
-}
-
 /* ==============================================================
-   VIEW 2: CYBER-NEUMORPHIC SOC METRICS & REAL-TIME STREAM
+   VIEW 2: FROSTED GLASS SOC STREAM & METRICS
    ============================================================== */
 
 .metrics-grid {
@@ -1036,16 +1125,19 @@ body {
 }
 
 .metric-card {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
-  border-radius: 18px;
+  background: var(--glass-surface);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
+  border-radius: 22px;
   padding: 1.5rem;
-  transition: transform 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .metric-card:hover {
   transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
 }
 
 .metric-title {
@@ -1070,11 +1162,11 @@ body {
   color: var(--text-dim);
 }
 
-.text-red { color: var(--accent-red); text-shadow: 0 0 10px rgba(255, 51, 102, 0.3); }
-.text-yellow { color: var(--accent-yellow); text-shadow: 0 0 10px rgba(255, 184, 0, 0.3); }
-.text-green { color: var(--accent-green); text-shadow: 0 0 10px rgba(0, 245, 155, 0.3); }
-.text-cyan { color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
-.text-purple { color: var(--accent-purple); text-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+.text-red { color: var(--accent-red); text-shadow: 0 0 12px rgba(255, 59, 48, 0.4); }
+.text-yellow { color: var(--accent-yellow); text-shadow: 0 0 12px rgba(255, 159, 10, 0.4); }
+.text-green { color: var(--accent-green); text-shadow: 0 0 12px rgba(52, 199, 89, 0.4); }
+.text-cyan { color: var(--accent-cyan); text-shadow: 0 0 12px rgba(0, 210, 255, 0.4); }
+.text-purple { color: var(--accent-purple); text-shadow: 0 0 12px rgba(175, 82, 222, 0.4); }
 
 /* Dashboard Columns */
 .dashboard-columns {
@@ -1090,10 +1182,12 @@ body {
 }
 
 .column-feed {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised);
-  border: var(--neu-bevel);
-  border-radius: 22px;
+  background: var(--glass-surface);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 26px;
   padding: 1.75rem;
 }
 
@@ -1118,10 +1212,10 @@ body {
 
 .filter-pills {
   display: flex;
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
+  background: rgba(0, 0, 0, 0.35);
+  border: var(--glass-border-subtle);
   padding: 0.25rem;
-  border-radius: 10px;
+  border-radius: 12px;
   gap: 0.2rem;
 }
 
@@ -1131,39 +1225,39 @@ body {
   color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.3rem 0.8rem;
-  border-radius: 7px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9px;
   cursor: pointer;
 }
 
 .filter-pill.active {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .btn-refresh {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--glass-border);
   color: var(--text-muted);
   font-size: 0.78rem;
   font-weight: 600;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  border-radius: 10px;
   cursor: pointer;
 }
 
-.btn-refresh:active {
-  box-shadow: var(--neu-inset);
+.btn-refresh:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 /* Events Table */
 .events-table-wrapper {
   overflow-x: auto;
-  border-radius: 14px;
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: var(--glass-border-subtle);
   padding: 0.5rem;
 }
 
@@ -1180,17 +1274,17 @@ body {
   font-weight: 700;
   font-size: 0.72rem;
   text-transform: uppercase;
-  border-bottom: var(--neu-bevel);
+  border-bottom: var(--glass-border-subtle);
 }
 
 .events-table td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   color: #e2e8f0;
 }
 
 .events-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .empty-state {
@@ -1218,11 +1312,11 @@ body {
   border-radius: 6px;
 }
 
-.sc-minimal { background: rgba(0, 245, 155, 0.15); color: #00f59b; }
-.sc-low { background: rgba(0, 210, 255, 0.15); color: #00d2ff; }
-.sc-medium { background: rgba(255, 184, 0, 0.15); color: #ffb800; }
-.sc-high { background: rgba(255, 119, 0, 0.15); color: #ff7700; }
-.sc-critical { background: rgba(255, 51, 102, 0.2); color: #ff3366; }
+.sc-minimal { background: rgba(52, 199, 89, 0.18); color: #34c759; }
+.sc-low { background: rgba(0, 210, 255, 0.18); color: #00d2ff; }
+.sc-medium { background: rgba(255, 159, 10, 0.18); color: #ff9f0a; }
+.sc-high { background: rgba(255, 149, 0, 0.18); color: #ff9500; }
+.sc-critical { background: rgba(255, 59, 48, 0.25); color: #ff3b30; }
 
 .action-badge {
   font-weight: 800;
@@ -1231,18 +1325,18 @@ body {
   border-radius: 6px;
 }
 
-.act-allow { background: rgba(0, 245, 155, 0.15); color: #00f59b; }
-.act-captcha { background: rgba(0, 210, 255, 0.15); color: #00d2ff; }
-.act-otp { background: rgba(255, 184, 0, 0.15); color: #ffb800; }
-.act-reset { background: rgba(255, 119, 0, 0.15); color: #ff7700; }
-.act-block { background: rgba(255, 51, 102, 0.25); color: #ff3366; }
+.act-allow { background: rgba(52, 199, 89, 0.2); color: #34c759; }
+.act-captcha { background: rgba(0, 210, 255, 0.2); color: #00d2ff; }
+.act-otp { background: rgba(255, 159, 10, 0.2); color: #ff9f0a; }
+.act-reset { background: rgba(255, 149, 0, 0.2); color: #ff9500; }
+.act-block { background: rgba(255, 59, 48, 0.28); color: #ff3b30; }
 
 .reason-tag {
   display: inline-block;
-  background: var(--neu-surface);
-  box-shadow: 2px 2px 5px #0a0c12;
-  border-radius: 4px;
-  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--glass-border-subtle);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
   font-size: 0.7rem;
   color: var(--text-muted);
   margin: 0.1rem;
@@ -1266,10 +1360,12 @@ body {
 
 /* Side Column Cards */
 .side-card {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised);
-  border: var(--neu-bevel);
-  border-radius: 20px;
+  background: var(--glass-surface);
+  backdrop-filter: var(--blur-base);
+  -webkit-backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 24px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
 }
@@ -1291,10 +1387,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  padding: 0.6rem 0.85rem;
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: var(--glass-border-subtle);
+  padding: 0.65rem 0.95rem;
+  border-radius: 12px;
   font-size: 0.76rem;
 }
 
@@ -1325,27 +1421,25 @@ body {
 
 .btn-action-lock {
   flex: 1;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: 1px solid rgba(255, 51, 102, 0.4);
-  color: #ff3366;
+  background: rgba(255, 59, 48, 0.18);
+  border: 1px solid rgba(255, 59, 48, 0.45);
+  color: #fca5a5;
   font-weight: 700;
   font-size: 0.76rem;
-  padding: 0.6rem;
-  border-radius: 8px;
+  padding: 0.65rem;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 .btn-action-unlock {
   flex: 1;
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: 1px solid rgba(0, 245, 155, 0.4);
-  color: #00f59b;
+  background: rgba(52, 199, 89, 0.18);
+  border: 1px solid rgba(52, 199, 89, 0.45);
+  color: #86efac;
   font-weight: 700;
   font-size: 0.76rem;
-  padding: 0.6rem;
-  border-radius: 8px;
+  padding: 0.65rem;
+  border-radius: 10px;
   cursor: pointer;
 }
 
@@ -1358,7 +1452,7 @@ body {
 .status-success { color: var(--accent-green); }
 
 /* ==============================================================
-   CYBER-NEUMORPHIC SECURITY INBOX DRAWER
+   iOS LOCK SCREEN NOTIFICATION CENTER (SECURITY ALERT DRAWER)
    ============================================================== */
 
 .inbox-drawer {
@@ -1367,9 +1461,11 @@ body {
   right: -450px;
   width: 420px;
   height: 100vh;
-  background: var(--neu-surface);
-  box-shadow: -12px 0 40px #080a10;
-  border-left: var(--neu-bevel-bright);
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: var(--blur-heavy);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.75);
+  border-left: var(--glass-border-bright);
   z-index: 150;
   display: flex;
   flex-direction: column;
@@ -1385,9 +1481,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1.35rem 1.75rem;
-  background: var(--neu-surface);
-  box-shadow: 0 4px 12px #0a0c14;
-  border-bottom: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: var(--blur-subtle);
+  border-bottom: var(--glass-border);
 }
 
 .inbox-title-wrap {
@@ -1403,9 +1499,8 @@ body {
 }
 
 .btn-close-inbox {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-raised-sm);
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: var(--glass-border);
   color: var(--text-muted);
   width: 30px;
   height: 30px;
@@ -1413,17 +1508,12 @@ body {
   cursor: pointer;
 }
 
-.btn-close-inbox:active {
-  box-shadow: var(--neu-inset);
-}
-
 .inbox-notice {
   padding: 0.75rem 1.75rem;
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
+  background: rgba(0, 122, 255, 0.12);
+  border-bottom: 1px solid rgba(0, 122, 255, 0.25);
   font-size: 0.72rem;
   color: #93c5fd;
-  border-bottom: var(--neu-bevel);
 }
 
 .inbox-list {
@@ -1435,23 +1525,30 @@ body {
   gap: 1.15rem;
 }
 
+/* iOS Notification Banner Card */
 .email-card {
-  background: var(--neu-surface);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: var(--blur-base);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
+  border-radius: 20px;
   padding: 1.25rem;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+}
+
+.email-card:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .email-card.card-alert-threat {
-  border: 1px solid rgba(255, 51, 102, 0.4);
-  box-shadow: var(--neu-raised-sm), 0 0 16px rgba(255, 51, 102, 0.15);
+  border: 1px solid rgba(255, 59, 48, 0.5);
+  background: linear-gradient(180deg, rgba(255, 59, 48, 0.14) 0%, rgba(255, 255, 255, 0.06) 60%);
+  box-shadow: 0 10px 30px rgba(255, 59, 48, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .email-card.card-alert-prompt {
-  border: 1px solid rgba(255, 184, 0, 0.4);
-  box-shadow: var(--neu-raised-sm), 0 0 16px rgba(255, 184, 0, 0.15);
+  border: 1px solid rgba(255, 159, 10, 0.5);
+  background: linear-gradient(180deg, rgba(255, 159, 10, 0.14) 0%, rgba(255, 255, 255, 0.06) 60%);
 }
 
 .email-meta {
@@ -1484,9 +1581,8 @@ body {
 }
 
 .email-bullets {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-inset);
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
   padding: 0.65rem 0.85rem;
   margin-bottom: 0.85rem;
   font-size: 0.72rem;
@@ -1504,23 +1600,23 @@ body {
 }
 
 .btn-email-action {
-  background: var(--neu-bg);
-  box-shadow: var(--neu-raised-sm);
-  border: var(--neu-bevel);
+  background: rgba(255, 255, 255, 0.1);
+  border: var(--glass-border);
   color: #fff;
   font-size: 0.72rem;
   font-weight: 600;
   padding: 0.45rem 0.85rem;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.btn-email-action:active {
-  box-shadow: var(--neu-inset);
+.btn-email-action:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .btn-email-danger {
+  background: rgba(255, 59, 48, 0.22);
+  border-color: rgba(255, 59, 48, 0.5);
   color: #fca5a5;
-  border-color: rgba(255, 51, 102, 0.4);
 }

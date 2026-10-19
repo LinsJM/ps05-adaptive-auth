@@ -62,3 +62,13 @@ class StepUpVerifyRequest(BaseModel):
     challenge_id: int
     code: str = Field(min_length=6, max_length=6)
     trust_device: bool = False
+
+class DeviceOut(BaseModel):
+    id: int
+    device_id: str
+    ua_summary: Optional[str] = None
+    trusted: bool
+    first_seen_at: datetime
+    last_seen_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

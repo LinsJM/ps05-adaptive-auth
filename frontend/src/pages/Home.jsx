@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api";
 import { SIGNAL_LABELS } from "../labels";
+import TrustedDevices from "../components/TrustedDevices";
 
 
 const DECISION_STYLES = {
@@ -104,6 +105,9 @@ export default function Home() {
       </header>
 
       <RiskBanner risk={lastRisk} />
+
+      <TrustedDevices />
+
 
       <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
         <h2 className="mb-3 text-lg font-medium">Login Activity</h2>

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import List
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 import models
@@ -17,6 +18,7 @@ WEIGHTS = {
 }
 FAILURE_POINTS = [(5, 30), (3, 15), (1, 5)]  # (minimum failures, points)
 STEP_UP_THRESHOLD = 30
+ENFORCE_STEP_UP = False  # shadow mode until the OTP flow exists on Day 3
 RESTRICT_AFTER_FAILURES = 5
 FAILURE_WINDOW_MINUTES = 15
 STUFFING_DISTINCT_EMAILS = 5
@@ -59,11 +61,13 @@ def _recent_failures(db: Session, email: str, window_start: datetime) -> int:
     )
     since = last_success[0] if last_success else window_start
     return (
-        db.query(models.LoginEvent)
+            db.query(models.LoginEvent)
         .filter(
             models.LoginEvent.email_attempted == email,
             models.LoginEvent.success.is_(False),
             models.LoginEvent.created_at > since,
+            or_(models.LoginEvent.failure_reason.is_(None),
+                models.LoginEvent.failure_reason != "restricted"),
         )
         .count()
     )
@@ -104,6 +108,8 @@ def evaluate(
                 models.LoginEvent.ip_prefix == ip_prefix,
                 models.LoginEvent.success.is_(False),
                 models.LoginEvent.created_at >= window_start,
+                or_(models.LoginEvent.failure_reason.is_(None),
+                    models.LoginEvent.failure_reason != "restricted"),
             )
             .distinct()
             .count()

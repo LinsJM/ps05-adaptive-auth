@@ -6,6 +6,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
+  const [lastRisk, setLastRisk] = useState(null);
   const [loading, setLoading] = useState(!!localStorage.getItem("token"));
 
   // On page load (or token change), fetch the user's profile
@@ -39,6 +40,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem("token", data.access_token);
     setToken(data.access_token);
     setUser(data.user);
+    setLastRisk(data.risk);
   }
 
   async function logout() {
@@ -50,10 +52,13 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+    setLastRisk(null);
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, register, login, logout }}>
+    <AuthContext.Provider
+      value={{ token, user, lastRisk, loading, register, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

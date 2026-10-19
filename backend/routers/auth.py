@@ -8,8 +8,37 @@ import schemas
 import security
 from database import get_db
 from routers.events import record_login_event
+from datetime import datetime, timedelta, timezone
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+OTP_MINUTES = 10
+MAX_OTP_ATTEMPTS = 5
+
+
+def now_naive() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def mark_device(db: Session, user, device_id, ua_summary, trusted: bool):
+    """Record a device after step-up verification. Trusted only if the user chose so."""
+    if not device_id:
+        return
+    device = (
+        db.query(models.KnownDevice)
+        .filter_by(user_id=user.id, device_id=device_id)
+        .first()
+    )
+    if device:
+        device.last_seen_at = models.utcnow()
+        if trusted:
+            device.trusted = True
+    else:
+        db.add(models.KnownDevice(
+            user_id=user.id, device_id=device_id,
+            ua_summary=ua_summary, trusted=trusted,
+        ))
+    db.commit()
 
 
 @router.post("/register", response_model=schemas.RegisterResponse,
@@ -50,7 +79,7 @@ def update_known_device(db: Session, user, device_id, ua_summary):
             ua_summary=ua_summary, trusted=not has_any,
         ))
     db.commit()
-    
+
 
 @router.post("/login", response_model=schemas.LoginResponse)
 def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends(get_db)):
@@ -105,6 +134,34 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+        # Right password, but the context is risky: require verification first
+    if result.decision == "step_up" and risk.ENFORCE_STEP_UP:
+        code = security.generate_otp()
+        challenge = models.StepUpChallenge(
+            user_id=user.id,
+            device_id=payload.device_id,
+            code_hash=security.hash_otp(code),
+            risk_score=result.score,
+            reasons_json=result.reasons_json(),
+            expires_at=now_naive() + timedelta(minutes=OTP_MINUTES),
+        )
+        db.add(challenge)
+        db.commit()
+        db.refresh(challenge)
+        log(False, "step_up_required")
+        print(f"[DEMO OTP] challenge {challenge.id}: {code}")
+        return {
+            "risk": {
+                "score": result.score,
+                "decision": result.decision,
+                "reasons": result.reasons,
+                "enforced": True,
+            },
+            "step_up_required": True,
+            "challenge_id": challenge.id,
+            "demo_code": code if privacy.DEMO_MODE else None,
+        }
+
     log(True)
     update_known_device(
         db, user, payload.device_id,
@@ -133,3 +190,59 @@ def me(current_user: models.User = Depends(security.get_current_user)):
 def logout(current_user: models.User = Depends(security.get_current_user)):
     # JWTs are stateless: the client deletes the token. Endpoint exists for the API contract.
     return {"message": "Logged out"}
+
+@router.post("/verify-step-up", response_model=schemas.LoginResponse)
+def verify_step_up(
+    payload: schemas.StepUpVerifyRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    invalid = HTTPException(status_code=400, detail="Invalid or expired code")
+
+    challenge = (
+        db.query(models.StepUpChallenge).filter_by(id=payload.challenge_id).first()
+    )
+    if (
+        not challenge
+        or challenge.used
+        or challenge.expires_at < now_naive()
+        or challenge.attempts >= MAX_OTP_ATTEMPTS
+    ):
+        raise invalid
+
+    challenge.attempts += 1
+    if not security.verify_otp(payload.code, challenge.code_hash):
+        db.commit()
+        raise invalid
+
+    challenge.used = True
+    db.commit()
+
+    user = db.query(models.User).filter_by(id=challenge.user_id).first()
+    record_login_event(
+        db, request,
+        email_attempted=user.email,
+        success=True,
+        user_id=user.id,
+        device_id=challenge.device_id,
+        risk_score=challenge.risk_score,
+        decision="step_up",
+        reasons_json=challenge.reasons_json,
+    )
+    mark_device(
+        db, user, challenge.device_id,
+        privacy.summarize_ua(request.headers.get("user-agent")),
+        trusted=payload.trust_device,
+    )
+
+    import json
+    return {
+        "access_token": security.create_access_token(user.id),
+        "user": user,
+        "risk": {
+            "score": challenge.risk_score or 0,
+            "decision": "step_up",
+            "reasons": json.loads(challenge.reasons_json or "[]"),
+            "enforced": True,
+        },
+    }

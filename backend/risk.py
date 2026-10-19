@@ -18,12 +18,13 @@ WEIGHTS = {
 }
 FAILURE_POINTS = [(5, 30), (3, 15), (1, 5)]  # (minimum failures, points)
 STEP_UP_THRESHOLD = 30
-ENFORCE_STEP_UP = False  # shadow mode until the OTP flow exists on Day 3
+ENFORCE_STEP_UP = True
 RESTRICT_AFTER_FAILURES = 5
 FAILURE_WINDOW_MINUTES = 15
 STUFFING_DISTINCT_EMAILS = 5
 MIN_LOGINS_FOR_HOUR = 5     # cold-start rule: need history before judging hours
 HOUR_TOLERANCE = 3          # hours either side of a usual login time
+NON_FAILURE_REASONS = ["restricted", "step_up_required"]
 
 
 @dataclass
@@ -67,7 +68,7 @@ def _recent_failures(db: Session, email: str, window_start: datetime) -> int:
             models.LoginEvent.success.is_(False),
             models.LoginEvent.created_at > since,
             or_(models.LoginEvent.failure_reason.is_(None),
-                models.LoginEvent.failure_reason != "restricted"),
+                models.LoginEvent.failure_reason.notin_(NON_FAILURE_REASONS)),
         )
         .count()
     )

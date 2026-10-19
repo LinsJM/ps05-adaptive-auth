@@ -44,3 +44,19 @@ class KnownDevice(Base):
     trusted = Column(Boolean, default=False, nullable=False)
     first_seen_at = Column(DateTime, default=utcnow)
     last_seen_at = Column(DateTime, default=utcnow)
+
+
+class StepUpChallenge(Base):
+    __tablename__ = "step_up_challenges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    device_id = Column(String)
+    code_hash = Column(String, nullable=False)   # the code itself is never stored
+    attempts = Column(Integer, default=0, nullable=False)
+    used = Column(Boolean, default=False, nullable=False)
+    risk_score = Column(Integer)
+    reasons_json = Column(Text)
+    created_at = Column(DateTime, default=utcnow)
+    expires_at = Column(DateTime, nullable=False)
+

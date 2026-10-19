@@ -1,8 +1,7 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
 from typing import Optional
-from typing import List, Optional
-
+from typing import List, Optional, Dict
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -72,3 +71,17 @@ class DeviceOut(BaseModel):
     last_seen_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class SignalCount(BaseModel):
+    signal: str
+    count: int
+
+
+class SummaryOut(BaseModel):
+    total: int
+    successful: int
+    wrong_password: int
+    challenged: int
+    verified: int
+    by_decision: Dict[str, int]
+    top_signals: List[SignalCount]

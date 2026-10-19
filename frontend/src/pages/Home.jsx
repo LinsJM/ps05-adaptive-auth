@@ -4,18 +4,21 @@ import { useAuth } from "../context/AuthContext";
 import api from "../api";
 import { SIGNAL_LABELS } from "../labels";
 import TrustedDevices from "../components/TrustedDevices";
+import SecuritySummary from "../components/SecuritySummary";
 
 
 const DECISION_STYLES = {
   allow: "bg-emerald-950 text-emerald-300",
   step_up: "bg-amber-950 text-amber-300",
   restrict: "bg-red-950 text-red-300",
+  verified: "bg-emerald-950 text-emerald-300",
 };
 
 const DECISION_LABELS = {
   allow: "Allow",
   step_up: "Step-up",
   restrict: "Restricted",
+  verified: "Verified",
 };
 
 function Badge({ decision }) {
@@ -105,6 +108,8 @@ export default function Home() {
       </header>
 
       <RiskBanner risk={lastRisk} />
+
+      <SecuritySummary />
 
       <TrustedDevices />
 

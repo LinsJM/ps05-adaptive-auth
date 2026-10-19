@@ -1,8 +1,7 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
 from typing import Optional
-from typing import List, Optional
-
+from typing import List, Optional, Dict
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -62,3 +61,27 @@ class StepUpVerifyRequest(BaseModel):
     challenge_id: int
     code: str = Field(min_length=6, max_length=6)
     trust_device: bool = False
+
+class DeviceOut(BaseModel):
+    id: int
+    device_id: str
+    ua_summary: Optional[str] = None
+    trusted: bool
+    first_seen_at: datetime
+    last_seen_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class SignalCount(BaseModel):
+    signal: str
+    count: int
+
+
+class SummaryOut(BaseModel):
+    total: int
+    successful: int
+    wrong_password: int
+    challenged: int
+    verified: int
+    by_decision: Dict[str, int]
+    top_signals: List[SignalCount]

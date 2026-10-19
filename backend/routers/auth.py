@@ -226,7 +226,7 @@ def verify_step_up(
         user_id=user.id,
         device_id=challenge.device_id,
         risk_score=challenge.risk_score,
-        decision="step_up",
+        decision="verified",
         reasons_json=challenge.reasons_json,
     )
     mark_device(

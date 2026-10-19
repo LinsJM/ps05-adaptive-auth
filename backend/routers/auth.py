@@ -18,6 +18,45 @@ def _utcnow():
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+SECURITY_NOTIFICATIONS = [
+    {
+        "id": "notif-init-1",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "type": "verified",
+        "recipient": "alice@example.com",
+        "subject": "🛡️ Security Checkup: Primary Trusted Phone Enrolled",
+        "app_id": "bank",
+        "device": "Pixel 8 Pro (Alice's Phone)",
+        "location": "Delhi, India",
+        "ip": "103.21.244.2",
+        "risk_score": 0,
+        "action": "allow",
+        "reasons": ["Device designated as primary trusted Google prompt recipient"],
+        "preview_body": "Your Google Pixel 8 Pro is registered as your primary authentication device. When unrecognized sign-ins occur, you will receive an 'Is this you?' prompt directly on your screen.",
+    }
+]
+
+
+def add_security_notification(notification_type, recipient, subject, app_id, device, location, ip, risk_score, action, reasons, preview_body):
+    item = {
+        "id": f"notif-{int(time.time() * 1000)}",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "type": notification_type,
+        "recipient": recipient,
+        "subject": subject,
+        "app_id": app_id,
+        "device": device,
+        "location": location,
+        "ip": ip,
+        "risk_score": risk_score,
+        "action": action,
+        "reasons": reasons,
+        "preview_body": preview_body,
+    }
+    SECURITY_NOTIFICATIONS.append(item)
+    return item
+
+
 @router.post("/api/auth/register", response_model=schemas.RegisterResponse, status_code=status.HTTP_201_CREATED)
 def register(payload: schemas.RegisterRequest, db: Session = Depends(get_db)):
     email = payload.email.lower()
@@ -90,6 +129,20 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
 
     # 1. HONEYTOKEN OR CRITICAL BLOCK
     if email == "backup_admin" or risk_res.action == "block" or risk_res.decision == "restrict":
+        add_security_notification(
+            notification_type="threat_blocked",
+            recipient=email,
+            subject=f"🚨 Critical Security Alert: Suspicious sign-in blocked ({payload.city or 'Foreign'}, {country})",
+            app_id=payload.app_id or "bank",
+            device=payload.device_id or "dev-unknown",
+            location=f"{payload.city or 'Foreign'}, {country}",
+            ip=client_ip,
+            risk_score=risk_res.score,
+            action="block",
+            reasons=[r.get("detail", str(r)) if isinstance(r, dict) else str(r) for r in risk_res.reasons],
+            preview_body=f"We automatically blocked an unauthorized sign-in attempt from {payload.city or 'Foreign Location'} ({country}) using IP {client_ip}. To protect your account, access has been restricted."
+        )
+
         record_login_event(
             db, request,
             email_attempted=email,
@@ -154,7 +207,7 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             app_id=payload.app_id or "bank",
         )
 
-    # 3. STEP-UP MFA REQUIRED (CAPTCHA / Email OTP / Password Reset)
+    # 3. STEP-UP MFA REQUIRED (CAPTCHA / Email OTP / Password Reset / Google Prompt)
     if risk_res.requires_step_up or risk_res.decision == "step_up":
         record_login_event(
             db, request,
@@ -180,6 +233,32 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             "otp_password_reset": "Suspicious login: OTP & mandatory password reset required (Risk 61-79)",
         }
 
+        prompt_info = {
+            "email": email,
+            "app_id": payload.app_id or "bank",
+            "device_id": payload.device_id or "dev-unrecognized",
+            "city": payload.city or "Delhi",
+            "country": country,
+            "ip_address": client_ip,
+            "time": datetime.now(timezone.utc).strftime("%H:%M UTC"),
+            "number_match": "42",
+            "action": risk_res.action,
+        }
+
+        add_security_notification(
+            notification_type="new_device",
+            recipient=email,
+            subject=f"⚠️ Security Alert: New sign-in prompt for {email}",
+            app_id=payload.app_id or "bank",
+            device=payload.device_id or "dev-unrecognized",
+            location=f"{payload.city or 'Delhi'}, {country}",
+            ip=client_ip,
+            risk_score=risk_res.score,
+            action=risk_res.action,
+            reasons=[r.get("detail", str(r)) if isinstance(r, dict) else str(r) for r in risk_res.reasons],
+            preview_body=f"A sign-in attempt was detected from {payload.device_id or 'new device'} near {payload.city or 'Delhi'}. An 'Is this you?' prompt has been sent to Alice's primary trusted device."
+        )
+
         return schemas.LoginResponse(
             access_token=None,
             user=None,
@@ -189,11 +268,13 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             action=risk_res.action,
             reasons=risk_res.reasons,
             requires_step_up=True,
-            step_up_type=risk_res.step_up_type or "email_otp",
+            step_up_type="google_prompt" if risk_res.action in ["captcha", "email_otp"] else (risk_res.step_up_type or "email_otp"),
+            prompt_details=prompt_info,
             message=challenge_messages.get(risk_res.action, "Step-up verification required."),
             latency_ms=latency_ms,
             app_id=payload.app_id or "bank",
         )
+
 
     # 4. ALLOW DIRECT ACCESS (Score 0-29: Low Risk Frictionless Login)
     token = security.create_access_token(user.id)
@@ -326,3 +407,134 @@ def me(current_user: models.User = Depends(security.get_current_user)):
 @router.post("/api/auth/logout")
 def logout(current_user: models.User = Depends(security.get_current_user)):
     return {"message": "Logged out"}
+
+
+@router.get("/api/notifications")
+def get_notifications():
+    """Return real-time security email alerts in reverse chronological order."""
+    return list(reversed(SECURITY_NOTIFICATIONS[-30:]))
+
+
+@router.post("/api/verify-prompt", response_model=schemas.LoginResponse)
+def verify_prompt(payload: schemas.PromptVerifyRequest, request: Request, db: Session = Depends(get_db)):
+    """Handles Google-style 2-Step verification prompt from Alice's primary trusted phone."""
+    t0 = time.perf_counter()
+    email = payload.email.strip().lower()
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User account not found")
+
+    if not payload.approved:
+        # User tapped [No, it's not me] -> Lock account & black-list IP
+        user.is_locked = True
+        user.locked_reason = f"Security prompt rejected by user on trusted phone (target: {payload.device_id})"
+        db.commit()
+
+        record_login_event(
+            db, request,
+            email_attempted=email,
+            success=False,
+            user_id=user.id,
+            device_id=payload.device_id,
+            app_id=payload.app_id,
+            risk_score=100,
+            decision="restrict",
+            action="block",
+            reasons_json='[{"signal": "prompt_rejected", "points": 100, "detail": "User tapped [No, it\'s not me] on trusted device."}]',
+            latency_ms=8.0,
+            city="Trusted Phone",
+        )
+
+        add_security_notification(
+            notification_type="threat_blocked",
+            recipient=email,
+            subject=f"🚨 Account Locked: Sign-in rejected by user for {email}",
+            app_id=payload.app_id,
+            device=payload.device_id,
+            location="Alerted Device",
+            ip="Blacklisted",
+            risk_score=100,
+            action="block",
+            reasons=["User responded 'No, it's not me' on trusted phone"],
+            preview_body=f"You reported an unauthorized sign-in attempt from {payload.device_id}. Your account was immediately locked to protect your data, and the attacker's connection was terminated."
+        )
+
+        return schemas.LoginResponse(
+            access_token=None,
+            user=None,
+            success=False,
+            score=100,
+            decision="restrict",
+            action="block",
+            reasons=[{"signal": "prompt_rejected", "points": 100, "detail": "User rejected the login on their trusted phone. Account locked."}],
+            requires_step_up=False,
+            message="Unauthorized login rejected! Account emergency lockdown initiated.",
+            latency_ms=8.0,
+            app_id=payload.app_id,
+        )
+
+    # User tapped [Yes, it's me] -> Trust device and allow login!
+    existing_dev = db.query(models.KnownDevice).filter(
+        models.KnownDevice.user_id == user.id,
+        models.KnownDevice.device_id == payload.device_id
+    ).first()
+    if existing_dev:
+        existing_dev.trusted = True
+        existing_dev.last_seen_at = _utcnow()
+    else:
+        db.add(models.KnownDevice(
+            user_id=user.id,
+            device_id=payload.device_id,
+            trusted=True,
+            first_seen_at=_utcnow(),
+            last_seen_at=_utcnow()
+        ))
+    db.commit()
+
+    token = security.create_access_token(user.id)
+    t_end = time.perf_counter()
+    latency_ms = round((t_end - t0) * 1000.0, 2)
+
+    record_login_event(
+        db, request,
+        email_attempted=email,
+        success=True,
+        user_id=user.id,
+        device_id=payload.device_id,
+        app_id=payload.app_id,
+        risk_score=0,
+        decision="allow",
+        action="allow",
+        reasons_json='[{"signal": "google_prompt_approved", "points": 0, "detail": "Google 2-Step verification approved on trusted phone. Device trusted."}]',
+        latency_ms=latency_ms,
+        city="Verified Prompt",
+    )
+
+    add_security_notification(
+        notification_type="verified",
+        recipient=email,
+        subject=f"✅ Sign-in approved on Alice's Trusted Phone",
+        app_id=payload.app_id,
+        device=payload.device_id,
+        location="Delhi, India",
+        ip="103.21.244.2",
+        risk_score=0,
+        action="allow",
+        reasons=["Google 2-Step prompt approved on trusted phone"],
+        preview_body=f"You successfully approved the sign-in attempt from {payload.device_id}. This device is now added to your trusted devices list."
+    )
+
+    return schemas.LoginResponse(
+        access_token=token,
+        token_type="bearer",
+        user=schemas.UserOut(id=user.id, email=user.email),
+        success=True,
+        score=0,
+        decision="allow",
+        action="allow",
+        reasons=[{"signal": "google_prompt_approved", "points": 0, "detail": "Device verified via trusted phone prompt and added to baseline."}],
+        requires_step_up=False,
+        message="Google 2-Step prompt approved! Device trusted and frictionless session granted.",
+        latency_ms=latency_ms,
+        app_id=payload.app_id,
+    )

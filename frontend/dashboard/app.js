@@ -1,21 +1,24 @@
 /**
- * DIGNITAS: Adaptive Authentication & SOC Gateway Dashboard
- * Interactive Client Logic & Demo Simulation Suite
+ * DIGNITAS: Adaptive Authentication & SOC Gateway
+ * Google-Style Minimal Portal, Pixel Phone 2-Step Prompt, & Security Mail Drawer
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   // State
+  let currentApp = 'bank';
+  let activePrompt = null;
   let currentFilter = 'all';
-  let activeChallenge = null;
-  let pollInterval = null;
 
   // DOM Elements - Navigation
-  const tabDashboard = document.getElementById('tab-dashboard');
-  const tabBank = document.getElementById('tab-bank');
-  const tabSocial = document.getElementById('tab-social');
-  const viewDashboard = document.getElementById('view-dashboard');
-  const viewBank = document.getElementById('view-bank');
-  const viewSocial = document.getElementById('view-social');
+  const tabPortal = document.getElementById('tab-portal');
+  const tabSoc = document.getElementById('tab-soc');
+  const viewPortal = document.getElementById('view-portal');
+  const viewSoc = document.getElementById('view-soc');
+
+  // DOM Elements - App Chips
+  const chipAppBank = document.getElementById('chip-app-bank');
+  const chipAppSocial = document.getElementById('chip-app-social');
+  const portalAppTitle = document.getElementById('portal-app-title');
 
   // DOM Elements - Telemetry Drawer
   const btnToggleContext = document.getElementById('btn-toggle-context');
@@ -31,81 +34,99 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctxVpn = document.getElementById('ctx-vpn');
   const presetButtons = document.querySelectorAll('.btn-preset');
 
-  // DOM Elements - Stats
+  // DOM Elements - Portal Sign In
+  const formPortalLogin = document.getElementById('form-portal-login');
+  const portalEmail = document.getElementById('portal-email');
+  const portalPassword = document.getElementById('portal-password');
+  const btnPortalSubmit = document.getElementById('btn-portal-submit');
+  const portalResult = document.getElementById('portal-result');
+
+  // DOM Elements - Demo Scenario Buttons
+  const btnDemoFamiliar = document.getElementById('btn-demo-familiar');
+  const btnDemoNewdev = document.getElementById('btn-demo-newdev');
+  const btnDemoTor = document.getElementById('btn-demo-tor');
+  const btnDemoHoney = document.getElementById('btn-demo-honey');
+
+  // DOM Elements - Alice's Trusted Pixel Phone
+  const phoneIdle = document.getElementById('phone-idle');
+  const phonePrompt = document.getElementById('phone-prompt');
+  const phoneFeedback = document.getElementById('phone-feedback');
+  const promptValAccount = document.getElementById('prompt-val-account');
+  const promptValDevice = document.getElementById('prompt-val-device');
+  const promptValLocation = document.getElementById('prompt-val-location');
+  const promptValTime = document.getElementById('prompt-val-time');
+  const promptNumberChip = document.getElementById('prompt-number-chip');
+  const btnPromptApprove = document.getElementById('btn-prompt-approve');
+  const btnPromptDeny = document.getElementById('btn-prompt-deny');
+  const btnFeedbackDismiss = document.getElementById('btn-feedback-dismiss');
+  const feedbackIcon = document.getElementById('feedback-icon');
+  const feedbackTitle = document.getElementById('feedback-title');
+  const feedbackDesc = document.getElementById('feedback-desc');
+  const phoneClock = document.getElementById('phone-clock');
+
+  // DOM Elements - Security Email Inbox Drawer
+  const btnToggleInbox = document.getElementById('btn-toggle-inbox');
+  const btnCloseInbox = document.getElementById('btn-close-inbox');
+  const inboxDrawer = document.getElementById('inbox-drawer');
+  const inboxList = document.getElementById('inbox-list');
+  const inboxCountBadge = document.getElementById('inbox-count-badge');
+
+  // DOM Elements - SOC Metrics & Feed
   const statTotal = document.getElementById('stat-total');
   const statBlocked = document.getElementById('stat-blocked');
   const statChallenged = document.getElementById('stat-challenged');
   const statAllowed = document.getElementById('stat-allowed');
   const statLatency = document.getElementById('stat-latency');
   const statHoneytoken = document.getElementById('stat-honeytoken');
+  const eventsTbody = document.getElementById('events-tbody');
+  const btnRefreshFeed = document.getElementById('btn-refresh-feed');
+  const filterPills = document.querySelectorAll('.filter-pill');
   const globalLatencyBadge = document.getElementById('global-latency-badge');
   const gatewayDot = document.getElementById('gateway-dot');
   const gatewayStatusText = document.getElementById('gateway-status-text');
 
-  // DOM Elements - Feed
-  const eventsTbody = document.getElementById('events-tbody');
-  const btnRefreshFeed = document.getElementById('btn-refresh-feed');
-  const filterPills = document.querySelectorAll('.filter-pill');
-
-  // DOM Elements - Lock Controls
+  // DOM Elements - Account Lock Controls
   const inputLockEmail = document.getElementById('input-lock-email');
   const btnDoLock = document.getElementById('btn-do-lock');
   const btnDoUnlock = document.getElementById('btn-do-unlock');
   const lockStatusMsg = document.getElementById('lock-status-msg');
 
-  // DOM Elements - Simulator
-  const simButtons = document.querySelectorAll('.btn-sim');
-  const btnResetDemo = document.getElementById('btn-reset-demo');
-
-  // DOM Elements - Mock Bank & Social
-  const formBank = document.getElementById('form-bank-login');
-  const bankEmail = document.getElementById('bank-email');
-  const bankPassword = document.getElementById('bank-password');
-  const bankResult = document.getElementById('bank-result');
-  const linkFillAlice = document.getElementById('link-fill-alice');
-  const linkFillHoneytoken = document.getElementById('link-fill-honeytoken');
-
-  const formSocial = document.getElementById('form-social-login');
-  const socialEmail = document.getElementById('social-email');
-  const socialPassword = document.getElementById('social-password');
-  const socialResult = document.getElementById('social-result');
-
-  // DOM Elements - Step Up Modal
-  const stepUpModal = document.getElementById('step-up-modal');
-  const btnCloseStepup = document.getElementById('btn-close-stepup');
-  const modalRiskScore = document.getElementById('modal-risk-score');
-  const modalRiskAction = document.getElementById('modal-risk-action');
-  const modalInstructions = document.getElementById('modal-instructions');
-  const challengeContent = document.getElementById('challenge-content');
-  const demoCodeVal = document.getElementById('demo-code-val');
-  const btnPasteCode = document.getElementById('btn-paste-code');
-
   // -------------------------------------------------------------
-  // 1. Navigation / View Switching
+  // 1. Navigation & App Switching
   // -------------------------------------------------------------
   function switchView(viewName) {
-    [tabDashboard, tabBank, tabSocial].forEach(t => t.classList.remove('active'));
-    [viewDashboard, viewBank, viewSocial].forEach(v => v.classList.remove('active'));
+    [tabPortal, tabSoc].forEach(t => t.classList.remove('active'));
+    [viewPortal, viewSoc].forEach(v => v.classList.remove('active'));
 
-    if (viewName === 'dashboard') {
-      tabDashboard.classList.add('active');
-      viewDashboard.classList.add('active');
-      refreshAll();
-    } else if (viewName === 'bank') {
-      tabBank.classList.add('active');
-      viewBank.classList.add('active');
-    } else if (viewName === 'social') {
-      tabSocial.classList.add('active');
-      viewSocial.classList.add('active');
+    if (viewName === 'portal') {
+      tabPortal.classList.add('active');
+      viewPortal.classList.add('active');
+    } else if (viewName === 'soc') {
+      tabSoc.classList.add('active');
+      viewSoc.classList.add('active');
+      refreshSocData();
     }
   }
 
-  tabDashboard.addEventListener('click', () => switchView('dashboard'));
-  tabBank.addEventListener('click', () => switchView('bank'));
-  tabSocial.addEventListener('click', () => switchView('social'));
+  tabPortal.addEventListener('click', () => switchView('portal'));
+  tabSoc.addEventListener('click', () => switchView('soc'));
+
+  chipAppBank.addEventListener('click', () => {
+    chipAppBank.classList.add('active');
+    chipAppSocial.classList.remove('active');
+    currentApp = 'bank';
+    portalAppTitle.textContent = 'Apex Trust Bank';
+  });
+
+  chipAppSocial.addEventListener('click', () => {
+    chipAppSocial.classList.add('active');
+    chipAppBank.classList.remove('active');
+    currentApp = 'social';
+    portalAppTitle.textContent = 'Pulse Social Platform';
+  });
 
   // -------------------------------------------------------------
-  // 2. Simulated Context Drawer
+  // 2. Simulated Telemetry Drawer
   // -------------------------------------------------------------
   btnToggleContext.addEventListener('click', () => {
     contextDrawer.classList.toggle('open');
@@ -163,8 +184,314 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------------------------------------
-  // 3. API Health & Gateway Polling
+  // 3. Google-Style Sign In Form Submission
   // -------------------------------------------------------------
+  formPortalLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await handleLoginAttempt(portalEmail.value, portalPassword.value);
+  });
+
+  async function handleLoginAttempt(email, password) {
+    portalResult.classList.remove('hidden');
+    portalResult.innerHTML = `<div class="spinner-inline"></div> Evaluating dynamic risk policy...`;
+    btnPortalSubmit.disabled = true;
+    btnPortalSubmit.textContent = 'Verifying...';
+
+    const telem = getClientTelemetry();
+    const payload = {
+      app_id: currentApp,
+      email: email,
+      password: password,
+      ...telem
+    };
+
+    try {
+      const data = await apiLogin(payload);
+      renderPortalResult(data);
+      refreshSocData();
+      fetchNotifications();
+
+      // IF 2-Step Verification Prompt is triggered (New device or medium risk)
+      if (data.requires_step_up || (data.prompt_details && data.action !== 'block')) {
+        triggerPhoneGooglePrompt(data.prompt_details || {
+          email: email,
+          device_id: telem.device_id,
+          city: telem.city,
+          country: telem.country,
+          app_id: currentApp,
+          time: 'Just now',
+          number_match: '42'
+        });
+      } else if (data.action === 'block') {
+        // High-risk or honeytoken blocked: open security inbox drawer!
+        setTimeout(() => {
+          inboxDrawer.classList.add('open');
+        }, 600);
+      }
+    } catch (err) {
+      portalResult.innerHTML = `<div class="callout callout-danger">Login evaluation error: ${escapeHtml(err.message)}</div>`;
+    } finally {
+      btnPortalSubmit.disabled = false;
+      btnPortalSubmit.textContent = 'Next';
+    }
+  }
+
+  function renderPortalResult(data) {
+    const actionClass = getActionBadgeClass(data.action);
+    const scoreClass = getScoreClass(data.score ?? data.risk_score ?? 0);
+    const reasons = (data.reasons || []).map(r => {
+      let t = typeof r === 'object' && r !== null ? (r.detail || r.signal || JSON.stringify(r)) : String(r);
+      return `<li>${escapeHtml(t)}</li>`;
+    }).join('');
+
+    const score = data.score ?? data.risk_score ?? 0;
+    const latency = data.latency_ms ? data.latency_ms.toFixed(1) : '9.2';
+
+    portalResult.innerHTML = `
+      <div class="result-header">
+        <span class="action-badge ${actionClass}">${(data.action || 'allow').toUpperCase()}</span>
+        <span class="score-badge ${scoreClass}">Risk Score: ${score}/100</span>
+        <span class="latency-tag">⚡ ${latency} ms</span>
+      </div>
+      <p class="result-msg">${escapeHtml(data.message || '')}</p>
+      ${reasons ? `<ul class="reasons-bullet-list">${reasons}</ul>` : ''}
+    `;
+  }
+
+  // -------------------------------------------------------------
+  // 4. Alice's Trusted Phone Mockup: Google 2-Step Push Prompt
+  // -------------------------------------------------------------
+  function triggerPhoneGooglePrompt(prompt) {
+    activePrompt = prompt;
+
+    // Fill phone UI
+    promptValAccount.textContent = prompt.email || 'alice@example.com';
+    promptValDevice.textContent = prompt.device_id || 'Windows PC (Chrome)';
+    promptValLocation.textContent = `${prompt.city || 'Delhi'}, ${prompt.country || 'IN'}`;
+    promptValTime.textContent = prompt.time || 'Just now';
+    promptNumberChip.textContent = prompt.number_match || '42';
+
+    // Switch phone screen state
+    phoneIdle.classList.add('hidden');
+    phoneFeedback.classList.add('hidden');
+    phonePrompt.classList.remove('hidden');
+
+    // Subtle vibration visual
+    phonePrompt.style.animation = 'none';
+    phonePrompt.offsetHeight; // trigger reflow
+    phonePrompt.style.animation = null;
+  }
+
+  // User taps [Yes, it's me] on Trusted Phone
+  btnPromptApprove.addEventListener('click', async () => {
+    if (!activePrompt) return;
+    btnPromptApprove.disabled = true;
+    btnPromptApprove.textContent = 'Verifying...';
+
+    try {
+      const res = await apiVerifyPrompt({
+        email: activePrompt.email,
+        device_id: activePrompt.device_id,
+        app_id: activePrompt.app_id || currentApp,
+        approved: true
+      });
+
+      // Show phone feedback
+      phonePrompt.classList.add('hidden');
+      phoneFeedback.classList.remove('hidden');
+      feedbackIcon.textContent = '✅';
+      feedbackTitle.textContent = 'Sign-in Approved';
+      feedbackDesc.textContent = `Device "${activePrompt.device_id}" is now trusted in Alice's baseline.`;
+
+      // Update Portal Card
+      portalResult.innerHTML = `
+        <div class="result-header">
+          <span class="action-badge act-allow">APPROVED</span>
+          <span class="score-badge sc-minimal">Risk Score: 0/100</span>
+          <span class="latency-tag">⚡ 6.8 ms</span>
+        </div>
+        <p class="result-msg">Google 2-Step Prompt Approved! Welcome back, Alice.</p>
+        <div class="callout callout-success" style="margin-top: 0.5rem; font-size: 0.8rem;">
+          Device has been verified on Alice's primary phone and added to trusted baseline. Subsequent logins will be frictionless!
+        </div>
+      `;
+
+      refreshSocData();
+      fetchNotifications();
+    } catch (err) {
+      alert(`Approval error: ${err.message}`);
+    } finally {
+      btnPromptApprove.disabled = false;
+      btnPromptApprove.textContent = "Yes, it's me";
+    }
+  });
+
+  // User taps [No, it's not me] on Trusted Phone
+  btnPromptDeny.addEventListener('click', async () => {
+    if (!activePrompt) return;
+    btnPromptDeny.disabled = true;
+    btnPromptDeny.textContent = 'Locking...';
+
+    try {
+      const res = await apiVerifyPrompt({
+        email: activePrompt.email,
+        device_id: activePrompt.device_id,
+        app_id: activePrompt.app_id || currentApp,
+        approved: false
+      });
+
+      // Show phone feedback
+      phonePrompt.classList.add('hidden');
+      phoneFeedback.classList.remove('hidden');
+      feedbackIcon.textContent = '🚨';
+      feedbackTitle.textContent = 'Sign-in Rejected & Account Locked';
+      feedbackDesc.textContent = `Unauthorized sign-in rejected. Account locked and intruder IP blacklisted.`;
+
+      // Update Portal Card
+      portalResult.innerHTML = `
+        <div class="result-header">
+          <span class="action-badge act-block">BLOCK & LOCK</span>
+          <span class="score-badge sc-critical">Risk Score: 100/100</span>
+          <span class="latency-tag">⚡ 8.0 ms</span>
+        </div>
+        <p class="result-msg">Security Alert: Login rejected by user on trusted phone. Account locked.</p>
+      `;
+
+      refreshSocData();
+      fetchNotifications();
+      setTimeout(() => { inboxDrawer.classList.add('open'); }, 800);
+    } catch (err) {
+      alert(`Rejection error: ${err.message}`);
+    } finally {
+      btnPromptDeny.disabled = false;
+      btnPromptDeny.textContent = "No, it's not me";
+    }
+  });
+
+  btnFeedbackDismiss.addEventListener('click', () => {
+    phoneFeedback.classList.add('hidden');
+    phonePrompt.classList.add('hidden');
+    phoneIdle.classList.remove('hidden');
+    activePrompt = null;
+  });
+
+  // -------------------------------------------------------------
+  // 5. 1-Click Demo Buttons on Portal Card
+  // -------------------------------------------------------------
+  btnDemoFamiliar.addEventListener('click', () => {
+    portalEmail.value = 'alice@example.com';
+    portalPassword.value = 'Password123!';
+    ctxIp.value = '103.21.244.2';
+    ctxDevice.value = 'dev-alice-laptop';
+    ctxCity.value = 'Delhi';
+    ctxCountry.value = 'IN';
+    ctxHour.value = 10;
+    ctxVpn.checked = false;
+    updatePillSummary();
+    handleLoginAttempt('alice@example.com', 'Password123!');
+  });
+
+  btnDemoNewdev.addEventListener('click', () => {
+    portalEmail.value = 'alice@example.com';
+    portalPassword.value = 'Password123!';
+    ctxIp.value = '103.21.244.2';
+    ctxDevice.value = 'dev-alice-new-tablet';
+    ctxCity.value = 'Delhi';
+    ctxCountry.value = 'IN';
+    ctxHour.value = 10;
+    ctxVpn.checked = false;
+    updatePillSummary();
+    handleLoginAttempt('alice@example.com', 'Password123!');
+  });
+
+  btnDemoTor.addEventListener('click', () => {
+    portalEmail.value = 'alice@example.com';
+    portalPassword.value = 'Password123!';
+    ctxIp.value = '185.220.101.5';
+    ctxDevice.value = 'dev-tor-attacker';
+    ctxCity.value = 'Moscow';
+    ctxCountry.value = 'RU';
+    ctxHour.value = 3;
+    ctxVpn.checked = true;
+    updatePillSummary();
+    handleLoginAttempt('alice@example.com', 'Password123!');
+  });
+
+  btnDemoHoney.addEventListener('click', () => {
+    portalEmail.value = 'backup_admin';
+    portalPassword.value = 'AdminSecret2024!';
+    ctxIp.value = '45.154.255.99';
+    ctxDevice.value = 'dev-honeypot-bot';
+    ctxCity.value = 'St. Petersburg';
+    ctxCountry.value = 'RU';
+    ctxHour.value = 1;
+    ctxVpn.checked = true;
+    updatePillSummary();
+    handleLoginAttempt('backup_admin', 'AdminSecret2024!');
+  });
+
+  // -------------------------------------------------------------
+  // 6. Instagram / Google Style Security Email Inbox Drawer
+  // -------------------------------------------------------------
+  btnToggleInbox.addEventListener('click', () => {
+    inboxDrawer.classList.toggle('open');
+  });
+
+  btnCloseInbox.addEventListener('click', () => {
+    inboxDrawer.classList.remove('open');
+  });
+
+  async function fetchNotifications() {
+    try {
+      const res = await fetch('/api/notifications');
+      if (!res.ok) return;
+      const notifs = await res.json();
+
+      inboxCountBadge.textContent = notifs.length;
+
+      if (!notifs || notifs.length === 0) {
+        inboxList.innerHTML = `<div class="empty-state" style="padding: 2rem; color: #64748b; text-align: center;">No security alerts yet.</div>`;
+        return;
+      }
+
+      inboxList.innerHTML = notifs.map(n => {
+        const timeStr = n.timestamp ? new Date(n.timestamp).toLocaleTimeString() : 'Just now';
+        const isThreat = (n.type === 'threat_blocked' || n.risk_score >= 80);
+        const isPrompt = (n.type === 'new_device');
+        const cardClass = isThreat ? 'card-alert-threat' : (isPrompt ? 'card-alert-prompt' : '');
+
+        const reasonsHtml = (n.reasons || []).map(r => `<li>• ${escapeHtml(r)}</li>`).join('');
+
+        return `
+          <div class="email-card ${cardClass}">
+            <div class="email-meta">
+              <span class="email-sender">🛡️ Dignitas Security Service</span>
+              <span>${timeStr}</span>
+            </div>
+            <div class="email-subject">${escapeHtml(n.subject)}</div>
+            <div class="email-body">${escapeHtml(n.preview_body)}</div>
+            ${reasonsHtml ? `<ul class="email-bullets">${reasonsHtml}</ul>` : ''}
+            <div class="email-footer-actions">
+              <button class="btn-email-action ${isThreat ? 'btn-email-danger' : ''}">Review Details</button>
+              <button class="btn-email-action">Secure Account</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) {
+      console.error('Failed to fetch notifications:', e);
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 7. SOC Live Telemetry & Feed (Metrics & Table)
+  // -------------------------------------------------------------
+  async function refreshSocData() {
+    checkGatewayHealth();
+    fetchStats();
+    fetchEvents();
+  }
+
   async function checkGatewayHealth() {
     try {
       const t0 = performance.now();
@@ -174,14 +501,12 @@ document.addEventListener('DOMContentLoaded', () => {
         gatewayDot.className = 'status-dot online';
         gatewayStatusText.textContent = 'Gateway Online';
         globalLatencyBadge.textContent = `${latency} ms`;
-        return true;
       }
     } catch {
       gatewayDot.className = 'status-dot offline';
       gatewayStatusText.textContent = 'Gateway Offline';
       globalLatencyBadge.textContent = 'ERR';
     }
-    return false;
   }
 
   async function fetchStats() {
@@ -218,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const events = await res.json();
 
       if (!events || events.length === 0) {
-        eventsTbody.innerHTML = `<tr><td colspan="8" class="empty-state">No login events recorded yet. Trigger a simulated login above!</td></tr>`;
+        eventsTbody.innerHTML = `<tr><td colspan="8" class="empty-state">No login events recorded yet. Trigger a simulated login!</td></tr>`;
         return;
       }
 
@@ -237,11 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reasonsList = (ev.reasons || []).map(r => {
           let text = '';
-          if (typeof r === 'string') {
-            text = r;
-          } else if (typeof r === 'object' && r !== null) {
-            text = r.detail || r.signal || JSON.stringify(r);
-          }
+          if (typeof r === 'string') text = r;
+          else if (typeof r === 'object' && r !== null) text = r.detail || r.signal || JSON.stringify(r);
           return `<span class="reason-tag">${escapeHtml(text)}</span>`;
         }).join('');
 
@@ -263,36 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function getActionBadgeClass(action) {
-    if (!action) return 'act-allow';
-    const a = action.toLowerCase();
-    if (a.includes('block')) return 'act-block';
-    if (a.includes('reset')) return 'act-reset';
-    if (a.includes('otp')) return 'act-otp';
-    if (a.includes('captcha')) return 'act-captcha';
-    return 'act-allow';
-  }
-
-  function getScoreClass(score) {
-    if (score >= 80) return 'sc-critical';
-    if (score >= 61) return 'sc-high';
-    if (score >= 45) return 'sc-medium';
-    if (score >= 30) return 'sc-low';
-    return 'sc-minimal';
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
-  function refreshAll() {
-    checkGatewayHealth();
-    fetchStats();
-    fetchEvents();
-  }
-
-  // Filter Buttons
+  // Filter Pills in SOC view
   filterPills.forEach(pill => {
     pill.addEventListener('click', () => {
       filterPills.forEach(p => p.classList.remove('active'));
@@ -304,16 +597,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnRefreshFeed.addEventListener('click', () => {
     btnRefreshFeed.textContent = '↻ Syncing...';
-    refreshAll();
+    refreshSocData();
     setTimeout(() => { btnRefreshFeed.textContent = '↻ Refresh'; }, 600);
   });
 
-  // Start polling
-  refreshAll();
-  pollInterval = setInterval(refreshAll, 3000);
-
   // -------------------------------------------------------------
-  // 4. Emergency Account Lock / Unlock
+  // 8. Emergency Account Lock / Unlock
   // -------------------------------------------------------------
   btnDoLock.addEventListener('click', async () => {
     const email = inputLockEmail.value.trim();
@@ -323,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       lockStatusMsg.className = 'lock-status status-danger';
       lockStatusMsg.textContent = `🔒 ${data.message || 'Account locked'}`;
-      refreshAll();
+      refreshSocData();
     } catch {
       lockStatusMsg.className = 'lock-status status-danger';
       lockStatusMsg.textContent = 'Lock action failed.';
@@ -338,7 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       lockStatusMsg.className = 'lock-status status-success';
       lockStatusMsg.textContent = `🔓 ${data.message || 'Account unlocked'}`;
-      refreshAll();
+      refreshSocData();
     } catch {
       lockStatusMsg.className = 'lock-status status-danger';
       lockStatusMsg.textContent = 'Unlock action failed.';
@@ -346,372 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // -------------------------------------------------------------
-  // 5. 8-Scenario Live Attack Simulator Buttons
-  // -------------------------------------------------------------
-  simButtons.forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const simId = btn.dataset.sim;
-      if (!simId) return;
-      btn.disabled = true;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = `⏳ Executing...`;
-
-      try {
-        await executeSimulatorScenario(parseInt(simId, 10));
-        refreshAll();
-      } catch (err) {
-        console.error('Simulator scenario failed:', err);
-      } finally {
-        setTimeout(() => {
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-        }, 800);
-      }
-    });
-  });
-
-  async function executeSimulatorScenario(id) {
-    switch (id) {
-      case 1:
-        // Scenario 1: Normal Login (Alice, Bank)
-        await apiLogin({
-          app_id: 'bank',
-          email: 'alice@example.com',
-          password: 'Password123!',
-          ip_address: '103.21.244.2',
-          device_id: 'dev-alice-laptop',
-          city: 'Delhi',
-          country: 'IN',
-          simulated_hour: 10,
-          is_vpn: false
-        });
-        break;
-
-      case 2:
-        // Scenario 2: New Device (Alice, Bank -> step-up)
-        const resp2 = await apiLogin({
-          app_id: 'bank',
-          email: 'alice@example.com',
-          password: 'Password123!',
-          ip_address: '103.21.244.2',
-          device_id: 'dev-alice-new-tablet',
-          city: 'Delhi',
-          country: 'IN',
-          simulated_hour: 10,
-          is_vpn: false
-        });
-        if (resp2.action !== 'allow') {
-          showStepUpModal(resp2, 'bank', 'alice@example.com', 'dev-alice-new-tablet');
-        }
-        break;
-
-      case 3:
-        // Scenario 3: Foreign Tor 3AM (Bob, Bank -> block)
-        await apiLogin({
-          app_id: 'bank',
-          email: 'bob@example.com',
-          password: 'Password123!',
-          ip_address: '185.220.101.5',
-          device_id: 'dev-unknown-attacker',
-          city: 'Moscow',
-          country: 'RU',
-          simulated_hour: 3,
-          is_vpn: true
-        });
-        break;
-
-      case 4:
-        // Scenario 4: Rapid Brute Force (5 rapid failures)
-        for (let i = 0; i < 4; i++) {
-          await apiLogin({
-            app_id: 'bank',
-            email: 'bob@example.com',
-            password: 'WrongPassword!',
-            ip_address: '198.51.100.22',
-            device_id: 'dev-brute-tool',
-            city: 'Berlin',
-            country: 'DE',
-            simulated_hour: 14,
-            is_vpn: false
-          });
-        }
-        // 5th attempt triggers lockout
-        await apiLogin({
-          app_id: 'bank',
-          email: 'bob@example.com',
-          password: 'WrongPassword!',
-          ip_address: '198.51.100.22',
-          device_id: 'dev-brute-tool',
-          city: 'Berlin',
-          country: 'DE',
-          simulated_hour: 14,
-          is_vpn: false
-        });
-        break;
-
-      case 5:
-        // Scenario 5: Cross-App Correlation (Attack Bank, then log into Social)
-        // 1. Attack on Bank
-        await apiLogin({
-          app_id: 'bank',
-          email: 'alice@example.com',
-          password: 'WrongPassword!',
-          ip_address: '198.51.100.44',
-          device_id: 'dev-cross-tool',
-          city: 'London',
-          country: 'GB',
-          simulated_hour: 2,
-          is_vpn: true
-        });
-        // 2. Immediate login to Social from unknown context
-        const resp5 = await apiLogin({
-          app_id: 'social',
-          email: 'alice@example.com',
-          password: 'Password123!',
-          ip_address: '198.51.100.44',
-          device_id: 'dev-cross-tool',
-          city: 'London',
-          country: 'GB',
-          simulated_hour: 2,
-          is_vpn: true
-        });
-        if (resp5.action !== 'allow') {
-          showStepUpModal(resp5, 'social', 'alice@example.com', 'dev-cross-tool');
-        }
-        break;
-
-      case 6:
-        // Scenario 6: Hit Honeytoken (backup_admin)
-        await apiLogin({
-          app_id: 'bank',
-          email: 'backup_admin',
-          password: 'AdminPassword123!',
-          ip_address: '45.154.255.99',
-          device_id: 'dev-honeypot-bot',
-          city: 'St. Petersburg',
-          country: 'RU',
-          simulated_hour: 1,
-          is_vpn: true
-        });
-        break;
-
-      case 7:
-        // Scenario 7: Post-MFA Baseline Adaptation
-        // 1. New device triggers challenge
-        const resp7 = await apiLogin({
-          app_id: 'bank',
-          email: 'alice@example.com',
-          password: 'Password123!',
-          ip_address: '103.21.244.2',
-          device_id: 'dev-alice-ipad-pro',
-          city: 'Delhi',
-          country: 'IN',
-          simulated_hour: 10,
-          is_vpn: false
-        });
-        // 2. Automatically solve step-up
-        if (resp7.challenge_id) {
-          await apiVerifyStepUp(resp7.challenge_id, '123456');
-          // 3. Second login with newly trusted device -> Risk 0 ALLOW!
-          await apiLogin({
-            app_id: 'bank',
-            email: 'alice@example.com',
-            password: 'Password123!',
-            ip_address: '103.21.244.2',
-            device_id: 'dev-alice-ipad-pro',
-            city: 'Delhi',
-            country: 'IN',
-            simulated_hour: 10,
-            is_vpn: false
-          });
-        }
-        break;
-    }
-  }
-
-  // One-Click Demo Reset
-  btnResetDemo.addEventListener('click', async () => {
-    btnResetDemo.disabled = true;
-    btnResetDemo.innerHTML = '⏳ Resetting Data...';
-    try {
-      const res = await fetch('/api/dashboard/reset-demo', { method: 'POST' });
-      if (res.ok) {
-        refreshAll();
-      }
-    } catch (e) {
-      console.error('Reset failed:', e);
-    } finally {
-      setTimeout(() => {
-        btnResetDemo.disabled = false;
-        btnResetDemo.innerHTML = '🔄 One-Click Demo Reset';
-      }, 700);
-    }
-  });
-
-  // -------------------------------------------------------------
-  // 6. Mock Application Login Forms (Bank & Social)
-  // -------------------------------------------------------------
-  linkFillAlice.addEventListener('click', () => {
-    bankEmail.value = 'alice@example.com';
-    bankPassword.value = 'Password123!';
-  });
-
-  linkFillHoneytoken.addEventListener('click', () => {
-    bankEmail.value = 'backup_admin';
-    bankPassword.value = 'AdminSecret2024!';
-  });
-
-  formBank.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await handleAppLoginSubmit('bank', bankEmail.value, bankPassword.value, bankResult);
-  });
-
-  formSocial.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await handleAppLoginSubmit('social', socialEmail.value, socialPassword.value, socialResult);
-  });
-
-  async function handleAppLoginSubmit(appId, email, password, resultEl) {
-    resultEl.classList.remove('hidden');
-    resultEl.innerHTML = `<div class="spinner-inline"></div> Evaluating security telemetry...`;
-
-    const telem = getClientTelemetry();
-    const payload = {
-      app_id: appId,
-      email: email,
-      password: password,
-      ...telem
-    };
-
-    try {
-      const data = await apiLogin(payload);
-      renderLoginResultCallout(resultEl, data);
-      refreshAll();
-
-      if (data.action !== 'allow' && data.challenge_id) {
-        setTimeout(() => {
-          showStepUpModal(data, appId, email, telem.device_id);
-        }, 700);
-      }
-    } catch (err) {
-      resultEl.innerHTML = `<div class="callout callout-danger">Login failed: ${escapeHtml(err.message)}</div>`;
-    }
-  }
-
-  function renderLoginResultCallout(container, data) {
-    const actionClass = getActionBadgeClass(data.action);
-    const scoreClass = getScoreClass(data.risk_score);
-    const reasonsHtml = (data.reasons || []).map(r => `<li>${escapeHtml(r)}</li>`).join('');
-
-    container.innerHTML = `
-      <div class="result-header">
-        <span class="action-badge ${actionClass}">${(data.action || 'allow').toUpperCase()}</span>
-        <span class="score-badge ${scoreClass}">Risk Score: ${data.risk_score} / 100</span>
-        <span class="latency-tag">⚡ ${data.latency_ms ? data.latency_ms.toFixed(1) : 10} ms</span>
-      </div>
-      <p class="result-msg">${escapeHtml(data.message || '')}</p>
-      ${reasonsHtml ? `<ul class="reasons-bullet-list">${reasonsHtml}</ul>` : ''}
-    `;
-  }
-
-  // -------------------------------------------------------------
-  // 7. Adaptive Step-Up Verification Modal
-  // -------------------------------------------------------------
-  function showStepUpModal(data, appId, email, deviceId) {
-    activeChallenge = {
-      challenge_id: data.challenge_id,
-      challenge_type: data.challenge_type || 'email_otp',
-      app_id: appId,
-      email: email,
-      device_id: deviceId
-    };
-
-    modalRiskScore.textContent = data.risk_score;
-    modalRiskAction.textContent = (data.action || 'CHALLENGE').toUpperCase();
-    modalRiskAction.className = `badge-action ${getActionBadgeClass(data.action)}`;
-
-    demoCodeVal.textContent = data.challenge_id ? data.challenge_id.substring(0, 6).toUpperCase() : '849201';
-
-    if (data.action === 'captcha') {
-      modalInstructions.textContent = 'Light verification required. Solve the security verification below.';
-      challengeContent.innerHTML = `
-        <div class="captcha-box">
-          <div class="captcha-math">What is <strong>7 + 5</strong> ?</div>
-          <input type="text" id="input-captcha-answer" class="challenge-input" placeholder="Enter answer (12)" autofocus>
-          <button class="btn-verify-submit" id="btn-submit-challenge">Verify & Complete Login</button>
-        </div>
-      `;
-    } else if (data.action === 'otp_and_reset') {
-      modalInstructions.textContent = 'High risk context detected. One-Time Password and password reset required.';
-      challengeContent.innerHTML = `
-        <div class="otp-box">
-          <input type="text" id="input-otp-code" class="challenge-input" placeholder="6-digit OTP Code" maxlength="6" autofocus>
-          <input type="password" id="input-new-password" class="challenge-input" placeholder="New Password (min 8 chars)">
-          <button class="btn-verify-submit" id="btn-submit-challenge">Verify & Reset Password</button>
-        </div>
-      `;
-    } else {
-      // email_otp default
-      modalInstructions.textContent = 'Step-up authentication required. Enter the 6-digit verification code sent to your registered device.';
-      challengeContent.innerHTML = `
-        <div class="otp-box">
-          <input type="text" id="input-otp-code" class="challenge-input" placeholder="6-digit OTP Code (e.g. 123456)" maxlength="6" autofocus>
-          <button class="btn-verify-submit" id="btn-submit-challenge">Verify & Continue</button>
-        </div>
-      `;
-    }
-
-    stepUpModal.classList.remove('hidden');
-
-    const submitBtn = document.getElementById('btn-submit-challenge');
-    submitBtn.addEventListener('click', handleStepUpSubmit);
-  }
-
-  btnPasteCode.addEventListener('click', () => {
-    const inputOtp = document.getElementById('input-otp-code');
-    const inputCaptcha = document.getElementById('input-captcha-answer');
-    if (inputOtp) inputOtp.value = '123456';
-    if (inputCaptcha) inputCaptcha.value = '12';
-  });
-
-  btnCloseStepup.addEventListener('click', () => {
-    stepUpModal.classList.add('hidden');
-    activeChallenge = null;
-  });
-
-  async function handleStepUpSubmit() {
-    if (!activeChallenge) return;
-    const submitBtn = document.getElementById('btn-submit-challenge');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Verifying...';
-
-    const inputOtp = document.getElementById('input-otp-code');
-    const inputCaptcha = document.getElementById('input-captcha-answer');
-    const inputNewPass = document.getElementById('input-new-password');
-
-    let answer = '123456';
-    if (inputOtp && inputOtp.value.trim()) answer = inputOtp.value.trim();
-    if (inputCaptcha && inputCaptcha.value.trim()) answer = inputCaptcha.value.trim();
-
-    try {
-      const res = await apiVerifyStepUp(activeChallenge.challenge_id, answer, inputNewPass ? inputNewPass.value : null);
-      if (res.verified) {
-        stepUpModal.classList.add('hidden');
-        alert(`✅ Step-Up Verification Successful!\nDevice "${activeChallenge.device_id}" is now trusted in Alice's baseline.`);
-        refreshAll();
-      } else {
-        alert(`❌ Verification Failed: ${res.message || 'Incorrect response'}`);
-      }
-    } catch (err) {
-      alert(`Verification error: ${err.message}`);
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Verify';
-    }
-  }
-
-  // -------------------------------------------------------------
-  // 8. Gateway HTTP Client Wrappers
+  // 9. API HTTP Wrappers & Helpers
   // -------------------------------------------------------------
   async function apiLogin(payload) {
     const res = await fetch('/api/login', {
@@ -722,18 +646,52 @@ document.addEventListener('DOMContentLoaded', () => {
     return await res.json();
   }
 
-  async function apiVerifyStepUp(challengeId, code, newPassword = null) {
-    const payload = {
-      challenge_id: challengeId,
-      code: code
-    };
-    if (newPassword) payload.new_password = newPassword;
-
-    const res = await fetch('/api/verify-stepup', {
+  async function apiVerifyPrompt(payload) {
+    const res = await fetch('/api/verify-prompt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     return await res.json();
   }
+
+  function getActionBadgeClass(action) {
+    if (!action) return 'act-allow';
+    const a = action.toLowerCase();
+    if (a.includes('block')) return 'act-block';
+    if (a.includes('reset')) return 'act-reset';
+    if (a.includes('otp')) return 'act-otp';
+    if (a.includes('captcha') || a.includes('prompt')) return 'act-captcha';
+    return 'act-allow';
+  }
+
+  function getScoreClass(score) {
+    if (score >= 80) return 'sc-critical';
+    if (score >= 61) return 'sc-high';
+    if (score >= 45) return 'sc-medium';
+    if (score >= 30) return 'sc-low';
+    return 'sc-minimal';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Initialize Clock & Polling
+  function updatePhoneClock() {
+    const now = new Date();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    if (phoneClock) phoneClock.textContent = `${hrs}:${mins}`;
+  }
+  updatePhoneClock();
+  setInterval(updatePhoneClock, 30000);
+
+  refreshSocData();
+  fetchNotifications();
+  setInterval(() => {
+    refreshSocData();
+    fetchNotifications();
+  }, 3500);
 });

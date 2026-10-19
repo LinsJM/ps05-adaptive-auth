@@ -7,54 +7,57 @@
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="theme-dark">
 
-  <!-- Top Global Header / App Switcher -->
+  <!-- ================= TOP MINIMAL NAVBAR ================= -->
   <header class="global-navbar">
     <div class="nav-brand">
       <div class="brand-shield">🛡️</div>
       <div class="brand-info">
-        <span class="brand-title">DIGNITAS <span class="badge-ps05">PS05 GATEWAY</span></span>
-        <span class="brand-subtitle">Adaptive Authentication & Anomaly Detection</span>
+        <span class="brand-title">DIGNITAS <span class="badge-ps05">ADAPTIVE AUTH</span></span>
+        <span class="brand-subtitle">AI Risk Engine & Zero-Trust Verification</span>
       </div>
     </div>
 
-    <!-- Application View Tabs -->
+    <!-- Minimal View Switcher -->
     <nav class="app-switcher">
-      <button class="nav-tab active" data-view="dashboard" id="tab-dashboard">
-        <span class="tab-icon">📊</span> SOC Dashboard
+      <button class="nav-tab active" data-view="portal" id="tab-portal">
+        <span class="tab-icon">🔐</span> Sign In Portal
       </button>
-      <button class="nav-tab" data-view="bank" id="tab-bank">
-        <span class="tab-icon">🏦</span> Apex Bank App
-      </button>
-      <button class="nav-tab" data-view="social" id="tab-social">
-        <span class="tab-icon">🌐</span> Pulse Social App
+      <button class="nav-tab" data-view="soc" id="tab-soc">
+        <span class="tab-icon">📊</span> SOC Stream & Metrics
       </button>
     </nav>
 
-    <!-- Global Connection & Latency Indicator -->
-    <div class="gateway-status">
-      <div class="status-dot online" id="gateway-dot"></div>
-      <span class="status-text" id="gateway-status-text">Gateway Online</span>
-      <span class="latency-badge" id="global-latency-badge">&lt; 15ms</span>
+    <!-- Right Controls: Security Mail Drawer + Gateway Status -->
+    <div class="nav-right-controls">
+      <button class="btn-inbox" id="btn-toggle-inbox">
+        <span class="inbox-icon">✉️</span> Security Alerts
+        <span class="inbox-badge" id="inbox-count-badge">1</span>
+      </button>
+      <div class="gateway-status">
+        <div class="status-dot online" id="gateway-dot"></div>
+        <span class="status-text" id="gateway-status-text">Gateway Online</span>
+        <span class="latency-badge" id="global-latency-badge">&lt; 10ms</span>
+      </div>
     </div>
   </header>
 
-  <!-- Simulated Context Drawer Toggle -->
+  <!-- ================= TELEMETRY CONTEXT BAR (MINIMAL) ================= -->
   <div class="context-drawer-bar">
     <div class="context-pill">
-      <span class="context-label">Current Telemetry Context:</span>
+      <span class="context-label">Client Telemetry:</span>
       <span class="context-val" id="pill-summary">Delhi, IN • Familiar Device • 10:00 UTC</span>
     </div>
     <button class="btn-drawer-toggle" id="btn-toggle-context">⚙️ Adjust Simulated Telemetry</button>
   </div>
 
-  <!-- Simulated Context Config Drawer (Collapsible) -->
+  <!-- Telemetry Config Drawer (Collapsible) -->
   <div class="context-drawer" id="context-drawer">
     <div class="drawer-header">
-      <h3>Simulate Client Context & Attack Telemetry</h3>
+      <h3>Simulated Telemetry & Threat Injection</h3>
       <button class="btn-close-drawer" id="btn-close-drawer">✕</button>
     </div>
     <div class="drawer-grid">
@@ -75,7 +78,7 @@
         <input type="text" id="ctx-country" value="IN">
       </div>
       <div class="form-group">
-        <label>Simulated Hour (0 - 23)</label>
+        <label>Simulated Hour (0 - 23 UTC)</label>
         <input type="number" id="ctx-hour" min="0" max="23" value="10">
       </div>
       <div class="form-group">
@@ -88,7 +91,7 @@
         </label>
       </div>
       <div class="form-group drawer-presets">
-        <label>Quick Presets:</label>
+        <label>Quick Telemetry Presets:</label>
         <div class="preset-buttons">
           <button class="btn-preset" data-preset="normal">Familiar (Delhi)</button>
           <button class="btn-preset" data-preset="new-device">New Device</button>
@@ -99,11 +102,176 @@
     </div>
   </div>
 
-  <!-- Main View Container -->
+  <!-- ================= MAIN CONTAINER ================= -->
   <main class="main-container">
 
-    <!-- ================= VIEW 1: SOC DASHBOARD ================= -->
-    <section class="view-panel active" id="view-dashboard">
+    <!-- ================= VIEW 1: MINIMAL SIGN IN & TRUSTED PHONE ================= -->
+    <section class="view-panel active" id="view-portal">
+      <div class="portal-grid">
+
+        <!-- Left: Minimal Google-style Gateway Sign In Box -->
+        <div class="portal-card-column">
+          <div class="google-auth-card">
+            <div class="auth-card-header">
+              <div class="google-g-logo">
+                <svg viewBox="0 0 48 48" width="40" height="40">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+              </div>
+              <h2>Sign in</h2>
+              <p class="auth-card-subtitle">to continue to <strong id="portal-app-title">Apex Trust Bank</strong></p>
+            </div>
+
+            <!-- App Select Tabs -->
+            <div class="auth-app-selector">
+              <button class="app-chip active" data-app="bank" id="chip-app-bank">🏛️ Apex Bank</button>
+              <button class="app-chip" data-app="social" id="chip-app-social">⚡ Pulse Social</button>
+            </div>
+
+            <form id="form-portal-login">
+              <div class="google-input-group">
+                <input type="text" id="portal-email" value="alice@example.com" required placeholder=" ">
+                <label for="portal-email">Email or phone</label>
+              </div>
+
+              <div class="google-input-group">
+                <input type="password" id="portal-password" value="Password123!" required placeholder=" ">
+                <label for="portal-password">Enter your password</label>
+              </div>
+
+              <div class="form-row-actions">
+                <button type="submit" class="btn-google-next" id="btn-portal-submit">Next</button>
+              </div>
+            </form>
+
+            <!-- Result Evaluation Banner -->
+            <div class="login-result-callout hidden" id="portal-result"></div>
+
+            <!-- Demo 1-Click Simulation Triggers Strip -->
+            <div class="demo-triggers-bar">
+              <span class="triggers-label">⚡ 1-Click Judge Demo Scenarios:</span>
+              <div class="triggers-grid">
+                <button class="btn-demo-pill pill-green" id="btn-demo-familiar">
+                  🟢 1. Familiar Login (0 Risk)
+                </button>
+                <button class="btn-demo-pill pill-yellow" id="btn-demo-newdev">
+                  🟡 2. New Device (Google Prompt)
+                </button>
+                <button class="btn-demo-pill pill-red" id="btn-demo-tor">
+                  🔴 3. Tor 3AM Attack (Alert Mail)
+                </button>
+                <button class="btn-demo-pill pill-pink" id="btn-demo-honey">
+                  🪤 6. Hit Honeytoken
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: Interactive Alice's Trusted Phone Mockup -->
+        <div class="portal-device-column">
+          <div class="device-wrapper">
+            <div class="device-badge-label">
+              📱 ALICE'S PRIMARY TRUSTED DEVICE (PIXEL 8)
+            </div>
+
+            <div class="phone-frame">
+              <div class="phone-notch">
+                <div class="notch-speaker"></div>
+                <div class="notch-camera"></div>
+              </div>
+
+              <div class="phone-screen">
+                <!-- Status Bar -->
+                <div class="phone-status-bar">
+                  <span class="phone-time" id="phone-clock">10:00</span>
+                  <div class="phone-icons">
+                    <span>5G</span>
+                    <span>📶</span>
+                    <span>🔋 96%</span>
+                  </div>
+                </div>
+
+                <!-- Phone Content State 1: Idle Screen -->
+                <div class="phone-content-idle" id="phone-idle">
+                  <div class="phone-wallpaper-widget">
+                    <div class="lock-shield-icon">🛡️</div>
+                    <div class="lock-title">Google Play Protect</div>
+                    <p class="lock-subtitle">Ready for 2-Step Verification Prompts</p>
+                  </div>
+                  <div class="phone-tip">
+                    <span class="tip-dot"></span>
+                    <span>Simulated push prompts from untrusted logins will appear here live!</span>
+                  </div>
+                </div>
+
+                <!-- Phone Content State 2: Google 2-Step Push Prompt -->
+                <div class="phone-content-prompt hidden" id="phone-prompt">
+                  <div class="prompt-header">
+                    <svg viewBox="0 0 48 48" width="28" height="28">
+                      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    </svg>
+                    <span class="prompt-brand">Google Prompt</span>
+                  </div>
+
+                  <h3 class="prompt-title">Is it you trying to sign in?</h3>
+                  <p class="prompt-desc">A device that you haven't used before is attempting to access your account.</p>
+
+                  <div class="prompt-details-card">
+                    <div class="detail-row">
+                      <span class="detail-label">Account:</span>
+                      <strong class="detail-val" id="prompt-val-account">alice@example.com</strong>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Device:</span>
+                      <span class="detail-val" id="prompt-val-device">Windows PC (Chrome)</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Location:</span>
+                      <span class="detail-val" id="prompt-val-location">Delhi, India</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-label">Time:</span>
+                      <span class="detail-val" id="prompt-val-time">Just now</span>
+                    </div>
+                  </div>
+
+                  <div class="prompt-number-match">
+                    <span>Verification Match Code:</span>
+                    <div class="number-chip" id="prompt-number-chip">42</div>
+                  </div>
+
+                  <div class="prompt-actions">
+                    <button class="btn-prompt-deny" id="btn-prompt-deny">No, it's not me</button>
+                    <button class="btn-prompt-approve" id="btn-prompt-approve">Yes, it's me</button>
+                  </div>
+                </div>
+
+                <!-- Phone Content State 3: Approved Success -->
+                <div class="phone-content-feedback hidden" id="phone-feedback">
+                  <div class="feedback-icon" id="feedback-icon">✅</div>
+                  <h4 id="feedback-title">Sign-in Approved</h4>
+                  <p id="feedback-desc">Device trusted. Session granted on Windows Chrome.</p>
+                  <button class="btn-phone-dismiss" id="btn-feedback-dismiss">Done</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= VIEW 2: SOC STREAM & METRICS ================= -->
+    <section class="view-panel" id="view-soc">
       
       <!-- Metrics Overview Cards -->
       <div class="metrics-grid">
@@ -120,7 +288,7 @@
         <div class="metric-card card-warning">
           <div class="metric-title">Step-Up Challenges Triggered</div>
           <div class="metric-value text-yellow" id="stat-challenged">0</div>
-          <div class="metric-sub">CAPTCHA / OTP / Reset (30-79)</div>
+          <div class="metric-sub">Google Prompts / OTP (30-79)</div>
         </div>
         <div class="metric-card card-success">
           <div class="metric-title">Frictionless Logins Allowed</div>
@@ -136,40 +304,6 @@
           <div class="metric-title">Honeytoken Hits</div>
           <div class="metric-value text-purple" id="stat-honeytoken">0</div>
           <div class="metric-sub">backup_admin Traps</div>
-        </div>
-      </div>
-
-      <!-- Live Attack Simulator Strip -->
-      <div class="simulator-strip">
-        <div class="strip-header">
-          <span class="strip-title">⚡ 4-Minute Demo Live Attack Simulator</span>
-          <span class="strip-desc">Click any scenario to inject telemetry directly into the gateway:</span>
-        </div>
-        <div class="simulator-actions">
-          <button class="btn-sim sim-green" data-sim="1">
-            🟢 1. Normal Login
-          </button>
-          <button class="btn-sim sim-yellow" data-sim="2">
-            🟡 2. New Device (OTP)
-          </button>
-          <button class="btn-sim sim-red" data-sim="3">
-            🔴 3. Tor 3AM Foreign Block
-          </button>
-          <button class="btn-sim sim-orange" data-sim="4">
-            ⚡ 4. Rapid Brute Force
-          </button>
-          <button class="btn-sim sim-purple" data-sim="5">
-            🔀 5. Cross-App Bank Attack
-          </button>
-          <button class="btn-sim sim-pink" data-sim="6">
-            🪤 6. Hit Honeytoken
-          </button>
-          <button class="btn-sim sim-cyan" data-sim="7">
-            ✨ 7. Post-MFA Adaptation
-          </button>
-          <button class="btn-sim sim-reset" id="btn-reset-demo">
-            🔄 One-Click Demo Reset
-          </button>
         </div>
       </div>
 
@@ -213,10 +347,8 @@
           </div>
         </div>
 
-        <!-- Right: Risk Policy Guide & Account Management -->
+        <!-- Right: Policy Matrix & Account Security -->
         <div class="column-side">
-          
-          <!-- Policy Matrix Card -->
           <div class="side-card">
             <h3>⚖️ Active Risk Policy Matrix</h3>
             <div class="policy-list">
@@ -227,8 +359,8 @@
               </div>
               <div class="policy-row row-captcha">
                 <span class="range">30 – 44</span>
-                <span class="action">CAPTCHA</span>
-                <span class="desc">Light verification friction</span>
+                <span class="action">GOOGLE PROMPT</span>
+                <span class="desc">1-Tap Trusted Phone Approval</span>
               </div>
               <div class="policy-row row-otp">
                 <span class="range">45 – 60</span>
@@ -248,7 +380,6 @@
             </div>
           </div>
 
-          <!-- Account Security Controls -->
           <div class="side-card">
             <h3>🔒 Account Emergency Lock/Unlock</h3>
             <div class="lock-controls">
@@ -260,122 +391,32 @@
               <div class="lock-status" id="lock-status-msg"></div>
             </div>
           </div>
-
         </div>
 
       </div>
 
-    </section>
-
-    <!-- ================= VIEW 2: APEX SECURE BANK MOCK APP ================= -->
-    <section class="view-panel" id="view-bank">
-      <div class="mock-app-wrapper theme-bank">
-        <div class="mock-card">
-          <div class="bank-card-header">
-            <div class="bank-logo">🏛️ APEX TRUST BANK</div>
-            <div class="bank-tagline">Enterprise Financial Portal</div>
-          </div>
-
-          <div class="login-form-box">
-            <h2>Client Online Banking Login</h2>
-            <p class="form-desc">Secured by Dignitas Adaptive Authentication Gateway</p>
-
-            <form id="form-bank-login">
-              <div class="form-group">
-                <label>User Identifier / Email</label>
-                <input type="text" id="bank-email" value="alice@example.com" required>
-              </div>
-              <div class="form-group">
-                <label>Security Password</label>
-                <input type="password" id="bank-password" value="Password123!" required>
-              </div>
-              <button type="submit" class="btn-app-submit btn-bank">Sign In to Apex Online</button>
-            </form>
-
-            <div class="demo-helpers">
-              <span>Demo Quick-Fill:</span>
-              <button class="btn-link" id="link-fill-alice">Alice (Familiar)</button>
-              <button class="btn-link" id="link-fill-honeytoken">backup_admin (Honeytoken)</button>
-            </div>
-
-            <!-- Login Response Callout -->
-            <div class="login-result-callout hidden" id="bank-result"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= VIEW 3: PULSE SOCIAL MOCK APP ================= -->
-    <section class="view-panel" id="view-social">
-      <div class="mock-app-wrapper theme-social">
-        <div class="mock-card">
-          <div class="social-card-header">
-            <div class="social-logo">⚡ PULSE</div>
-            <div class="social-tagline">Connect with creators worldwide</div>
-          </div>
-
-          <div class="login-form-box">
-            <h2>Welcome Back</h2>
-            <p class="form-desc">Sign in to your Pulse feed & community</p>
-
-            <form id="form-social-login">
-              <div class="form-group">
-                <label>Email or Username</label>
-                <input type="text" id="social-email" value="alice@example.com" required>
-              </div>
-              <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="social-password" value="Password123!" required>
-              </div>
-              <button type="submit" class="btn-app-submit btn-social">Continue to Pulse</button>
-            </form>
-
-            <div class="cross-app-banner">
-              <strong>💡 Cross-App Correlation Test:</strong>
-              <p>If Alice's Bank login was attacked or scored high risk, logging into Pulse will dynamically show elevated risk!</p>
-            </div>
-
-            <div class="login-result-callout hidden" id="social-result"></div>
-          </div>
-        </div>
-      </div>
     </section>
 
   </main>
 
-  <!-- ================= ADAPTIVE STEP-UP MODAL ================= -->
-  <div class="modal-overlay hidden" id="step-up-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-icon">🛡️</span>
-          <h3 id="modal-title">Adaptive Verification Challenge</h3>
-        </div>
-        <button class="btn-close-modal" id="btn-close-stepup">✕</button>
+  <!-- ================= INSTAGRAM / GOOGLE STYLE SECURITY EMAIL DRAWER ================= -->
+  <aside class="inbox-drawer" id="inbox-drawer">
+    <div class="inbox-header">
+      <div class="inbox-title-wrap">
+        <span class="inbox-mail-icon">📬</span>
+        <h3>Security Alert Inbox (Simulated)</h3>
       </div>
-
-      <div class="modal-body">
-        <div class="risk-badge-strip">
-          <span>Assessed Risk Score: <strong id="modal-risk-score">45</strong></span>
-          <span class="badge-action" id="modal-risk-action">EMAIL OTP</span>
-        </div>
-
-        <p class="challenge-instructions" id="modal-instructions">
-          Anomalous context detected. Please verify your identity to proceed.
-        </p>
-
-        <!-- Dynamic Challenge Container -->
-        <div id="challenge-content">
-          <!-- Form dynamically injected by app.js depending on challenge type -->
-        </div>
-
-        <div class="demo-otp-helper">
-          <span>Demo Verification Code: <strong id="demo-code-val">849201</strong></span>
-          <button class="btn-copy-code" id="btn-paste-code">Auto-Fill Code</button>
-        </div>
-      </div>
+      <button class="btn-close-inbox" id="btn-close-inbox">✕</button>
     </div>
-  </div>
+
+    <div class="inbox-notice">
+      <span>Real-time security emails dispatched to user's registered inbox.</span>
+    </div>
+
+    <div class="inbox-list" id="inbox-list">
+      <!-- Injected by app.js -->
+    </div>
+  </aside>
 
   <script src="app.js"></script>
 </body>

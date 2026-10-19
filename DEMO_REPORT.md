@@ -1,5 +1,5 @@
 # DIGNITAS PS05: OFFICIAL LIVE DEMO EVALUATION REPORT
-**Generated:** 2026-10-19 10:15:01 UTC  
+**Generated:** 2026-10-19 10:32:28 UTC  
 **Team Name:** Dignitas  
 **Project:** Adaptive Authentication & Suspicious Login Detection (`ps05-adaptive-auth`)  
 **Audit Verification Status:** **PASSED (100% SUCCESS RATE)**  
@@ -12,7 +12,7 @@ All eight live demo scenarios were executed end-to-end against the Dignitas Adap
 
 - **Total Scenarios Evaluated:** 8
 - **Passed Scenarios:** 8 / 8 (100%)
-- **Average Gateway Decision Latency:** **7.19 ms** (Target SLA: < 100 ms)
+- **Average Gateway Decision Latency:** **7.77 ms** (Target SLA: < 100 ms)
 - **Detection Rate:** **100.0%** for unauthorized/anomalous attempts
 - **False Positive Rate:** **0.0%** on legitimate familiar baseline logins
 
@@ -22,14 +22,14 @@ All eight live demo scenarios were executed end-to-end against the Dignitas Adap
 
 | Scenario | Target App | User & Telemetry Context | Expected Outcome | Score | Action | Latency | Audit Status |
 | :--- | :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **1. Normal Familiar Login** | `Apex Bank` | Delhi, IN • Trusted Laptop • 10:00 UTC | Allow (Frictionless) | `0` | `allow` | `15.76 ms` | **PASS** |
-| **2. First-Time Device Login** | `Apex Bank` | Delhi, IN • Unrecognized Mobile • 10:00 UTC | Step-Up Challenge (CAPTCHA/OTP) | `35` | `captcha` | `4.71 ms` | **PASS** |
-| **3. Foreign Tor Login at 3 AM** | `Apex Bank` | Moscow, RU • Tor Node • New Device • 03:00 UTC | Block & Lock Account | `100` | `block` | `3.99 ms` | **PASS** |
-| **4. Rapid Brute-Force Burst** | `Apex Bank` | 5 rapid password failures injected in < 2 mins | Restrict / Cooldown Challenge | `30` | `captcha` | `5.78 ms` | **PASS** |
-| **5. Cross-App Threat Correlation** | `Pulse Social` | Attacked on Apex Bank, now logging into Pulse Social | Elevated Risk (+35 Cross-App Threat) | `40` | `captcha` | `5.81 ms` | **PASS** |
-| **6. Honeytoken Trap (backup_admin)** | `Apex Bank` | Decoy account targeted by automated scanner | Immediate Block (Score 100) & Source IP Flagged | `100` | `block` | `10.29 ms` | **PASS** |
-| **7. Baseline Adaptation Post-MFA** | `Apex Bank` | Logging in again from newly trusted mobile device | Frictionless Allow (Score 0) | `0` | `allow` | `6.35 ms` | **PASS** |
-| **8. Impossible Travel Velocity** | `Apex Bank` | Jumped from Delhi, IN to London, GB in 15 minutes | Step-Up / Elevated (+45 Impossible Travel) | `70` | `otp_password_reset` | `4.84 ms` | **PASS** |
+| **1. Normal Familiar Login** | `Apex Bank` | Delhi, IN • Trusted Laptop • 10:00 UTC | Allow (Frictionless) | `0` | `allow` | `18.43 ms` | **PASS** |
+| **2. First-Time Device Login** | `Apex Bank` | Delhi, IN • Unrecognized Mobile • 10:00 UTC | Step-Up Challenge (CAPTCHA/OTP) | `35` | `captcha` | `5.48 ms` | **PASS** |
+| **3. Foreign Tor Login at 3 AM** | `Apex Bank` | Moscow, RU • Tor Node • New Device • 03:00 UTC | Block & Lock Account | `100` | `block` | `5.38 ms` | **PASS** |
+| **4. Rapid Brute-Force Burst** | `Apex Bank` | 5 rapid password failures injected in < 2 mins | Restrict / Cooldown Challenge | `30` | `captcha` | `6.09 ms` | **PASS** |
+| **5. Cross-App Threat Correlation** | `Pulse Social` | Attacked on Apex Bank, now logging into Pulse Social | Elevated Risk (+35 Cross-App Threat) | `40` | `captcha` | `5.33 ms` | **PASS** |
+| **6. Honeytoken Trap (backup_admin)** | `Apex Bank` | Decoy account targeted by automated scanner | Immediate Block (Score 100) & Source IP Flagged | `100` | `block` | `10.27 ms` | **PASS** |
+| **7. Baseline Adaptation Post-MFA** | `Apex Bank` | Logging in again from newly trusted mobile device | Frictionless Allow (Score 0) | `0` | `allow` | `7.06 ms` | **PASS** |
+| **8. Impossible Travel Velocity** | `Apex Bank` | Jumped from Delhi, IN to London, GB in 15 minutes | Step-Up / Elevated (+45 Impossible Travel) | `70` | `otp_password_reset` | `4.09 ms` | **PASS** |
 
 ---
 
@@ -38,21 +38,21 @@ All eight live demo scenarios were executed end-to-end against the Dignitas Adap
 ### 1. Normal Familiar Login
 - **Target User:** `alice@example.com` on `Apex Bank`
 - **Assessed Risk Score:** `0/100`
-- **Enforced Action:** `allow` (Latency: `15.76 ms`)
+- **Enforced Action:** `allow` (Latency: `18.43 ms`)
 - **Explainable Named Reasons:**
   * Trusted device and habitual baseline match
 
 ### 2. First-Time Device Login
 - **Target User:** `alice@example.com` on `Apex Bank`
 - **Assessed Risk Score:** `35/100`
-- **Enforced Action:** `captcha` (Latency: `4.71 ms`)
+- **Enforced Action:** `captcha` (Latency: `5.48 ms`)
 - **Explainable Named Reasons:**
   * Device has not been verified for this account
 
 ### 3. Foreign Tor Login at 3 AM
 - **Target User:** `alice@example.com` on `Apex Bank`
 - **Assessed Risk Score:** `100/100`
-- **Enforced Action:** `block` (Latency: `3.99 ms`)
+- **Enforced Action:** `block` (Latency: `5.38 ms`)
 - **Explainable Named Reasons:**
   * IP 198.51.100.42 is listed on threat watchlist: Known Tor exit node observed in credential stuffing campaign
   * Traffic routed through anonymizing VPN / Tor exit node
@@ -64,14 +64,14 @@ All eight live demo scenarios were executed end-to-end against the Dignitas Adap
 ### 4. Rapid Brute-Force Burst
 - **Target User:** `alice@example.com` on `Apex Bank`
 - **Assessed Risk Score:** `30/100`
-- **Enforced Action:** `captcha` (Latency: `5.78 ms`)
+- **Enforced Action:** `captcha` (Latency: `6.09 ms`)
 - **Explainable Named Reasons:**
   * 5 failed attempt(s) in the last 15 minutes
 
 ### 5. Cross-App Threat Correlation
 - **Target User:** `bob@bank.com` on `Pulse Social`
 - **Assessed Risk Score:** `40/100`
-- **Enforced Action:** `captcha` (Latency: `5.81 ms`)
+- **Enforced Action:** `captcha` (Latency: `5.33 ms`)
 - **Explainable Named Reasons:**
   * 1 failed attempt(s) in the last 15 minutes
   * Cross-app correlation: High-risk security event (Score 85) on 'bank' 5m ago
@@ -79,21 +79,21 @@ All eight live demo scenarios were executed end-to-end against the Dignitas Adap
 ### 6. Honeytoken Trap (backup_admin)
 - **Target User:** `backup_admin` on `Apex Bank`
 - **Assessed Risk Score:** `100/100`
-- **Enforced Action:** `block` (Latency: `10.29 ms`)
+- **Enforced Action:** `block` (Latency: `10.27 ms`)
 - **Explainable Named Reasons:**
   * Honeytoken account 'backup_admin' targeted. Source IP flagged.
 
 ### 7. Baseline Adaptation Post-MFA
 - **Target User:** `alice@example.com` on `Apex Bank`
 - **Assessed Risk Score:** `0/100`
-- **Enforced Action:** `allow` (Latency: `6.35 ms`)
+- **Enforced Action:** `allow` (Latency: `7.06 ms`)
 - **Explainable Named Reasons:**
   * Device recognized and trusted in user baseline
 
 ### 8. Impossible Travel Velocity
 - **Target User:** `alice@example.com` on `Apex Bank`
 - **Assessed Risk Score:** `70/100`
-- **Enforced Action:** `otp_password_reset` (Latency: `4.84 ms`)
+- **Enforced Action:** `otp_password_reset` (Latency: `4.09 ms`)
 - **Explainable Named Reasons:**
   * Login from GB; earlier successful logins were from IN
   * Impossible travel: Jump from IN to GB in 15 mins

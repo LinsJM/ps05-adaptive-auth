@@ -52,6 +52,7 @@ class LoginResponse(BaseModel):
     reasons: Optional[List[Any]] = None
     requires_step_up: Optional[bool] = False
     step_up_type: Optional[str] = None
+    prompt_details: Optional[Any] = None
     message: Optional[str] = "Authentication successful"
     latency_ms: Optional[float] = 0.0
     app_id: Optional[str] = "bank"
@@ -60,10 +61,35 @@ class LoginResponse(BaseModel):
 class StepUpVerifyRequest(BaseModel):
     email: str
     app_id: str = "bank"
-    step_up_type: str  # 'captcha', 'email_otp', 'otp_password_reset'
+    step_up_type: str  # 'captcha', 'email_otp', 'otp_password_reset', 'google_prompt'
     code: str
     device_id: str
     new_password: Optional[str] = None
+
+
+class PromptVerifyRequest(BaseModel):
+    email: str
+    device_id: str
+    app_id: str = "bank"
+    approved: bool
+    new_password: Optional[str] = None
+
+
+class NotificationItem(BaseModel):
+    id: str
+    timestamp: str
+    type: str  # 'new_device', 'threat_blocked', 'honeytoken_trap', 'verified'
+    recipient: str
+    subject: str
+    app_id: str
+    device: str
+    location: str
+    ip: str
+    risk_score: int
+    action: str
+    reasons: List[str]
+    preview_body: str
+
 
 
 class LoginEventOut(BaseModel):

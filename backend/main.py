@@ -1,4 +1,11 @@
 import os
+import sys
+
+# Ensure backend directory is in sys.path regardless of working directory
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI
@@ -54,6 +61,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.responses import RedirectResponse
+
 # Include Routers
 app.include_router(auth.router)
 app.include_router(events.router)
@@ -65,7 +74,15 @@ def health():
     return {"status": "ok", "project": "ps05-adaptive-auth"}
 
 
-# Serve static frontend application
+# Serve static dashboard and frontend application
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
-if os.path.exists(os.path.join(frontend_dir, "index.html")):
+dashboard_dir = os.path.join(frontend_dir, "dashboard")
+
+if os.path.exists(dashboard_dir):
+    app.mount("/dashboard", StaticFiles(directory=dashboard_dir, html=True), name="dashboard")
+
+    @app.get("/")
+    def root():
+        return RedirectResponse(url="/dashboard")
+elif os.path.exists(os.path.join(frontend_dir, "index.html")):
     app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")

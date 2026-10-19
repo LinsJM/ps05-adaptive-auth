@@ -1,30 +1,30 @@
 /**
- * DIGNITAS: Adaptive Authentication & SOC Gateway
- * Google-Style Minimal Portal, Pixel Phone 2-Step Prompt, & Security Mail Drawer
+ * DIGNITAS: Checkpoint & Border-Control Adaptive Gateway
+ * Interactive Controller: 5-Tier Segmented Gauge, Explainable Reasons, 
+ * Functional Challenge Panel, Scenarios 1–8 with Keyboard Shortcuts, and SOC Telemetry.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // State
+  // Global State
   let currentApp = 'bank';
-  let activePrompt = null;
   let currentFilter = 'all';
+  let activeChallenge = null;
+  let lastScore = 0;
 
-  // DOM Elements - Navigation
-  const tabPortal = document.getElementById('tab-portal');
+  // DOM Elements - Header Navigation
+  const tabGateway = document.getElementById('tab-gateway');
   const tabSoc = document.getElementById('tab-soc');
-  const viewPortal = document.getElementById('view-portal');
+  const viewGateway = document.getElementById('view-gateway');
   const viewSoc = document.getElementById('view-soc');
-
-  // DOM Elements - App Chips
-  const chipAppBank = document.getElementById('chip-app-bank');
-  const chipAppSocial = document.getElementById('chip-app-social');
-  const portalAppTitle = document.getElementById('portal-app-title');
+  const globalLatencyVal = document.getElementById('global-latency-val');
+  const btnTopReset = document.getElementById('btn-top-reset');
+  const btnDockReset = document.getElementById('btn-dock-reset');
 
   // DOM Elements - Telemetry Drawer
-  const btnToggleContext = document.getElementById('btn-toggle-context');
-  const btnCloseDrawer = document.getElementById('btn-close-drawer');
-  const contextDrawer = document.getElementById('context-drawer');
-  const pillSummary = document.getElementById('pill-summary');
+  const btnToggleTelemetry = document.getElementById('btn-toggle-telemetry');
+  const btnCloseTelemetry = document.getElementById('btn-close-telemetry');
+  const telemetryDrawer = document.getElementById('telemetry-drawer');
+  const summaryTelemetry = document.getElementById('summary-telemetry');
   const ctxIp = document.getElementById('ctx-ip');
   const ctxDevice = document.getElementById('ctx-device');
   const ctxCity = document.getElementById('ctx-city');
@@ -32,143 +32,123 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctxHour = document.getElementById('ctx-hour');
   const ctxMins = document.getElementById('ctx-mins');
   const ctxVpn = document.getElementById('ctx-vpn');
-  const presetButtons = document.querySelectorAll('.btn-preset');
 
-  // DOM Elements - Portal Sign In
-  const formPortalLogin = document.getElementById('form-portal-login');
-  const portalEmail = document.getElementById('portal-email');
-  const portalPassword = document.getElementById('portal-password');
-  const btnPortalSubmit = document.getElementById('btn-portal-submit');
-  const portalResult = document.getElementById('portal-result');
+  // DOM Elements - Customer App Login Form
+  const appShell = document.getElementById('app-shell');
+  const pillBank = document.getElementById('pill-bank');
+  const pillSocial = document.getElementById('pill-social');
+  const logoBank = document.getElementById('logo-bank');
+  const logoSocial = document.getElementById('logo-social');
+  const appHeadingText = document.getElementById('app-heading-text');
+  const appSubheadText = document.getElementById('app-subhead-text');
+  const formCustomerLogin = document.getElementById('form-customer-login');
+  const inputEmail = document.getElementById('input-email');
+  const inputPassword = document.getElementById('input-password');
+  const btnAppSignin = document.getElementById('btn-app-signin');
+  const btnFillAlice = document.getElementById('btn-fill-alice');
+  const btnFillBob = document.getElementById('btn-fill-bob');
+  const btnFillHoney = document.getElementById('btn-fill-honey');
 
-  // DOM Elements - Demo Scenario Buttons
-  const btnDemoFamiliar = document.getElementById('btn-demo-familiar');
-  const btnDemoNewdev = document.getElementById('btn-demo-newdev');
-  const btnDemoTor = document.getElementById('btn-demo-tor');
-  const btnDemoHoney = document.getElementById('btn-demo-honey');
+  // DOM Elements - Decision Panel & Gauge
+  const bannerDecisionBadge = document.getElementById('banner-decision-badge');
+  const bannerHeadline = document.getElementById('banner-headline');
+  const displayScore = document.getElementById('display-score');
+  const displayLatency = document.getElementById('display-latency');
+  const gaugePin = document.getElementById('gauge-pin');
+  const pinTooltip = document.getElementById('pin-tooltip');
+  const reasonsStack = document.getElementById('reasons-stack');
 
-  // DOM Elements - Alice's Trusted Pixel Phone
-  const phoneIdle = document.getElementById('phone-idle');
-  const phonePrompt = document.getElementById('phone-prompt');
-  const phoneFeedback = document.getElementById('phone-feedback');
-  const promptValAccount = document.getElementById('prompt-val-account');
-  const promptValDevice = document.getElementById('prompt-val-device');
-  const promptValLocation = document.getElementById('prompt-val-location');
-  const promptValTime = document.getElementById('prompt-val-time');
-  const promptNumberChip = document.getElementById('prompt-number-chip');
-  const btnPromptApprove = document.getElementById('btn-prompt-approve');
-  const btnPromptDeny = document.getElementById('btn-prompt-deny');
-  const btnFeedbackDismiss = document.getElementById('btn-feedback-dismiss');
-  const feedbackIcon = document.getElementById('feedback-icon');
-  const feedbackTitle = document.getElementById('feedback-title');
-  const feedbackDesc = document.getElementById('feedback-desc');
-  const phoneClock = document.getElementById('phone-clock');
+  // DOM Elements - Verification / Challenge Panel
+  const panelStateIdle = document.getElementById('panel-state-idle');
+  const panelStateActive = document.getElementById('panel-state-active');
+  const activeChallengeType = document.getElementById('active-challenge-type');
+  const activeChallengeUser = document.getElementById('active-challenge-user');
+  const activeChallengeContent = document.getElementById('active-challenge-content');
 
-  // DOM Elements - Security Email Inbox Drawer
-  const btnToggleInbox = document.getElementById('btn-toggle-inbox');
-  const btnCloseInbox = document.getElementById('btn-close-inbox');
-  const inboxDrawer = document.getElementById('inbox-drawer');
-  const inboxList = document.getElementById('inbox-list');
-  const inboxCountBadge = document.getElementById('inbox-count-badge');
-
-  // DOM Elements - SOC Metrics & Feed
+  // DOM Elements - SOC Operations
   const statTotal = document.getElementById('stat-total');
   const statBlocked = document.getElementById('stat-blocked');
   const statChallenged = document.getElementById('stat-challenged');
   const statAllowed = document.getElementById('stat-allowed');
   const statLatency = document.getElementById('stat-latency');
   const statHoneytoken = document.getElementById('stat-honeytoken');
-  const eventsTbody = document.getElementById('events-tbody');
-  const btnRefreshFeed = document.getElementById('btn-refresh-feed');
-  const filterPills = document.querySelectorAll('.filter-pill');
-  const globalLatencyBadge = document.getElementById('global-latency-badge');
-  const gatewayDot = document.getElementById('gateway-dot');
-  const gatewayStatusText = document.getElementById('gateway-status-text');
-
-  // DOM Elements - Account Lock Controls
+  const ledgerTbody = document.getElementById('ledger-tbody');
+  const btnRefreshLedger = document.getElementById('btn-refresh-ledger');
+  const ledgerFilters = document.querySelectorAll('.ledger-filter');
   const inputLockEmail = document.getElementById('input-lock-email');
   const btnDoLock = document.getElementById('btn-do-lock');
   const btnDoUnlock = document.getElementById('btn-do-unlock');
-  const lockStatusMsg = document.getElementById('lock-status-msg');
+  const lockFeedback = document.getElementById('lock-feedback');
 
   // -------------------------------------------------------------
   // 1. Navigation & App Switching
   // -------------------------------------------------------------
-  function switchView(viewName) {
-    [tabPortal, tabSoc].forEach(t => t.classList.remove('active'));
-    [viewPortal, viewSoc].forEach(v => v.classList.remove('active'));
-
-    if (viewName === 'portal') {
-      tabPortal.classList.add('active');
-      viewPortal.classList.add('active');
-    } else if (viewName === 'soc') {
+  function switchView(target) {
+    if (target === 'soc') {
+      tabGateway.classList.remove('active');
       tabSoc.classList.add('active');
+      viewGateway.classList.remove('active');
       viewSoc.classList.add('active');
       refreshSocData();
+    } else {
+      tabSoc.classList.remove('active');
+      tabGateway.classList.add('active');
+      viewSoc.classList.remove('active');
+      viewGateway.classList.add('active');
     }
   }
 
-  tabPortal.addEventListener('click', () => switchView('portal'));
+  tabGateway.addEventListener('click', () => switchView('gateway'));
   tabSoc.addEventListener('click', () => switchView('soc'));
 
-  chipAppBank.addEventListener('click', () => {
-    chipAppBank.classList.add('active');
-    chipAppSocial.classList.remove('active');
-    currentApp = 'bank';
-    portalAppTitle.textContent = 'Apex Trust Bank';
-  });
+  function setCustomerApp(app) {
+    currentApp = app;
+    if (app === 'social') {
+      pillBank.classList.remove('active');
+      pillSocial.classList.add('active');
+      logoBank.classList.add('hidden');
+      logoSocial.classList.remove('hidden');
+      appShell.classList.add('app-social');
+      appHeadingText.textContent = 'Pulse Social Network';
+      appSubheadText.textContent = 'User Social Identity Gateway';
+    } else {
+      pillSocial.classList.remove('active');
+      pillBank.classList.add('active');
+      logoSocial.classList.add('hidden');
+      logoBank.classList.remove('hidden');
+      appShell.classList.remove('app-social');
+      appHeadingText.textContent = 'Apex Trust Bank';
+      appSubheadText.textContent = 'Client Online Financial Portal';
+    }
+  }
 
-  chipAppSocial.addEventListener('click', () => {
-    chipAppSocial.classList.add('active');
-    chipAppBank.classList.remove('active');
-    currentApp = 'social';
-    portalAppTitle.textContent = 'Pulse Social Platform';
-  });
+  pillBank.addEventListener('click', () => setCustomerApp('bank'));
+  pillSocial.addEventListener('click', () => setCustomerApp('social'));
 
   // -------------------------------------------------------------
   // 2. Simulated Telemetry Drawer
   // -------------------------------------------------------------
-  btnToggleContext.addEventListener('click', () => {
-    contextDrawer.classList.toggle('open');
-  });
-  btnCloseDrawer.addEventListener('click', () => {
-    contextDrawer.classList.remove('open');
-  });
-
-  function updatePillSummary() {
-    const city = ctxCity.value || 'Unknown';
-    const country = ctxCountry.value || 'XX';
-    const dev = ctxDevice.value || 'unknown-device';
-    const hr = ctxHour.value ? `${ctxHour.value}:00 UTC` : 'Now';
-    const vpn = ctxVpn.checked ? ' • 🛡️ VPN/Tor' : '';
-    pillSummary.textContent = `${city}, ${country} • ${dev} • ${hr}${vpn}`;
+  function updateTelemetrySummary() {
+    const city = ctxCity.value.trim() || 'Delhi';
+    const country = ctxCountry.value.trim() || 'IN';
+    const dev = ctxDevice.value.trim() || 'dev-unknown';
+    const ip = ctxIp.value.trim() || '127.0.0.1';
+    const hour = ctxHour.value !== '' ? `${ctxHour.value}:00 UTC` : '10:00 UTC';
+    const vpn = ctxVpn.checked ? ' • [VPN/Tor Node]' : '';
+    summaryTelemetry.textContent = `${city}, ${country} • ${dev} (${ip}) • ${hour}${vpn}`;
   }
 
-  [ctxIp, ctxDevice, ctxCity, ctxCountry, ctxHour, ctxMins, ctxVpn].forEach(input => {
-    input.addEventListener('change', updatePillSummary);
+  btnToggleTelemetry.addEventListener('click', () => {
+    telemetryDrawer.classList.toggle('open');
   });
 
-  const presets = {
-    normal: { ip: '103.21.244.2', device: 'dev-alice-laptop', city: 'Delhi', country: 'IN', hour: 10, mins: '', vpn: false },
-    'new-device': { ip: '103.21.244.2', device: 'dev-alice-phone-new', city: 'Delhi', country: 'IN', hour: 10, mins: '', vpn: false },
-    'tor-foreign': { ip: '185.220.101.5', device: 'dev-unknown-attacker', city: 'Moscow', country: 'RU', hour: 3, mins: '', vpn: true },
-    impossible: { ip: '185.86.151.11', device: 'dev-alice-laptop', city: 'London', country: 'GB', hour: 11, mins: 5, vpn: false }
-  };
+  btnCloseTelemetry.addEventListener('click', () => {
+    telemetryDrawer.classList.remove('open');
+  });
 
-  presetButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const p = presets[btn.dataset.preset];
-      if (p) {
-        ctxIp.value = p.ip;
-        ctxDevice.value = p.device;
-        ctxCity.value = p.city;
-        ctxCountry.value = p.country;
-        ctxHour.value = p.hour;
-        ctxMins.value = p.mins;
-        ctxVpn.checked = p.vpn;
-        updatePillSummary();
-      }
-    });
+  [ctxIp, ctxDevice, ctxCity, ctxCountry, ctxHour, ctxMins, ctxVpn].forEach(el => {
+    el.addEventListener('change', updateTelemetrySummary);
+    el.addEventListener('input', updateTelemetrySummary);
   });
 
   function getClientTelemetry() {
@@ -177,465 +157,54 @@ document.addEventListener('DOMContentLoaded', () => {
       device_id: ctxDevice.value.trim() || 'dev-unknown',
       city: ctxCity.value.trim() || 'Delhi',
       country: ctxCountry.value.trim() || 'IN',
-      simulated_hour: ctxHour.value !== '' ? parseInt(ctxHour.value, 10) : null,
+      hour: ctxHour.value !== '' ? parseInt(ctxHour.value, 10) : 10,
       minutes_since_last_login: ctxMins.value !== '' ? parseInt(ctxMins.value, 10) : null,
       is_vpn: ctxVpn.checked
     };
   }
 
-  // -------------------------------------------------------------
-  // 3. Google-Style Sign In Form Submission
-  // -------------------------------------------------------------
-  formPortalLogin.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await handleLoginAttempt(portalEmail.value, portalPassword.value);
-  });
-
-  async function handleLoginAttempt(email, password) {
-    portalResult.classList.remove('hidden');
-    portalResult.innerHTML = `<div class="spinner-inline"></div> Evaluating dynamic risk policy...`;
-    btnPortalSubmit.disabled = true;
-    btnPortalSubmit.textContent = 'Verifying...';
-
-    const telem = getClientTelemetry();
-    const payload = {
-      app_id: currentApp,
-      email: email,
-      password: password,
-      ...telem
-    };
-
-    try {
-      const data = await apiLogin(payload);
-      renderPortalResult(data);
-      refreshSocData();
-      fetchNotifications();
-
-      // IF 2-Step Verification Prompt is triggered (New device or medium risk)
-      if (data.requires_step_up || (data.prompt_details && data.action !== 'block')) {
-        triggerPhoneGooglePrompt(data.prompt_details || {
-          email: email,
-          device_id: telem.device_id,
-          city: telem.city,
-          country: telem.country,
-          app_id: currentApp,
-          time: 'Just now',
-          number_match: '42'
-        });
-      } else if (data.action === 'block') {
-        // High-risk or honeytoken blocked: open security inbox drawer!
-        setTimeout(() => {
-          inboxDrawer.classList.add('open');
-        }, 600);
-      }
-    } catch (err) {
-      portalResult.innerHTML = `<div class="callout callout-danger">Login evaluation error: ${escapeHtml(err.message)}</div>`;
-    } finally {
-      btnPortalSubmit.disabled = false;
-      btnPortalSubmit.textContent = 'Next';
-    }
-  }
-
-  function renderPortalResult(data) {
-    const actionClass = getActionBadgeClass(data.action);
-    const scoreClass = getScoreClass(data.score ?? data.risk_score ?? 0);
-    const reasons = (data.reasons || []).map(r => {
-      let t = typeof r === 'object' && r !== null ? (r.detail || r.signal || JSON.stringify(r)) : String(r);
-      return `<li>${escapeHtml(t)}</li>`;
-    }).join('');
-
-    const score = data.score ?? data.risk_score ?? 0;
-    const latency = data.latency_ms ? data.latency_ms.toFixed(1) : '9.2';
-
-    portalResult.innerHTML = `
-      <div class="result-header">
-        <span class="action-badge ${actionClass}">${(data.action || 'allow').toUpperCase()}</span>
-        <span class="score-badge ${scoreClass}">Risk Score: ${score}/100</span>
-        <span class="latency-tag">⚡ ${latency} ms</span>
-      </div>
-      <p class="result-msg">${escapeHtml(data.message || '')}</p>
-      ${reasons ? `<ul class="reasons-bullet-list">${reasons}</ul>` : ''}
-    `;
-  }
-
-  // -------------------------------------------------------------
-  // 4. Alice's Trusted Phone Mockup: Google 2-Step Push Prompt
-  // -------------------------------------------------------------
-  function triggerPhoneGooglePrompt(prompt) {
-    activePrompt = prompt;
-
-    // Fill phone UI
-    promptValAccount.textContent = prompt.email || 'alice@example.com';
-    promptValDevice.textContent = prompt.device_id || 'Windows PC (Chrome)';
-    promptValLocation.textContent = `${prompt.city || 'Delhi'}, ${prompt.country || 'IN'}`;
-    promptValTime.textContent = prompt.time || 'Just now';
-    promptNumberChip.textContent = prompt.number_match || '42';
-
-    // Switch phone screen state
-    phoneIdle.classList.add('hidden');
-    phoneFeedback.classList.add('hidden');
-    phonePrompt.classList.remove('hidden');
-
-    // Subtle vibration visual
-    phonePrompt.style.animation = 'none';
-    phonePrompt.offsetHeight; // trigger reflow
-    phonePrompt.style.animation = null;
-  }
-
-  // User taps [Yes, it's me] on Trusted Phone
-  btnPromptApprove.addEventListener('click', async () => {
-    if (!activePrompt) return;
-    btnPromptApprove.disabled = true;
-    btnPromptApprove.textContent = 'Verifying...';
-
-    try {
-      const res = await apiVerifyPrompt({
-        email: activePrompt.email,
-        device_id: activePrompt.device_id,
-        app_id: activePrompt.app_id || currentApp,
-        approved: true
-      });
-
-      // Show phone feedback
-      phonePrompt.classList.add('hidden');
-      phoneFeedback.classList.remove('hidden');
-      feedbackIcon.textContent = '✅';
-      feedbackTitle.textContent = 'Sign-in Approved';
-      feedbackDesc.textContent = `Device "${activePrompt.device_id}" is now trusted in Alice's baseline.`;
-
-      // Update Portal Card
-      portalResult.innerHTML = `
-        <div class="result-header">
-          <span class="action-badge act-allow">APPROVED</span>
-          <span class="score-badge sc-minimal">Risk Score: 0/100</span>
-          <span class="latency-tag">⚡ 6.8 ms</span>
-        </div>
-        <p class="result-msg">Google 2-Step Prompt Approved! Welcome back, Alice.</p>
-        <div class="callout callout-success" style="margin-top: 0.5rem; font-size: 0.8rem;">
-          Device has been verified on Alice's primary phone and added to trusted baseline. Subsequent logins will be frictionless!
-        </div>
-      `;
-
-      refreshSocData();
-      fetchNotifications();
-    } catch (err) {
-      alert(`Approval error: ${err.message}`);
-    } finally {
-      btnPromptApprove.disabled = false;
-      btnPromptApprove.textContent = "Yes, it's me";
-    }
-  });
-
-  // User taps [No, it's not me] on Trusted Phone
-  btnPromptDeny.addEventListener('click', async () => {
-    if (!activePrompt) return;
-    btnPromptDeny.disabled = true;
-    btnPromptDeny.textContent = 'Locking...';
-
-    try {
-      const res = await apiVerifyPrompt({
-        email: activePrompt.email,
-        device_id: activePrompt.device_id,
-        app_id: activePrompt.app_id || currentApp,
-        approved: false
-      });
-
-      // Show phone feedback
-      phonePrompt.classList.add('hidden');
-      phoneFeedback.classList.remove('hidden');
-      feedbackIcon.textContent = '🚨';
-      feedbackTitle.textContent = 'Sign-in Rejected & Account Locked';
-      feedbackDesc.textContent = `Unauthorized sign-in rejected. Account locked and intruder IP blacklisted.`;
-
-      // Update Portal Card
-      portalResult.innerHTML = `
-        <div class="result-header">
-          <span class="action-badge act-block">BLOCK & LOCK</span>
-          <span class="score-badge sc-critical">Risk Score: 100/100</span>
-          <span class="latency-tag">⚡ 8.0 ms</span>
-        </div>
-        <p class="result-msg">Security Alert: Login rejected by user on trusted phone. Account locked.</p>
-      `;
-
-      refreshSocData();
-      fetchNotifications();
-      setTimeout(() => { inboxDrawer.classList.add('open'); }, 800);
-    } catch (err) {
-      alert(`Rejection error: ${err.message}`);
-    } finally {
-      btnPromptDeny.disabled = false;
-      btnPromptDeny.textContent = "No, it's not me";
-    }
-  });
-
-  btnFeedbackDismiss.addEventListener('click', () => {
-    phoneFeedback.classList.add('hidden');
-    phonePrompt.classList.add('hidden');
-    phoneIdle.classList.remove('hidden');
-    activePrompt = null;
-  });
-
-  // -------------------------------------------------------------
-  // 5. 1-Click Demo Buttons on Portal Card
-  // -------------------------------------------------------------
-  btnDemoFamiliar.addEventListener('click', () => {
-    portalEmail.value = 'alice@example.com';
-    portalPassword.value = 'Password123!';
+  // Quick User Fill Buttons
+  btnFillAlice.addEventListener('click', () => {
+    inputEmail.value = 'alice@example.com';
+    inputPassword.value = 'Password123!';
     ctxIp.value = '103.21.244.2';
     ctxDevice.value = 'dev-alice-laptop';
     ctxCity.value = 'Delhi';
     ctxCountry.value = 'IN';
     ctxHour.value = 10;
+    ctxMins.value = '';
     ctxVpn.checked = false;
-    updatePillSummary();
-    handleLoginAttempt('alice@example.com', 'Password123!');
+    updateTelemetrySummary();
   });
 
-  btnDemoNewdev.addEventListener('click', () => {
-    portalEmail.value = 'alice@example.com';
-    portalPassword.value = 'Password123!';
+  btnFillBob.addEventListener('click', () => {
+    inputEmail.value = 'bob@example.com';
+    inputPassword.value = 'Password123!';
     ctxIp.value = '103.21.244.2';
-    ctxDevice.value = 'dev-alice-new-tablet';
+    ctxDevice.value = 'dev-bob-laptop';
     ctxCity.value = 'Delhi';
     ctxCountry.value = 'IN';
     ctxHour.value = 10;
+    ctxMins.value = '';
     ctxVpn.checked = false;
-    updatePillSummary();
-    handleLoginAttempt('alice@example.com', 'Password123!');
+    updateTelemetrySummary();
   });
 
-  btnDemoTor.addEventListener('click', () => {
-    portalEmail.value = 'alice@example.com';
-    portalPassword.value = 'Password123!';
-    ctxIp.value = '185.220.101.5';
-    ctxDevice.value = 'dev-tor-attacker';
-    ctxCity.value = 'Moscow';
-    ctxCountry.value = 'RU';
-    ctxHour.value = 3;
-    ctxVpn.checked = true;
-    updatePillSummary();
-    handleLoginAttempt('alice@example.com', 'Password123!');
-  });
-
-  btnDemoHoney.addEventListener('click', () => {
-    portalEmail.value = 'backup_admin';
-    portalPassword.value = 'AdminSecret2024!';
+  btnFillHoney.addEventListener('click', () => {
+    inputEmail.value = 'backup_admin';
+    inputPassword.value = 'AdminSecret2024!';
     ctxIp.value = '45.154.255.99';
     ctxDevice.value = 'dev-honeypot-bot';
     ctxCity.value = 'St. Petersburg';
     ctxCountry.value = 'RU';
     ctxHour.value = 1;
+    ctxMins.value = '';
     ctxVpn.checked = true;
-    updatePillSummary();
-    handleLoginAttempt('backup_admin', 'AdminSecret2024!');
+    updateTelemetrySummary();
   });
 
   // -------------------------------------------------------------
-  // 6. Instagram / Google Style Security Email Inbox Drawer
-  // -------------------------------------------------------------
-  btnToggleInbox.addEventListener('click', () => {
-    inboxDrawer.classList.toggle('open');
-  });
-
-  btnCloseInbox.addEventListener('click', () => {
-    inboxDrawer.classList.remove('open');
-  });
-
-  async function fetchNotifications() {
-    try {
-      const res = await fetch('/api/notifications');
-      if (!res.ok) return;
-      const notifs = await res.json();
-
-      inboxCountBadge.textContent = notifs.length;
-
-      if (!notifs || notifs.length === 0) {
-        inboxList.innerHTML = `<div class="empty-state" style="padding: 2rem; color: #64748b; text-align: center;">No security alerts yet.</div>`;
-        return;
-      }
-
-      inboxList.innerHTML = notifs.map(n => {
-        const timeStr = n.timestamp ? new Date(n.timestamp).toLocaleTimeString() : 'Just now';
-        const isThreat = (n.type === 'threat_blocked' || n.risk_score >= 80);
-        const isPrompt = (n.type === 'new_device');
-        const cardClass = isThreat ? 'card-alert-threat' : (isPrompt ? 'card-alert-prompt' : '');
-
-        const reasonsHtml = (n.reasons || []).map(r => `<li>• ${escapeHtml(r)}</li>`).join('');
-
-        return `
-          <div class="email-card ${cardClass}">
-            <div class="email-meta">
-              <span class="email-sender">🛡️ Dignitas Security Service</span>
-              <span>${timeStr}</span>
-            </div>
-            <div class="email-subject">${escapeHtml(n.subject)}</div>
-            <div class="email-body">${escapeHtml(n.preview_body)}</div>
-            ${reasonsHtml ? `<ul class="email-bullets">${reasonsHtml}</ul>` : ''}
-            <div class="email-footer-actions">
-              <button class="btn-email-action ${isThreat ? 'btn-email-danger' : ''}">Review Details</button>
-              <button class="btn-email-action">Secure Account</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    } catch (e) {
-      console.error('Failed to fetch notifications:', e);
-    }
-  }
-
-  // -------------------------------------------------------------
-  // 7. SOC Live Telemetry & Feed (Metrics & Table)
-  // -------------------------------------------------------------
-  async function refreshSocData() {
-    checkGatewayHealth();
-    fetchStats();
-    fetchEvents();
-  }
-
-  async function checkGatewayHealth() {
-    try {
-      const t0 = performance.now();
-      const res = await fetch('/api/health');
-      const latency = Math.round(performance.now() - t0);
-      if (res.ok) {
-        gatewayDot.className = 'status-dot online';
-        gatewayStatusText.textContent = 'Gateway Online';
-        globalLatencyBadge.textContent = `${latency} ms`;
-      }
-    } catch {
-      gatewayDot.className = 'status-dot offline';
-      gatewayStatusText.textContent = 'Gateway Offline';
-      globalLatencyBadge.textContent = 'ERR';
-    }
-  }
-
-  async function fetchStats() {
-    try {
-      const res = await fetch('/api/dashboard/stats');
-      if (res.ok) {
-        const data = await res.json();
-        const total = (data.total_events !== undefined) ? data.total_events : (data.total_logins || 0);
-        const blocked = (data.blocked_count !== undefined) ? data.blocked_count : (data.blocked_logins || 0);
-        const challenged = (data.challenged_count !== undefined) ? data.challenged_count : (data.challenged_logins || 0);
-        const allowed = (data.allowed_count !== undefined) ? data.allowed_count : (data.allowed_logins || 0);
-        const latency = (data.average_latency_ms !== undefined) ? data.average_latency_ms : 8.4;
-        const honeytoken = (data.honeytoken_hits !== undefined) ? data.honeytoken_hits : 0;
-
-        statTotal.textContent = total.toLocaleString();
-        statBlocked.textContent = blocked.toLocaleString();
-        statChallenged.textContent = challenged.toLocaleString();
-        statAllowed.textContent = allowed.toLocaleString();
-        statLatency.textContent = `${latency.toFixed(1)} ms`;
-        statHoneytoken.textContent = honeytoken.toLocaleString();
-      }
-    } catch (e) {
-      console.error('Failed to fetch stats:', e);
-    }
-  }
-
-  async function fetchEvents() {
-    try {
-      const url = currentFilter === 'all' 
-        ? '/api/dashboard/events?limit=40' 
-        : `/api/dashboard/events?limit=40&app_id=${currentFilter}`;
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const events = await res.json();
-
-      if (!events || events.length === 0) {
-        eventsTbody.innerHTML = `<tr><td colspan="8" class="empty-state">No login events recorded yet. Trigger a simulated login!</td></tr>`;
-        return;
-      }
-
-      eventsTbody.innerHTML = events.map(ev => {
-        const rawTime = ev.timestamp || ev.created_at;
-        const timeStr = rawTime ? new Date(rawTime).toLocaleTimeString() : 'Just now';
-        const rawAction = ev.action || ev.decision || 'allow';
-        const actionClass = getActionBadgeClass(rawAction);
-        const score = (ev.score !== undefined) ? ev.score : (ev.risk_score || 0);
-        const scoreClass = getScoreClass(score);
-        const userIdentifier = ev.email_attempted || ev.user_identifier || 'unknown';
-        const isHoney = (userIdentifier === 'backup_admin') ? ' <span class="honey-pill">HONEYTOKEN</span>' : '';
-        const appBadge = (ev.app_id === 'bank') 
-          ? '<span class="badge-app app-bank">🏦 BANK</span>' 
-          : '<span class="badge-app app-social">🌐 SOCIAL</span>';
-
-        const reasonsList = (ev.reasons || []).map(r => {
-          let text = '';
-          if (typeof r === 'string') text = r;
-          else if (typeof r === 'object' && r !== null) text = r.detail || r.signal || JSON.stringify(r);
-          return `<span class="reason-tag">${escapeHtml(text)}</span>`;
-        }).join('');
-
-        return `
-          <tr class="${score >= 80 ? 'tr-high-risk' : ''}">
-            <td class="cell-time">${timeStr}</td>
-            <td>${appBadge}</td>
-            <td class="cell-user"><strong>${escapeHtml(userIdentifier)}</strong>${isHoney}</td>
-            <td>${escapeHtml(ev.city || '')}${ev.country ? `, ${escapeHtml(ev.country)}` : ''} <span class="text-muted">(${escapeHtml(ev.ip_address)})</span></td>
-            <td><code class="device-tag">${escapeHtml(ev.device_id || 'unknown')}</code></td>
-            <td><span class="score-badge ${scoreClass}">${score}</span></td>
-            <td><span class="action-badge ${actionClass}">${rawAction.toUpperCase()}</span></td>
-            <td class="cell-reasons">${reasonsList || '<span class="text-muted">None (Normal Baseline)</span>'}</td>
-          </tr>
-        `;
-      }).join('');
-    } catch (e) {
-      console.error('Failed to fetch events:', e);
-    }
-  }
-
-  // Filter Pills in SOC view
-  filterPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      filterPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      currentFilter = pill.dataset.filter;
-      fetchEvents();
-    });
-  });
-
-  btnRefreshFeed.addEventListener('click', () => {
-    btnRefreshFeed.textContent = '↻ Syncing...';
-    refreshSocData();
-    setTimeout(() => { btnRefreshFeed.textContent = '↻ Refresh'; }, 600);
-  });
-
-  // -------------------------------------------------------------
-  // 8. Emergency Account Lock / Unlock
-  // -------------------------------------------------------------
-  btnDoLock.addEventListener('click', async () => {
-    const email = inputLockEmail.value.trim();
-    if (!email) return;
-    try {
-      const res = await fetch(`/api/dashboard/users/${encodeURIComponent(email)}/lock`, { method: 'POST' });
-      const data = await res.json();
-      lockStatusMsg.className = 'lock-status status-danger';
-      lockStatusMsg.textContent = `🔒 ${data.message || 'Account locked'}`;
-      refreshSocData();
-    } catch {
-      lockStatusMsg.className = 'lock-status status-danger';
-      lockStatusMsg.textContent = 'Lock action failed.';
-    }
-  });
-
-  btnDoUnlock.addEventListener('click', async () => {
-    const email = inputLockEmail.value.trim();
-    if (!email) return;
-    try {
-      const res = await fetch(`/api/dashboard/users/${encodeURIComponent(email)}/unlock`, { method: 'POST' });
-      const data = await res.json();
-      lockStatusMsg.className = 'lock-status status-success';
-      lockStatusMsg.textContent = `🔓 ${data.message || 'Account unlocked'}`;
-      refreshSocData();
-    } catch {
-      lockStatusMsg.className = 'lock-status status-danger';
-      lockStatusMsg.textContent = 'Unlock action failed.';
-    }
-  });
-
-  // -------------------------------------------------------------
-  // 9. API HTTP Wrappers & Helpers
+  // 3. API Communication
   // -------------------------------------------------------------
   async function apiLogin(payload) {
     const res = await fetch('/api/login', {
@@ -655,43 +224,642 @@ document.addEventListener('DOMContentLoaded', () => {
     return await res.json();
   }
 
-  function getActionBadgeClass(action) {
-    if (!action) return 'act-allow';
-    const a = action.toLowerCase();
-    if (a.includes('block')) return 'act-block';
-    if (a.includes('reset')) return 'act-reset';
-    if (a.includes('otp')) return 'act-otp';
-    if (a.includes('captcha') || a.includes('prompt')) return 'act-captcha';
-    return 'act-allow';
+  async function apiVerifyStepUp(payload) {
+    const res = await fetch('/api/verify-stepup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
   }
 
-  function getScoreClass(score) {
-    if (score >= 80) return 'sc-critical';
-    if (score >= 61) return 'sc-high';
-    if (score >= 45) return 'sc-medium';
-    if (score >= 30) return 'sc-low';
-    return 'sc-minimal';
+  async function apiResetDemo() {
+    const res = await fetch('/api/dashboard/reset-demo', { method: 'POST' });
+    return await res.json();
   }
 
+  // -------------------------------------------------------------
+  // 4. Form Submission & Evaluation Pipeline
+  // -------------------------------------------------------------
+  formCustomerLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await executeLoginEvaluation(inputEmail.value.trim(), inputPassword.value);
+  });
+
+  async function executeLoginEvaluation(email, password) {
+    btnAppSignin.disabled = true;
+    btnAppSignin.textContent = 'Evaluating Risk Policy...';
+
+    const telem = getClientTelemetry();
+    const payload = {
+      app_id: currentApp,
+      email: email,
+      password: password,
+      ...telem
+    };
+
+    try {
+      const data = await apiLogin(payload);
+      applyEvaluationResult(data, email);
+    } catch (err) {
+      console.error('Login evaluation failed:', err);
+      bannerHeadline.textContent = 'Evaluation Gateway Error';
+    } finally {
+      btnAppSignin.disabled = false;
+      btnAppSignin.textContent = 'Sign In';
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 5. Dynamic Decision Rendering & Signature Gauge Animation
+  // -------------------------------------------------------------
+  function applyEvaluationResult(data, email) {
+    const score = Number.isFinite(data.score) ? data.score : (data.risk_score || 0);
+    const latency = (data.latency_ms !== undefined && data.latency_ms !== null) ? Number(data.latency_ms).toFixed(1) : '8.4';
+
+    // 1. Unified Real Per-Decision Latency Display
+    displayLatency.textContent = `${latency} ms`;
+    globalLatencyVal.textContent = `${latency} ms`;
+
+    // 2. Animate Score Counter (Readable from 3 meters!)
+    animateScoreCounter(lastScore, score);
+    lastScore = score;
+
+    // 3. Move Segmented Risk Gauge Needle Pin
+    const clampedScore = Math.max(0, Math.min(100, score));
+    gaugePin.style.left = `${clampedScore}%`;
+    pinTooltip.textContent = `${score}`;
+
+    // 4. Update Decision Badge & Projector Headline
+    updateDecisionBanner(data.action, data.decision, score, data.message);
+
+    // 5. Render Explainable Named Reasons with Points
+    renderExplainableReasons(data.reasons || []);
+
+    // 6. Handle Step-Up Verification Challenge Box
+    handleChallengeDisplay(data, email);
+  }
+
+  function animateScoreCounter(fromVal, toVal) {
+    const duration = 500;
+    const start = performance.now();
+
+    function step(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(fromVal + (toVal - fromVal) * ease);
+      displayScore.textContent = current;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        displayScore.textContent = toVal;
+      }
+    }
+    requestAnimationFrame(step);
+
+    // Dynamic Colorize Score Digits
+    if (toVal < 30) {
+      displayScore.style.color = '#166534';
+    } else if (toVal < 45) {
+      displayScore.style.color = '#92400E';
+    } else if (toVal < 61) {
+      displayScore.style.color = '#9A3412';
+    } else if (toVal < 80) {
+      displayScore.style.color = '#9F1239';
+    } else {
+      displayScore.style.color = '#7F1D1D';
+    }
+  }
+
+  function updateDecisionBanner(action, decision, score, message) {
+    bannerDecisionBadge.className = 'decision-badge';
+
+    if (action === 'block' || decision === 'restrict' || score >= 80) {
+      bannerDecisionBadge.classList.add('badge-block');
+      bannerDecisionBadge.textContent = 'BLOCK & LOCK (80–100)';
+      bannerHeadline.textContent = 'Intrusion Blocked • Account Locked';
+    } else if (action === 'otp_password_reset' || score >= 61) {
+      bannerDecisionBadge.classList.add('badge-reset');
+      bannerDecisionBadge.textContent = 'RESET REQUIRED (61–79)';
+      bannerHeadline.textContent = 'Suspicious Login • OTP & Reset';
+    } else if (action === 'email_otp' || score >= 45) {
+      bannerDecisionBadge.classList.add('badge-otp');
+      bannerDecisionBadge.textContent = 'EMAIL OTP (45–60)';
+      bannerHeadline.textContent = 'Step-Up MFA Required';
+    } else if (action === 'captcha' || score >= 30) {
+      bannerDecisionBadge.classList.add('badge-captcha');
+      bannerDecisionBadge.textContent = 'CAPTCHA (30–44)';
+      bannerHeadline.textContent = 'Light Friction Challenge';
+    } else {
+      bannerDecisionBadge.classList.add('badge-allow');
+      bannerDecisionBadge.textContent = 'ALLOW (0–29)';
+      bannerHeadline.textContent = 'Frictionless Sign-In Approved';
+    }
+  }
+
+  function renderExplainableReasons(reasons) {
+    reasonsStack.innerHTML = '';
+
+    if (!reasons || reasons.length === 0) {
+      reasonsStack.innerHTML = `
+        <div class="empty-reasons-state">
+          No anomaly detected. Client baseline matches historic trusted pattern (0 risk points).
+        </div>
+      `;
+      return;
+    }
+
+    // Normalize and sort reasons descending by points
+    const normalized = reasons.map(r => {
+      if (typeof r === 'object' && r !== null) {
+        return {
+          points: typeof r.points === 'number' ? r.points : 0,
+          signal: r.signal || 'RISK_SIGNAL',
+          detail: r.detail || JSON.stringify(r)
+        };
+      } else {
+        // String format parsing
+        const str = String(r);
+        const match = str.match(/\+(\d+)/);
+        const pts = match ? parseInt(match[1], 10) : 0;
+        return {
+          points: pts,
+          signal: 'TELEMETRY_ANOMALY',
+          detail: str
+        };
+      }
+    });
+
+    // Sort descending by risk points
+    normalized.sort((a, b) => b.points - a.points);
+
+    normalized.forEach((item, index) => {
+      const row = document.createElement('div');
+      row.className = 'reason-item';
+      row.style.animationDelay = `${index * 60}ms`;
+
+      let ptsClass = 'pts-low';
+      if (item.points >= 40) ptsClass = 'pts-high';
+      else if (item.points >= 20) ptsClass = 'pts-med';
+      else if (item.points === 0) ptsClass = 'pts-zero';
+
+      const signStr = item.points >= 0 ? `+${item.points}` : `${item.points}`;
+
+      row.innerHTML = `
+        <div class="reason-points-badge ${ptsClass}">${signStr} pts</div>
+        <div class="reason-content">
+          <div class="reason-signal">${escapeHtml(item.signal.toUpperCase())}</div>
+          <div class="reason-detail">${escapeHtml(item.detail)}</div>
+        </div>
+      `;
+      reasonsStack.appendChild(row);
+    });
+  }
+
+  // -------------------------------------------------------------
+  // 6. Challenge & Verification Panel
+  // -------------------------------------------------------------
+  function handleChallengeDisplay(data, email) {
+    const isStepUp = data.requires_step_up || data.decision === 'step_up' || (data.action && data.action !== 'allow' && data.action !== 'block');
+
+    if (!isStepUp) {
+      panelStateActive.classList.add('hidden');
+      panelStateIdle.classList.remove('hidden');
+
+      if (data.action === 'block') {
+        panelStateIdle.innerHTML = `
+          <div class="idle-icon-wrap" style="color: #DC2626; border-color: #FCA5A5;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          </div>
+          <div class="idle-text-wrap">
+            <div class="idle-heading" style="color: #7F1D1D;">Intrusion Mitigated • Account Locked</div>
+            <div class="idle-sub">Intruder IP blacklisted. Access blocked until SOC administrator manually unlocks.</div>
+          </div>
+        `;
+      } else {
+        panelStateIdle.innerHTML = `
+          <div class="idle-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div class="idle-text-wrap">
+            <div class="idle-heading">Adaptive Step-Up Inactive</div>
+            <div class="idle-sub">When unusual telemetry triggers a challenge, the verification prompt appears here.</div>
+          </div>
+        `;
+      }
+      activeChallenge = null;
+      return;
+    }
+
+    // Step-up is active!
+    panelStateIdle.classList.add('hidden');
+    panelStateActive.classList.remove('hidden');
+
+    activeChallengeUser.textContent = email;
+    activeChallenge = {
+      email: email,
+      action: data.action,
+      device_id: ctxDevice.value.trim() || 'dev-unknown',
+      app_id: currentApp
+    };
+
+    if (data.prompt_details || data.action === 'captcha' || data.action === 'email_otp') {
+      activeChallengeType.textContent = 'TRUSTED DEVICE PROMPT';
+      activeChallengeContent.innerHTML = `
+        <div class="challenge-body-prompt">
+          <div class="prompt-details-summary">
+            <div class="prompt-title-bold">Is this you signing in?</div>
+            <div class="prompt-context-snippet">Device: <strong>${escapeHtml(activeChallenge.device_id)}</strong> near ${escapeHtml(ctxCity.value)}, ${escapeHtml(ctxCountry.value)}</div>
+          </div>
+          <div class="prompt-action-btns">
+            <button class="btn-prompt-yes" id="btn-challenge-approve">✓ Yes, it's me</button>
+            <button class="btn-prompt-no" id="btn-challenge-deny">✕ No, lock</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('btn-challenge-approve').addEventListener('click', () => submitPromptVerification(true));
+      document.getElementById('btn-challenge-deny').addEventListener('click', () => submitPromptVerification(false));
+    } else {
+      activeChallengeType.textContent = 'MFA PASSCODE';
+      activeChallengeContent.innerHTML = `
+        <div class="challenge-body-input">
+          <input type="text" id="input-stepup-code" placeholder="123456" maxlength="6" value="123456">
+          <button class="btn-challenge-submit" id="btn-submit-code">Verify Code</button>
+        </div>
+      `;
+      document.getElementById('btn-submit-code').addEventListener('click', submitOtpVerification);
+    }
+  }
+
+  async function submitPromptVerification(approved) {
+    if (!activeChallenge) return;
+    try {
+      const res = await apiVerifyPrompt({
+        email: activeChallenge.email,
+        device_id: activeChallenge.device_id,
+        app_id: activeChallenge.app_id,
+        approved: approved
+      });
+      applyEvaluationResult(res, activeChallenge.email);
+    } catch (err) {
+      console.error('Prompt verify error:', err);
+    }
+  }
+
+  async function submitOtpVerification() {
+    if (!activeChallenge) return;
+    const code = document.getElementById('input-stepup-code')?.value || '123456';
+    try {
+      const res = await apiVerifyStepUp({
+        email: activeChallenge.email,
+        device_id: activeChallenge.device_id,
+        app_id: activeChallenge.app_id,
+        step_up_type: activeChallenge.action || 'email_otp',
+        code: code
+      });
+      applyEvaluationResult(res, activeChallenge.email);
+    } catch (err) {
+      console.error('OTP verify error:', err);
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 7. Demo Scenarios 1 to 8 & Keyboard Shortcuts
+  // -------------------------------------------------------------
+  const scenarios = {
+    1: {
+      name: 'Familiar Login',
+      email: 'alice@example.com',
+      pass: 'Password123!',
+      app: 'bank',
+      ip: '103.21.244.2',
+      dev: 'dev-alice-laptop',
+      city: 'Delhi',
+      country: 'IN',
+      hour: 10,
+      mins: '',
+      vpn: false
+    },
+    2: {
+      name: 'New Device',
+      email: 'alice@example.com',
+      pass: 'Password123!',
+      app: 'bank',
+      ip: '103.21.244.2',
+      dev: 'dev-alice-tablet-unseen',
+      city: 'Delhi',
+      country: 'IN',
+      hour: 10,
+      mins: '',
+      vpn: false
+    },
+    3: {
+      name: 'Tor 3 AM Intrusion',
+      email: 'alice@example.com',
+      pass: 'Password123!',
+      app: 'bank',
+      ip: '185.220.101.5',
+      dev: 'dev-tor-attacker',
+      city: 'Moscow',
+      country: 'RU',
+      hour: 3,
+      mins: '',
+      vpn: true
+    },
+    4: {
+      name: 'Brute Force Defense',
+      email: 'alice@example.com',
+      pass: 'WrongPassword!',
+      app: 'bank',
+      ip: '103.21.244.2',
+      dev: 'dev-alice-laptop',
+      city: 'Delhi',
+      country: 'IN',
+      hour: 10,
+      mins: '',
+      vpn: false
+    },
+    5: {
+      name: 'Cross-App Threat',
+      email: 'bob@example.com',
+      pass: 'Password123!',
+      app: 'social',
+      ip: '103.21.244.2',
+      dev: 'dev-bob-laptop',
+      city: 'Delhi',
+      country: 'IN',
+      hour: 10,
+      mins: '',
+      vpn: false
+    },
+    6: {
+      name: 'Honeytoken Trap',
+      email: 'backup_admin',
+      pass: 'AdminSecret2024!',
+      app: 'bank',
+      ip: '45.154.255.99',
+      dev: 'dev-honeypot-bot',
+      city: 'St. Petersburg',
+      country: 'RU',
+      hour: 1,
+      mins: '',
+      vpn: true
+    },
+    7: {
+      name: 'Adapted Baseline',
+      email: 'alice@example.com',
+      pass: 'Password123!',
+      app: 'bank',
+      ip: '103.21.244.2',
+      dev: 'dev-alice-laptop',
+      city: 'Delhi',
+      country: 'IN',
+      hour: 10,
+      mins: '',
+      vpn: false
+    },
+    8: {
+      name: 'Impossible Velocity',
+      email: 'alice@example.com',
+      pass: 'Password123!',
+      app: 'bank',
+      ip: '185.86.151.11',
+      dev: 'dev-alice-laptop',
+      city: 'London',
+      country: 'GB',
+      hour: 11,
+      mins: 15,
+      vpn: false
+    }
+  };
+
+  function triggerScenario(num) {
+    const sc = scenarios[num];
+    if (!sc) return;
+
+    // Switch to Gateway view if on SOC
+    switchView('gateway');
+
+    // Set Customer App
+    setCustomerApp(sc.app);
+
+    // Populate Fields
+    inputEmail.value = sc.email;
+    inputPassword.value = sc.pass;
+    ctxIp.value = sc.ip;
+    ctxDevice.value = sc.dev;
+    ctxCity.value = sc.city;
+    ctxCountry.value = sc.country;
+    ctxHour.value = sc.hour;
+    ctxMins.value = sc.mins;
+    ctxVpn.checked = sc.vpn;
+    updateTelemetrySummary();
+
+    // Visual highlight on scenario button
+    document.querySelectorAll('.btn-scenario').forEach(b => b.style.outline = 'none');
+    const activeBtn = document.getElementById(`btn-sc-${num}`);
+    if (activeBtn) {
+      activeBtn.style.outline = '2px solid var(--accent-navy)';
+      setTimeout(() => { activeBtn.style.outline = 'none'; }, 1000);
+    }
+
+    // Execute Login Attempt
+    executeLoginEvaluation(sc.email, sc.pass);
+  }
+
+  // Hook up scenario buttons 1–8
+  for (let i = 1; i <= 8; i++) {
+    const btn = document.getElementById(`btn-sc-${i}`);
+    if (btn) {
+      btn.addEventListener('click', () => triggerScenario(i));
+    }
+  }
+
+  // Keyboard Shortcuts: Keys 1 to 8
+  window.addEventListener('keydown', (e) => {
+    // Avoid triggering when user is typing into input fields
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    const keyStr = (e.key || '').replace(/^Digit/, '') || (e.code || '').replace(/^Digit/, '') || (e.code || '').replace(/^Numpad/, '');
+    const keyNum = parseInt(keyStr, 10);
+    if (keyNum >= 1 && keyNum <= 8) {
+      triggerScenario(keyNum);
+    }
+  });
+
+  // Expose globally on window for inline handlers & programmatic trigger
+  window.triggerScenario = triggerScenario;
+  window.handleDemoReset = handleDemoReset;
+  window.executeLoginEvaluation = executeLoginEvaluation;
+
+  // Reset Demo State
+  async function handleDemoReset() {
+    try {
+      await apiResetDemo();
+      btnFillAlice.click();
+      lastScore = 0;
+      displayScore.textContent = '0';
+      displayScore.style.color = '#14171F';
+      displayLatency.textContent = '-- ms';
+      globalLatencyVal.textContent = '4.5 ms';
+      gaugePin.style.left = '0%';
+      pinTooltip.textContent = '0';
+      bannerDecisionBadge.className = 'decision-badge badge-neutral';
+      bannerDecisionBadge.textContent = 'AWAITING LOGIN';
+      bannerHeadline.textContent = 'Ready for Authentication';
+      reasonsStack.innerHTML = `
+        <div class="empty-reasons-state">
+          Submit a login or click any demo scenario below to inspect security telemetry.
+        </div>
+      `;
+      handleChallengeDisplay({ requires_step_up: false, action: 'allow' }, 'alice@example.com');
+      refreshSocData();
+    } catch (err) {
+      console.error('Reset error:', err);
+    }
+  }
+
+  btnTopReset.addEventListener('click', handleDemoReset);
+  btnDockReset.addEventListener('click', handleDemoReset);
+
+  // -------------------------------------------------------------
+  // 8. SOC Operations & Real-Time Event Ledger
+  // -------------------------------------------------------------
+  async function refreshSocData() {
+    try {
+      // 1. Fetch Stats
+      const statsRes = await fetch('/api/dashboard/stats');
+      if (statsRes.ok) {
+        const stats = await statsRes.json();
+        statTotal.textContent = stats.total_events || 0;
+        statBlocked.textContent = stats.blocked_count || 0;
+        statChallenged.textContent = stats.challenged_count || 0;
+        statAllowed.textContent = stats.allowed_count || 0;
+        statLatency.textContent = `${stats.average_latency_ms || 9.2} ms`;
+        statHoneytoken.textContent = stats.honeytoken_hits || 0;
+      }
+
+      // 2. Fetch Events
+      const url = currentFilter === 'all' ? '/api/dashboard/events?limit=30' : `/api/dashboard/events?app_id=${currentFilter}&limit=30`;
+      const eventsRes = await fetch(url);
+      if (eventsRes.ok) {
+        const events = await eventsRes.json();
+        renderLedgerTable(events);
+      }
+    } catch (err) {
+      console.error('Error refreshing SOC data:', err);
+    }
+  }
+
+  function renderLedgerTable(events) {
+    if (!events || events.length === 0) {
+      ledgerTbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="table-empty">No authentication events recorded yet.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    ledgerTbody.innerHTML = events.map(ev => {
+      const timeStr = ev.timestamp ? new Date(ev.timestamp).toLocaleTimeString() : '--:--';
+      const appBadge = ev.app_id === 'social' ? 'Pulse Social' : 'Apex Bank';
+      const score = ev.score ?? 0;
+
+      let tagClass = 'tag-allow';
+      let tagText = 'ALLOW';
+      if (ev.action === 'block' || ev.decision === 'restrict' || score >= 80) {
+        tagClass = 'tag-block';
+        tagText = 'BLOCK';
+      } else if (ev.action !== 'allow' || score >= 30) {
+        tagClass = 'tag-stepup';
+        tagText = (ev.action || 'CHALLENGE').toUpperCase();
+      }
+
+      const reasonsSnippet = (ev.reasons || []).map(r => {
+        const p = typeof r.points === 'number' ? `+${r.points} ` : '';
+        const s = r.signal || r.detail || JSON.stringify(r);
+        return `<span style="font-weight:600;">${escapeHtml(p)}${escapeHtml(s)}</span>`;
+      }).join(', ') || 'Baseline pass';
+
+      const vpnBadge = ev.is_vpn ? ' <span style="color:#DC2626; font-weight:700;">[VPN]</span>' : '';
+
+      return `
+        <tr>
+          <td style="font-family: var(--font-mono);">${timeStr}</td>
+          <td><strong>${appBadge}</strong></td>
+          <td style="font-family: var(--font-mono);">${escapeHtml(ev.email_attempted || '')}</td>
+          <td>${escapeHtml(ev.city || 'Unknown')}, ${escapeHtml(ev.country || '')}${vpnBadge}</td>
+          <td style="font-family: var(--font-mono); font-size: 0.68rem;">${escapeHtml(ev.device_id || '')}</td>
+          <td class="table-score">${score}</td>
+          <td><span class="table-tag ${tagClass}">${tagText}</span></td>
+          <td style="font-size: 0.68rem; color: var(--ink-secondary);">${reasonsSnippet}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  btnRefreshLedger.addEventListener('click', refreshSocData);
+
+  ledgerFilters.forEach(btn => {
+    btn.addEventListener('click', () => {
+      ledgerFilters.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      refreshSocData();
+    });
+  });
+
+  // Emergency Account Lock / Unlock Controls
+  btnDoLock.addEventListener('click', async () => {
+    const email = inputLockEmail.value.trim();
+    if (!email) return;
+    try {
+      const res = await fetch(`/api/dashboard/user/${encodeURIComponent(email)}/lock`, { method: 'POST' });
+      if (res.ok) {
+        lockFeedback.textContent = `Account ${email} locked.`;
+        lockFeedback.style.color = '#DC2626';
+        refreshSocData();
+      }
+    } catch (err) {
+      lockFeedback.textContent = 'Error locking account.';
+    }
+  });
+
+  btnDoUnlock.addEventListener('click', async () => {
+    const email = inputLockEmail.value.trim();
+    if (!email) return;
+    try {
+      const res = await fetch(`/api/dashboard/user/${encodeURIComponent(email)}/unlock`, { method: 'POST' });
+      if (res.ok) {
+        lockFeedback.textContent = `Account ${email} unlocked.`;
+        lockFeedback.style.color = '#16A34A';
+        refreshSocData();
+      }
+    } catch (err) {
+      lockFeedback.textContent = 'Error unlocking account.';
+    }
+  });
+
+  // Utility: HTML Escaping
   function escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
-  // Initialize Clock & Polling
-  function updatePhoneClock() {
-    const now = new Date();
-    const hrs = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    if (phoneClock) phoneClock.textContent = `${hrs}:${mins}`;
-  }
-  updatePhoneClock();
-  setInterval(updatePhoneClock, 30000);
-
+  // Initial Boot
+  updateTelemetrySummary();
   refreshSocData();
-  fetchNotifications();
-  setInterval(() => {
-    refreshSocData();
-    fetchNotifications();
-  }, 3500);
 });

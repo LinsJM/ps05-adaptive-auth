@@ -3,427 +3,473 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dignitas: Adaptive Authentication & SOC Gateway</title>
-  <link rel="stylesheet" href="style.css">
+  <title>DIGNITAS — Adaptive Authentication Gateway</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-dark">
+<body class="theme-checkpoint">
 
-  <!-- ================= iOS AMBIENT GLOW BACKGROUND MESH ================= -->
-  <div class="ambient-glow-mesh" aria-hidden="true">
-    <div class="glow-orb orb-blue"></div>
-    <div class="glow-orb orb-purple"></div>
-    <div class="glow-orb orb-cyan"></div>
-  </div>
-
-  <!-- ================= TOP MINIMAL NAVBAR ================= -->
-  <header class="global-navbar">
-    <div class="nav-brand">
-      <div class="brand-shield">🛡️</div>
-      <div class="brand-info">
-        <span class="brand-title">DIGNITAS <span class="badge-ps05">ADAPTIVE AUTH</span></span>
-        <span class="brand-subtitle">AI Risk Engine & Zero-Trust Verification</span>
+  <!-- ================= TOP CHECKPOINT BAR ================= -->
+  <header class="checkpoint-header">
+    <div class="header-brand">
+      <div class="brand-caliper-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <path d="M9 3v18"/>
+          <path d="M15 9l-3 3 3 3"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">DIGNITAS <span class="brand-tag">PS05 GATEWAY</span></div>
+        <div class="brand-sub">Adaptive Authentication & Threat Correlation</div>
       </div>
     </div>
 
-    <!-- Minimal View Switcher -->
-    <nav class="app-switcher">
-      <button class="nav-tab active" data-view="portal" id="tab-portal">
-        <span class="tab-icon">🔐</span> Sign In Portal
+    <!-- Central View Mode Selector -->
+    <nav class="nav-modes">
+      <button class="mode-tab active" data-view="gateway" id="tab-gateway">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Sign In & Decision Gateway
       </button>
-      <button class="nav-tab" data-view="soc" id="tab-soc">
-        <span class="tab-icon">📊</span> SOC Stream & Metrics
+      <button class="mode-tab" data-view="soc" id="tab-soc">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
+        Security Operations (Audit Feed)
       </button>
     </nav>
 
-    <!-- Right Controls: Security Mail Drawer + Gateway Status -->
-    <div class="nav-right-controls">
-      <button class="btn-inbox" id="btn-toggle-inbox">
-        <span class="inbox-icon">✉️</span> Security Alerts
-        <span class="inbox-badge" id="inbox-count-badge">1</span>
-      </button>
-      <div class="gateway-status">
-        <div class="status-dot online" id="gateway-dot"></div>
-        <span class="status-text" id="gateway-status-text">Gateway Online</span>
-        <span class="latency-badge" id="global-latency-badge">&lt; 10ms</span>
+    <!-- Right Gateway Telemetry -->
+    <div class="header-status">
+      <div class="latency-indicator">
+        <span class="status-dot online" id="gateway-dot"></span>
+        <span class="latency-label">Gateway:</span>
+        <strong class="latency-val" id="global-latency-val">4.5 ms</strong>
       </div>
+      <button class="btn-reset-top" id="btn-top-reset" title="Reset all users and devices to clean baseline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+        Reset State
+      </button>
     </div>
   </header>
 
-  <!-- ================= TELEMETRY CONTEXT BAR (MINIMAL) ================= -->
-  <div class="context-drawer-bar">
-    <div class="context-pill">
-      <span class="context-label">Client Telemetry:</span>
-      <span class="context-val" id="pill-summary">Delhi, IN • Familiar Device • 10:00 UTC</span>
+  <!-- ================= EDITABLE TELEMETRY DRAWER (COLLAPSIBLE) ================= -->
+  <div class="telemetry-bar">
+    <div class="telemetry-summary">
+      <span class="telemetry-meta-label">Client Telemetry:</span>
+      <span class="telemetry-meta-val" id="summary-telemetry">Delhi, IN • Familiar Laptop (103.21.244.2) • 10:00 UTC</span>
     </div>
-    <button class="btn-drawer-toggle" id="btn-toggle-context">⚙️ Adjust Simulated Telemetry</button>
+    <button class="btn-toggle-telemetry" id="btn-toggle-telemetry">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Adjust Telemetry
+    </button>
   </div>
 
-  <!-- Telemetry Config Drawer (Collapsible) -->
-  <div class="context-drawer" id="context-drawer">
-    <div class="drawer-header">
-      <h3>Simulated Telemetry & Threat Injection</h3>
-      <button class="btn-close-drawer" id="btn-close-drawer">✕</button>
-    </div>
-    <div class="drawer-grid">
-      <div class="form-group">
-        <label>IP Address</label>
-        <input type="text" id="ctx-ip" value="103.21.244.2">
+  <div class="telemetry-drawer" id="telemetry-drawer">
+    <div class="drawer-inner">
+      <div class="drawer-title-row">
+        <h3>Simulated Context & Attack Telemetry</h3>
+        <button class="btn-close-drawer" id="btn-close-telemetry">✕</button>
       </div>
-      <div class="form-group">
-        <label>Device ID</label>
-        <input type="text" id="ctx-device" value="dev-alice-laptop">
-      </div>
-      <div class="form-group">
-        <label>City</label>
-        <input type="text" id="ctx-city" value="Delhi">
-      </div>
-      <div class="form-group">
-        <label>Country Code</label>
-        <input type="text" id="ctx-country" value="IN">
-      </div>
-      <div class="form-group">
-        <label>Simulated Hour (0 - 23 UTC)</label>
-        <input type="number" id="ctx-hour" min="0" max="23" value="10">
-      </div>
-      <div class="form-group">
-        <label>Minutes Since Last Login</label>
-        <input type="number" id="ctx-mins" placeholder="Auto" value="">
-      </div>
-      <div class="form-group checkbox-group">
-        <label>
-          <input type="checkbox" id="ctx-vpn"> VPN / Tor Exit Node Active
-        </label>
-      </div>
-      <div class="form-group drawer-presets">
-        <label>Quick Telemetry Presets:</label>
-        <div class="preset-buttons">
-          <button class="btn-preset" data-preset="normal">Familiar (Delhi)</button>
-          <button class="btn-preset" data-preset="new-device">New Device</button>
-          <button class="btn-preset" data-preset="tor-foreign">Tor Exit (Russia, 3 AM)</button>
-          <button class="btn-preset" data-preset="impossible">Impossible Travel (London)</button>
+      <div class="drawer-fields">
+        <div class="field-item">
+          <label for="ctx-ip">IP Address</label>
+          <input type="text" id="ctx-ip" value="103.21.244.2">
+        </div>
+        <div class="field-item">
+          <label for="ctx-device">Device ID</label>
+          <input type="text" id="ctx-device" value="dev-alice-laptop">
+        </div>
+        <div class="field-item">
+          <label for="ctx-city">City</label>
+          <input type="text" id="ctx-city" value="Delhi">
+        </div>
+        <div class="field-item">
+          <label for="ctx-country">Country Code</label>
+          <input type="text" id="ctx-country" value="IN">
+        </div>
+        <div class="field-item">
+          <label for="ctx-hour">Hour (0-23 UTC)</label>
+          <input type="number" id="ctx-hour" min="0" max="23" value="10">
+        </div>
+        <div class="field-item">
+          <label for="ctx-mins">Mins Since Last Login</label>
+          <input type="number" id="ctx-mins" placeholder="Auto" value="">
+        </div>
+        <div class="field-item checkbox-item">
+          <label>
+            <input type="checkbox" id="ctx-vpn">
+            Route via VPN / Tor Node
+          </label>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ================= MAIN CONTAINER ================= -->
-  <main class="main-container">
+  <!-- ================= MAIN STAGE CONTAINER ================= -->
+  <main class="main-stage">
 
-    <!-- ================= VIEW 1: MINIMAL SIGN IN & TRUSTED PHONE ================= -->
-    <section class="view-panel active" id="view-portal">
-      <div class="portal-grid">
+    <!-- ================= VIEW 1: SIGN IN & DECISION GATEWAY ================= -->
+    <section class="view-panel active" id="view-gateway">
+      <div class="split-workspace">
 
-        <!-- Left: Minimal Google-style Gateway Sign In Box -->
-        <div class="portal-card-column">
-          <div class="google-auth-card">
-            <div class="auth-card-header">
-              <div class="google-g-logo">
-                <svg viewBox="0 0 48 48" width="40" height="40">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
-              </div>
-              <h2>Sign in</h2>
-              <p class="auth-card-subtitle">to continue to <strong id="portal-app-title">Apex Trust Bank</strong></p>
-            </div>
-
-            <!-- App Select Tabs -->
-            <div class="auth-app-selector">
-              <button class="app-chip active" data-app="bank" id="chip-app-bank">🏛️ Apex Bank</button>
-              <button class="app-chip" data-app="social" id="chip-app-social">⚡ Pulse Social</button>
-            </div>
-
-            <form id="form-portal-login">
-              <div class="google-input-group">
-                <input type="text" id="portal-email" value="alice@example.com" required placeholder=" ">
-                <label for="portal-email">Email or phone</label>
-              </div>
-
-              <div class="google-input-group">
-                <input type="password" id="portal-password" value="Password123!" required placeholder=" ">
-                <label for="portal-password">Enter your password</label>
-              </div>
-
-              <div class="form-row-actions">
-                <button type="submit" class="btn-google-next" id="btn-portal-submit">Next</button>
-              </div>
-            </form>
-
-            <!-- Result Evaluation Banner -->
-            <div class="login-result-callout hidden" id="portal-result"></div>
-
-            <!-- Demo 1-Click Simulation Triggers Strip -->
-            <div class="demo-triggers-bar">
-              <span class="triggers-label">⚡ 1-Click Judge Demo Scenarios:</span>
-              <div class="triggers-grid">
-                <button class="btn-demo-pill pill-green" id="btn-demo-familiar">
-                  🟢 1. Familiar Login (0 Risk)
+        <!-- LEFT COLUMN: THE CUSTOMER APPLICATION -->
+        <div class="customer-app-col">
+          <div class="app-shell" id="app-shell">
+            <!-- App Switcher Header -->
+            <div class="app-switcher-bar">
+              <span class="switcher-label">Customer Application:</span>
+              <div class="app-pills">
+                <button class="app-pill active" data-app="bank" id="pill-bank">
+                  <span class="pill-badge">Apex Bank</span>
                 </button>
-                <button class="btn-demo-pill pill-yellow" id="btn-demo-newdev">
-                  🟡 2. New Device (Google Prompt)
-                </button>
-                <button class="btn-demo-pill pill-red" id="btn-demo-tor">
-                  🔴 3. Tor 3AM Attack (Alert Mail)
-                </button>
-                <button class="btn-demo-pill pill-pink" id="btn-demo-honey">
-                  🪤 6. Hit Honeytoken
+                <button class="app-pill" data-app="social" id="pill-social">
+                  <span class="pill-badge">Pulse Social</span>
                 </button>
               </div>
             </div>
 
+            <!-- Authentic Login Form Card -->
+            <div class="app-login-card">
+              <div class="app-brand-row">
+                <div class="app-logo-mark" id="app-logo-container">
+                  <!-- Apex Bank Mark -->
+                  <svg id="logo-bank" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/>
+                  </svg>
+                  <!-- Pulse Social Mark (hidden by default) -->
+                  <svg id="logo-social" class="hidden" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                </div>
+                <div class="app-title-wrap">
+                  <h2 class="app-heading" id="app-heading-text">Apex Trust Bank</h2>
+                  <p class="app-subhead" id="app-subhead-text">Client Online Financial Portal</p>
+                </div>
+              </div>
+
+              <!-- Realistic Single-Page Login Form -->
+              <form class="app-login-form" id="form-customer-login">
+                <div class="input-field">
+                  <label for="input-email">Account Identifier / Email</label>
+                  <input type="text" id="input-email" value="alice@example.com" autocomplete="username" required>
+                </div>
+
+                <div class="input-field">
+                  <label for="input-password">Account Password</label>
+                  <input type="password" id="input-password" value="Password123!" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" class="btn-primary-signin" id="btn-app-signin">
+                  Sign In
+                </button>
+              </form>
+
+              <!-- Quick Demo Fill Helpers -->
+              <div class="quick-accounts">
+                <span class="quick-label">Quick fill:</span>
+                <button type="button" class="btn-quick" id="btn-fill-alice">Alice (Familiar)</button>
+                <button type="button" class="btn-quick" id="btn-fill-bob">Bob (Cross-App Target)</button>
+                <button type="button" class="btn-quick text-danger" id="btn-fill-honey">backup_admin (Decoy)</button>
+              </div>
+
+              <!-- Integration Footer Note -->
+              <div class="app-gateway-footnote">
+                Protected by <strong>DIGNITAS Adaptive Gateway</strong> via <code>POST /api/login</code>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Right: Interactive Alice's Trusted Phone Mockup -->
-        <div class="portal-device-column">
-          <div class="device-wrapper">
-            <div class="device-badge-label">
-              📱 ALICE'S PRIMARY TRUSTED DEVICE (PIXEL 8)
-            </div>
-
-            <div class="phone-frame">
-              <div class="phone-notch">
-                <div class="notch-speaker"></div>
-                <div class="notch-camera"></div>
+        <!-- RIGHT COLUMN: DIGNITAS GATEWAY DECISION ENGINE -->
+        <div class="gateway-decision-col">
+          <div class="decision-panel" id="decision-panel">
+            
+            <!-- Decision Header & Projector-Readable Big Score -->
+            <div class="decision-top-bar">
+              <div class="decision-banner-wrap">
+                <div class="decision-badge badge-neutral" id="banner-decision-badge">
+                  AWAITING LOGIN
+                </div>
+                <h1 class="decision-headline" id="banner-headline">Ready for Authentication</h1>
               </div>
-
-              <div class="phone-screen">
-                <!-- Status Bar -->
-                <div class="phone-status-bar">
-                  <span class="phone-time" id="phone-clock">10:00</span>
-                  <div class="phone-icons">
-                    <span>5G</span>
-                    <span>📶</span>
-                    <span>🔋 96%</span>
-                  </div>
+              <div class="decision-metrics-callout">
+                <div class="score-display">
+                  <span class="score-number" id="display-score">0</span>
+                  <span class="score-max">/100</span>
                 </div>
-
-                <!-- Phone Content State 1: Idle Screen -->
-                <div class="phone-content-idle" id="phone-idle">
-                  <div class="phone-wallpaper-widget">
-                    <div class="lock-shield-icon">🛡️</div>
-                    <div class="lock-title">Google Play Protect</div>
-                    <p class="lock-subtitle">Ready for 2-Step Verification Prompts</p>
-                  </div>
-                  <div class="phone-tip">
-                    <span class="tip-dot"></span>
-                    <span>Simulated push prompts from untrusted logins will appear here live!</span>
-                  </div>
+                <div class="latency-display">
+                  <span class="latency-tag-label">Decision Latency:</span>
+                  <strong class="latency-tag-value" id="display-latency">-- ms</strong>
                 </div>
-
-                <!-- Phone Content State 2: Google 2-Step Push Prompt -->
-                <div class="phone-content-prompt hidden" id="phone-prompt">
-                  <div class="prompt-header">
-                    <svg viewBox="0 0 48 48" width="28" height="28">
-                      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                    </svg>
-                    <span class="prompt-brand">Google Prompt</span>
-                  </div>
-
-                  <h3 class="prompt-title">Is it you trying to sign in?</h3>
-                  <p class="prompt-desc">A device that you haven't used before is attempting to access your account.</p>
-
-                  <div class="prompt-details-card">
-                    <div class="detail-row">
-                      <span class="detail-label">Account:</span>
-                      <strong class="detail-val" id="prompt-val-account">alice@example.com</strong>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Device:</span>
-                      <span class="detail-val" id="prompt-val-device">Windows PC (Chrome)</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Location:</span>
-                      <span class="detail-val" id="prompt-val-location">Delhi, India</span>
-                    </div>
-                    <div class="detail-row">
-                      <span class="detail-label">Time:</span>
-                      <span class="detail-val" id="prompt-val-time">Just now</span>
-                    </div>
-                  </div>
-
-                  <div class="prompt-number-match">
-                    <span>Verification Match Code:</span>
-                    <div class="number-chip" id="prompt-number-chip">42</div>
-                  </div>
-
-                  <div class="prompt-actions">
-                    <button class="btn-prompt-deny" id="btn-prompt-deny">No, it's not me</button>
-                    <button class="btn-prompt-approve" id="btn-prompt-approve">Yes, it's me</button>
-                  </div>
-                </div>
-
-                <!-- Phone Content State 3: Approved Success -->
-                <div class="phone-content-feedback hidden" id="phone-feedback">
-                  <div class="feedback-icon" id="feedback-icon">✅</div>
-                  <h4 id="feedback-title">Sign-in Approved</h4>
-                  <p id="feedback-desc">Device trusted. Session granted on Windows Chrome.</p>
-                  <button class="btn-phone-dismiss" id="btn-feedback-dismiss">Done</button>
-                </div>
-
               </div>
             </div>
+
+            <!-- SIGNATURE ELEMENT: 5-TIER SEGMENTED RISK GAUGE -->
+            <div class="gauge-container">
+              <div class="gauge-labels-row">
+                <span class="gauge-label-tier tier-allow">ALLOW (0–29)</span>
+                <span class="gauge-label-tier tier-captcha">CAPTCHA (30–44)</span>
+                <span class="gauge-label-tier tier-otp">EMAIL OTP (45–60)</span>
+                <span class="gauge-label-tier tier-reset">RESET (61–79)</span>
+                <span class="gauge-label-tier tier-block">BLOCK (80–100)</span>
+              </div>
+              <div class="gauge-track-wrapper">
+                <div class="gauge-track">
+                  <div class="gauge-segment seg-allow" title="0–29: Allow (Frictionless)"></div>
+                  <div class="gauge-segment seg-captcha" title="30–44: CAPTCHA"></div>
+                  <div class="gauge-segment seg-otp" title="45–60: Email OTP"></div>
+                  <div class="gauge-segment seg-reset" title="61–79: OTP + Password Reset"></div>
+                  <div class="gauge-segment seg-block" title="80–100: Block & Lock"></div>
+                </div>
+                <!-- Animated Needle Pin -->
+                <div class="gauge-pin" id="gauge-pin" style="left: 0%;">
+                  <div class="pin-head"></div>
+                  <div class="pin-pointer"></div>
+                  <div class="pin-tooltip" id="pin-tooltip">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- EXPLAINABLE NAMED REASONS BREAKDOWN (WITH POINTS) -->
+            <div class="reasons-section">
+              <div class="reasons-header-row">
+                <h3 class="reasons-title">Explainable Reasons Breakdown</h3>
+                <span class="reasons-subtitle">Ranked by risk contribution</span>
+              </div>
+              <div class="reasons-stack" id="reasons-stack">
+                <div class="empty-reasons-state">
+                  Submit a login or click any demo scenario below to inspect security telemetry.
+                </div>
+              </div>
+            </div>
+
+            <!-- FUNCTIONAL VERIFICATION / CHALLENGE PANEL (REPLACES THE EMPTY PHONE) -->
+            <div class="challenge-panel-wrapper" id="challenge-panel-wrapper">
+              <div class="challenge-idle-state" id="panel-state-idle">
+                <div class="idle-icon-wrap">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                </div>
+                <div class="idle-text-wrap">
+                  <div class="idle-heading">Adaptive Step-Up Inactive</div>
+                  <div class="idle-sub">When unusual telemetry triggers a challenge, the verification prompt appears here.</div>
+                </div>
+              </div>
+
+              <!-- Interactive Challenge Box (Shown when challenge is active) -->
+              <div class="challenge-active-box hidden" id="panel-state-active">
+                <div class="challenge-box-header">
+                  <div class="challenge-type-pill" id="active-challenge-type">GOOGLE 2-STEP PROMPT</div>
+                  <span class="challenge-target-user" id="active-challenge-user">alice@example.com</span>
+                </div>
+
+                <div class="challenge-box-body" id="active-challenge-content">
+                  <!-- Dynamically populated by app.js (Prompt, OTP, or CAPTCHA) -->
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- ================= VIEW 2: SOC STREAM & METRICS ================= -->
+    <!-- ================= VIEW 2: SECURITY OPERATIONS AUDIT FEED ================= -->
     <section class="view-panel" id="view-soc">
-      
-      <!-- Metrics Overview Cards -->
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-title">Total Evaluated Logins</div>
-          <div class="metric-value" id="stat-total">0</div>
-          <div class="metric-sub">Across Bank & Social Apps</div>
+      <div class="soc-workspace">
+
+        <!-- Metrics Cards Row -->
+        <div class="soc-metrics-strip">
+          <div class="soc-metric-tile">
+            <span class="metric-lbl">Total Evaluated</span>
+            <div class="metric-num" id="stat-total">0</div>
+            <span class="metric-meta">Across Bank & Social</span>
+          </div>
+          <div class="soc-metric-tile tile-danger">
+            <span class="metric-lbl">Critical Blocked</span>
+            <div class="metric-num text-danger" id="stat-blocked">0</div>
+            <span class="metric-meta">Score 80–100 (Lockouts)</span>
+          </div>
+          <div class="soc-metric-tile tile-warning">
+            <span class="metric-lbl">Challenged</span>
+            <div class="metric-num text-warning" id="stat-challenged">0</div>
+            <span class="metric-meta">Score 30–79 (Step-Up)</span>
+          </div>
+          <div class="soc-metric-tile tile-success">
+            <span class="metric-lbl">Frictionless</span>
+            <div class="metric-num text-success" id="stat-allowed">0</div>
+            <span class="metric-meta">Score 0–29 (Allow)</span>
+          </div>
+          <div class="soc-metric-tile">
+            <span class="metric-lbl">Average Latency</span>
+            <div class="metric-num text-accent" id="stat-latency">-- ms</div>
+            <span class="metric-meta">SLA Target &lt; 100ms</span>
+          </div>
+          <div class="soc-metric-tile tile-purple">
+            <span class="metric-lbl">Honeytoken Hits</span>
+            <div class="metric-num text-purple" id="stat-honeytoken">0</div>
+            <span class="metric-meta">backup_admin traps</span>
+          </div>
         </div>
-        <div class="metric-card card-danger">
-          <div class="metric-title">Critical Threats Blocked</div>
-          <div class="metric-value text-red" id="stat-blocked">0</div>
-          <div class="metric-sub">Risk Score 80 - 100</div>
+
+        <!-- SOC Columns -->
+        <div class="soc-columns">
+          
+          <!-- Left: Real-Time Event Ledger -->
+          <div class="soc-ledger-card">
+            <div class="ledger-header">
+              <div class="ledger-header-left">
+                <h2>Real-Time Authentication Event Stream</h2>
+                <div class="ledger-filters">
+                  <button class="ledger-filter active" data-filter="all">All Apps</button>
+                  <button class="ledger-filter" data-filter="bank">Apex Bank</button>
+                  <button class="ledger-filter" data-filter="social">Pulse Social</button>
+                </div>
+              </div>
+              <button class="btn-refresh-ledger" id="btn-refresh-ledger">↻ Sync Feed</button>
+            </div>
+
+            <div class="ledger-table-wrap">
+              <table class="ledger-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>App</th>
+                    <th>Target Account</th>
+                    <th>Context & Location</th>
+                    <th>Device</th>
+                    <th>Score</th>
+                    <th>Action</th>
+                    <th>Explainable Reasons & Points</th>
+                  </tr>
+                </thead>
+                <tbody id="ledger-tbody">
+                  <tr>
+                    <td colspan="8" class="table-empty">Loading authentication stream...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Account Emergency Controls & Policy Matrix -->
+          <div class="soc-side-card">
+            <div class="sub-card">
+              <h3>Emergency Account Security</h3>
+              <p class="sub-desc">Manual administrative account lockdown</p>
+              <div class="lock-form">
+                <input type="email" id="input-lock-email" value="alice@example.com" placeholder="user@example.com">
+                <div class="lock-btns">
+                  <button class="btn-lock" id="btn-do-lock">Lock Account</button>
+                  <button class="btn-unlock" id="btn-do-unlock">Unlock</button>
+                </div>
+                <div class="lock-feedback" id="lock-feedback"></div>
+              </div>
+            </div>
+
+            <div class="sub-card policy-card">
+              <h3>Active 5-Tier Policy Matrix</h3>
+              <div class="policy-rows">
+                <div class="p-row row-allow">
+                  <span class="p-range">0–29</span>
+                  <strong class="p-action">ALLOW</strong>
+                  <span class="p-desc">Frictionless pass</span>
+                </div>
+                <div class="p-row row-captcha">
+                  <span class="p-range">30–44</span>
+                  <strong class="p-action">CAPTCHA</strong>
+                  <span class="p-desc">Light friction</span>
+                </div>
+                <div class="p-row row-otp">
+                  <span class="p-range">45–60</span>
+                  <strong class="p-action">EMAIL OTP</strong>
+                  <span class="p-desc">Step-up MFA</span>
+                </div>
+                <div class="p-row row-reset">
+                  <span class="p-range">61–79</span>
+                  <strong class="p-action">OTP + RESET</strong>
+                  <span class="p-desc">MFA & PW reset</span>
+                </div>
+                <div class="p-row row-block">
+                  <span class="p-range">80–100</span>
+                  <strong class="p-action">BLOCK & LOCK</strong>
+                  <span class="p-desc">Account lockout</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="metric-card card-warning">
-          <div class="metric-title">Step-Up Challenges Triggered</div>
-          <div class="metric-value text-yellow" id="stat-challenged">0</div>
-          <div class="metric-sub">Google Prompts / OTP (30-79)</div>
-        </div>
-        <div class="metric-card card-success">
-          <div class="metric-title">Frictionless Logins Allowed</div>
-          <div class="metric-value text-green" id="stat-allowed">0</div>
-          <div class="metric-sub">Risk Score 0 - 29</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">Avg Decision Latency</div>
-          <div class="metric-value text-cyan" id="stat-latency">8.4 ms</div>
-          <div class="metric-sub">Gateway Target: &lt; 100 ms</div>
-        </div>
-        <div class="metric-card card-purple">
-          <div class="metric-title">Honeytoken Hits</div>
-          <div class="metric-value text-purple" id="stat-honeytoken">0</div>
-          <div class="metric-sub">backup_admin Traps</div>
-        </div>
+
       </div>
-
-      <!-- Feed & Incident Columns -->
-      <div class="dashboard-columns">
-        
-        <!-- Left: Live Login Event Stream -->
-        <div class="column-feed">
-          <div class="section-header">
-            <div class="header-left">
-              <h2>📡 Real-Time Login Stream</h2>
-              <div class="filter-pills">
-                <button class="filter-pill active" data-filter="all">All Apps</button>
-                <button class="filter-pill" data-filter="bank">Bank</button>
-                <button class="filter-pill" data-filter="social">Social</button>
-              </div>
-            </div>
-            <button class="btn-refresh" id="btn-refresh-feed">↻ Refresh</button>
-          </div>
-
-          <div class="events-table-wrapper">
-            <table class="events-table">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>App</th>
-                  <th>User / Target</th>
-                  <th>Location & IP</th>
-                  <th>Device</th>
-                  <th>Risk Score</th>
-                  <th>Decision</th>
-                  <th>Explainable Reasons</th>
-                </tr>
-              </thead>
-              <tbody id="events-tbody">
-                <tr>
-                  <td colspan="8" class="empty-state">Loading live authentication stream...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Right: Policy Matrix & Account Security -->
-        <div class="column-side">
-          <div class="side-card">
-            <h3>⚖️ Active Risk Policy Matrix</h3>
-            <div class="policy-list">
-              <div class="policy-row row-allow">
-                <span class="range">0 – 29</span>
-                <span class="action">ALLOW</span>
-                <span class="desc">Frictionless direct access</span>
-              </div>
-              <div class="policy-row row-captcha">
-                <span class="range">30 – 44</span>
-                <span class="action">GOOGLE PROMPT</span>
-                <span class="desc">1-Tap Trusted Phone Approval</span>
-              </div>
-              <div class="policy-row row-otp">
-                <span class="range">45 – 60</span>
-                <span class="action">EMAIL OTP</span>
-                <span class="desc">Step-up MFA challenge</span>
-              </div>
-              <div class="policy-row row-reset">
-                <span class="range">61 – 79</span>
-                <span class="action">OTP + RESET</span>
-                <span class="desc">MFA & Mandatory password update</span>
-              </div>
-              <div class="policy-row row-block">
-                <span class="range">80 – 100</span>
-                <span class="action">BLOCK & LOCK</span>
-                <span class="desc">Immediate lockout + SOC Alert</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="side-card">
-            <h3>🔒 Account Emergency Lock/Unlock</h3>
-            <div class="lock-controls">
-              <input type="email" id="input-lock-email" placeholder="user@example.com" value="alice@example.com">
-              <div class="lock-buttons">
-                <button class="btn-action-lock" id="btn-do-lock">Lock Account</button>
-                <button class="btn-action-unlock" id="btn-do-unlock">Unlock Account</button>
-              </div>
-              <div class="lock-status" id="lock-status-msg"></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
     </section>
 
   </main>
 
-  <!-- ================= INSTAGRAM / GOOGLE STYLE SECURITY EMAIL DRAWER ================= -->
-  <aside class="inbox-drawer" id="inbox-drawer">
-    <div class="inbox-header">
-      <div class="inbox-title-wrap">
-        <span class="inbox-mail-icon">📬</span>
-        <h3>Security Alert Inbox (Simulated)</h3>
-      </div>
-      <button class="btn-close-inbox" id="btn-close-inbox">✕</button>
+  <!-- ================= BOTTOM DEMO CONTROLS BAR (SCENARIOS 1–8) ================= -->
+  <footer class="demo-controls-dock">
+    <div class="controls-label-group">
+      <div class="controls-title">DEMO SCENARIOS</div>
+      <div class="controls-hint">Keys 1–8</div>
     </div>
 
-    <div class="inbox-notice">
-      <span>Real-time security emails dispatched to user's registered inbox.</span>
+    <div class="scenario-buttons-strip">
+      <button class="btn-scenario sc-1" data-scenario="1" id="btn-sc-1" title="Shortcut key: 1" onclick="window.triggerScenario && window.triggerScenario(1)">
+        <span class="sc-key">1</span>
+        <span class="sc-name">Familiar</span>
+        <span class="sc-meta">0 pts • Allow</span>
+      </button>
+
+      <button class="btn-scenario sc-2" data-scenario="2" id="btn-sc-2" title="Shortcut key: 2" onclick="window.triggerScenario && window.triggerScenario(2)">
+        <span class="sc-key">2</span>
+        <span class="sc-name">New Device</span>
+        <span class="sc-meta">35 pts • Step-Up</span>
+      </button>
+
+      <button class="btn-scenario sc-3" data-scenario="3" id="btn-sc-3" title="Shortcut key: 3" onclick="window.triggerScenario && window.triggerScenario(3)">
+        <span class="sc-key">3</span>
+        <span class="sc-name">Tor 3 AM</span>
+        <span class="sc-meta">100 pts • Block</span>
+      </button>
+
+      <button class="btn-scenario sc-4" data-scenario="4" id="btn-sc-4" title="Shortcut key: 4" onclick="window.triggerScenario && window.triggerScenario(4)">
+        <span class="sc-key">4</span>
+        <span class="sc-name">Brute Force</span>
+        <span class="sc-meta">30 pts • Cooldown</span>
+      </button>
+
+      <button class="btn-scenario sc-5" data-scenario="5" id="btn-sc-5" title="Shortcut key: 5" onclick="window.triggerScenario && window.triggerScenario(5)">
+        <span class="sc-key">5</span>
+        <span class="sc-name">Cross-App</span>
+        <span class="sc-meta">40 pts • Correlated</span>
+      </button>
+
+      <button class="btn-scenario sc-6" data-scenario="6" id="btn-sc-6" title="Shortcut key: 6" onclick="window.triggerScenario && window.triggerScenario(6)">
+        <span class="sc-key">6</span>
+        <span class="sc-name">Honeytoken</span>
+        <span class="sc-meta">100 pts • Flag IP</span>
+      </button>
+
+      <button class="btn-scenario sc-7" data-scenario="7" id="btn-sc-7" title="Shortcut key: 7" onclick="window.triggerScenario && window.triggerScenario(7)">
+        <span class="sc-key">7</span>
+        <span class="sc-name">Adapted</span>
+        <span class="sc-meta">0 pts • Trusted</span>
+      </button>
+
+      <button class="btn-scenario sc-8" data-scenario="8" id="btn-sc-8" title="Shortcut key: 8" onclick="window.triggerScenario && window.triggerScenario(8)">
+        <span class="sc-key">8</span>
+        <span class="sc-name">Velocity</span>
+        <span class="sc-meta">70 pts • Travel</span>
+      </button>
     </div>
 
-    <div class="inbox-list" id="inbox-list">
-      <!-- Injected by app.js -->
+    <div class="dock-reset-wrap">
+      <button class="btn-dock-reset" id="btn-dock-reset" title="Reset all demo users and events" onclick="window.handleDemoReset && window.handleDemoReset()">
+        ↺ Reset
+      </button>
     </div>
-  </aside>
+  </footer>
 
   <script src="app.js"></script>
 </body>

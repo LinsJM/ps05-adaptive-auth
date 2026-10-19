@@ -1,46 +1,100 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Any
 
 
 class RegisterRequest(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=6, max_length=128)
+    device_id: Optional[str] = None
+    country: Optional[str] = "IN"
 
 
 class RegisterResponse(BaseModel):
     message: str
     user_id: int
 
+
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     device_id: Optional[str] = None
+    app_id: Optional[str] = "bank"
+    ip_address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+    is_vpn: Optional[bool] = False
+    hour: Optional[int] = None
+    minutes_since_last_login: Optional[int] = None
 
 
 class UserOut(BaseModel):
     id: int
-    email: EmailStr
+    email: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
+class LoginReasonItem(BaseModel):
+    signal: str
+    points: int
+    detail: str
+
+
 class LoginResponse(BaseModel):
-    access_token: str
+    access_token: Optional[str] = None
     token_type: str = "bearer"
-    user: UserOut
+    user: Optional[UserOut] = None
+    success: Optional[bool] = True
+    score: Optional[int] = 0
+    decision: Optional[str] = "allow"
+    action: Optional[str] = "allow"
+    reasons: Optional[List[Any]] = None
+    requires_step_up: Optional[bool] = False
+    step_up_type: Optional[str] = None
+    message: Optional[str] = "Authentication successful"
+    latency_ms: Optional[float] = 0.0
+    app_id: Optional[str] = "bank"
+
+
+class StepUpVerifyRequest(BaseModel):
+    email: str
+    app_id: str = "bank"
+    step_up_type: str  # 'captcha', 'email_otp', 'otp_password_reset'
+    code: str
+    device_id: str
+    new_password: Optional[str] = None
 
 
 class LoginEventOut(BaseModel):
     id: int
     email_attempted: str
     ip_prefix: Optional[str] = None
+    ip_address: Optional[str] = None
     ua_summary: Optional[str] = None
     device_id: Optional[str] = None
+    city: Optional[str] = None
     country: Optional[str] = None
+    is_vpn: Optional[bool] = False
     success: bool
     failure_reason: Optional[str] = None
+    risk_score: Optional[int] = None
+    decision: Optional[str] = None
+    action: Optional[str] = None
+    reasons_json: Optional[str] = None
+    latency_ms: Optional[float] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
+
+class DashboardStatsResponse(BaseModel):
+    total_events: int
+    blocked_count: int
+    challenged_count: int
+    allowed_count: int
+    detection_rate_pct: float
+    false_positive_rate_pct: float
+    average_latency_ms: float
+    honeytoken_hits: int
+    active_flagged_ips: int

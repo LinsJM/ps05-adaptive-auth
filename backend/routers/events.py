@@ -21,16 +21,35 @@ def record_login_event(
     user_id: Optional[int] = None,
     device_id: Optional[str] = None,
     failure_reason: Optional[str] = None,
+    app_id: str = "bank",
+    risk_score: int = 0,
+    decision: str = "allow",
+    action: str = "allow",
+    reasons_json: str = "[]",
+    latency_ms: float = 0.0,
+    city: Optional[str] = None,
+    is_vpn: bool = False,
+    ip_address: Optional[str] = None,
 ) -> models.LoginEvent:
+    client_ip = ip_address or privacy.get_client_ip(request)
     event = models.LoginEvent(
+        app_id=app_id,
         user_id=user_id,
         email_attempted=email_attempted,
-        ip_prefix=privacy.truncate_ip(privacy.get_client_ip(request)),
+        ip_prefix=privacy.truncate_ip(client_ip),
+        ip_address=client_ip,
         ua_summary=privacy.summarize_ua(request.headers.get("user-agent")),
-        device_id=device_id,
+        device_id=device_id or "dev-unknown",
+        city=city,
         country=privacy.get_country(request),
+        is_vpn=is_vpn,
         success=success,
         failure_reason=failure_reason,
+        risk_score=risk_score,
+        decision=decision,
+        action=action,
+        reasons_json=reasons_json,
+        latency_ms=latency_ms,
     )
     db.add(event)
     db.commit()

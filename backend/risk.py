@@ -1,19 +1,24 @@
 import json
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
 import models
 
-# ---- Tunable settings (we will tune these on Day 4 using the evaluation) ----
+# ---- Tunable settings ----
 WEIGHTS = {
     "new_device": 35,
     "new_country": 25,
     "unusual_hour": 10,
     "abrupt_change": 15,        # new device AND new country together
     "credential_stuffing": 20,  # many different accounts failing from one network
+    "vpn_tor_proxy": 25,        # Tor exit node / VPN detected
+    "impossible_travel": 45,    # Distance / time anomaly
+    "cross_app_threat": 35,     # Attack on companion app (Bank/Social)
+    "flagged_ip": 50,           # IP in threat watchlist
+    "honeytoken": 100,          # backup_admin trap
 }
 FAILURE_POINTS = [(5, 30), (3, 15), (1, 5)]  # (minimum failures, points)
 STEP_UP_THRESHOLD = 30
@@ -27,8 +32,11 @@ HOUR_TOLERANCE = 3          # hours either side of a usual login time
 @dataclass
 class RiskResult:
     score: int
-    decision: str  # allow / step_up / restrict
+    decision: str  # allow / step_up / restrict (LinsJM backward compatibility)
     reasons: List[dict] = field(default_factory=list)
+    action: str = "allow"  # allow / captcha / email_otp / otp_password_reset / block (Brief policy)
+    requires_step_up: bool = False
+    step_up_type: Optional[str] = None
 
     def reasons_json(self) -> str:
         return json.dumps(self.reasons)
@@ -69,6 +77,27 @@ def _recent_failures(db: Session, email: str, window_start: datetime) -> int:
     )
 
 
+def map_score_to_action(score: int) -> tuple[str, bool, Optional[str]]:
+    """
+    Project Risk Policy:
+    0-29  : Allow
+    30-44 : CAPTCHA
+    45-60 : Email OTP
+    61-79 : OTP + forced password reset
+    80-100: Block and lock account
+    """
+    if score >= 80:
+        return "block", False, None
+    elif score >= 61:
+        return "otp_password_reset", True, "otp_password_reset"
+    elif score >= 45:
+        return "email_otp", True, "email_otp"
+    elif score >= 30:
+        return "captcha", True, "captcha"
+    else:
+        return "allow", False, None
+
+
 def evaluate(
     db: Session,
     *,
@@ -79,24 +108,74 @@ def evaluate(
     ip_prefix,
     hour,
     now=None,
+    ip_address: Optional[str] = None,
+    app_id: str = "bank",
+    is_vpn: bool = False,
+    mins_since_last_login: Optional[int] = None,
 ) -> RiskResult:
     """Score one login attempt using this user's history. Call BEFORE recording the attempt."""
     now = now or _utcnow()
     window_start = now - timedelta(minutes=FAILURE_WINDOW_MINUTES)
     reasons: List[dict] = []
+    clean_email = email.strip().lower()
 
     def add(signal: str, points: int, detail: str):
         reasons.append({"signal": signal, "points": points, "detail": detail})
 
-    # Signal: repeated failures on this account
-    failures = _recent_failures(db, email, window_start)
+    # 1. HONEYTOKEN TRAP: backup_admin
+    if clean_email == "backup_admin":
+        if ip_address:
+            # Auto-flag the attacking IP
+            flag_ip = db.query(models.FlaggedIP).filter(models.FlaggedIP.ip_address == ip_address).first()
+            if not flag_ip:
+                db.add(models.FlaggedIP(
+                    ip_address=ip_address,
+                    reason="Honeytoken account 'backup_admin' access attempt",
+                    flagged_at=now
+                ))
+                db.commit()
+
+        add("honeytoken", WEIGHTS["honeytoken"], "Honeytoken account 'backup_admin' targeted. Source IP flagged.")
+        return RiskResult(
+            score=100,
+            decision="restrict",
+            reasons=reasons,
+            action="block",
+            requires_step_up=False,
+            step_up_type=None
+        )
+
+    # 2. ACCOUNT LOCKED STATUS
+    if user is not None and getattr(user, "is_locked", False):
+        add("account_locked", 100, f"Account is locked: {user.locked_reason or 'Security lockout'}")
+        return RiskResult(
+            score=100,
+            decision="restrict",
+            reasons=reasons,
+            action="block",
+            requires_step_up=False,
+            step_up_type=None
+        )
+
+    # 3. FLAGGED IP CHECK
+    if ip_address:
+        is_flagged = db.query(models.FlaggedIP).filter(models.FlaggedIP.ip_address == ip_address).first()
+        if is_flagged:
+            add("flagged_ip", WEIGHTS["flagged_ip"], f"IP {ip_address} is listed on threat watchlist: {is_flagged.reason}")
+
+    # 4. VPN / TOR / PROXY
+    if is_vpn:
+        add("vpn_tor_proxy", WEIGHTS["vpn_tor_proxy"], "Traffic routed through anonymizing VPN / Tor exit node")
+
+    # 5. REPEATED FAILURES
+    failures = _recent_failures(db, clean_email, window_start)
     for minimum, points in FAILURE_POINTS:
         if failures >= minimum:
             add("repeated_failures", points,
                 f"{failures} failed attempt(s) in the last {FAILURE_WINDOW_MINUTES} minutes")
             break
 
-    # Signal: many different accounts failing from the same network
+    # 6. CREDENTIAL STUFFING FROM SAME NETWORK
     if ip_prefix:
         distinct = (
             db.query(models.LoginEvent.email_attempted)
@@ -145,6 +224,7 @@ def evaluate(
                 models.LoginEvent.user_id == user.id,
                 models.LoginEvent.success.is_(True),
             )
+            .order_by(models.LoginEvent.created_at.desc())
             .all()
         )
 
@@ -156,6 +236,18 @@ def evaluate(
                 add("new_country", WEIGHTS["new_country"],
                     f"Login from {country}; earlier successful logins were from "
                     f"{', '.join(sorted(known))}")
+
+            # Check Impossible Travel
+            last_country, last_time = successes[0]
+            mins_diff = mins_since_last_login
+            if mins_diff is None and last_time:
+                elapsed = (now - last_time).total_seconds() / 60.0
+                mins_diff = max(1, int(elapsed))
+
+            if last_country and country and last_country != country:
+                if mins_diff is not None and mins_diff < 60:
+                    add("impossible_travel", WEIGHTS["impossible_travel"],
+                        f"Impossible travel: Jump from {last_country} to {country} in {mins_diff} mins")
 
         # Hour: cold-start rule, needs enough history first
         if hour is not None and len(successes) >= MIN_LOGINS_FOR_HOUR:
@@ -170,8 +262,29 @@ def evaluate(
         add("abrupt_change", WEIGHTS["abrupt_change"],
             "New device and new country at the same time")
 
+    # 7. CROSS-APP CORRELATION: Check other companion app
+    companion_app = "social" if app_id == "bank" else "bank"
+    recent_companion_attack = (
+        db.query(models.LoginEvent)
+        .filter(
+            models.LoginEvent.email_attempted == clean_email,
+            models.LoginEvent.app_id == companion_app,
+            models.LoginEvent.created_at >= window_start,
+            models.LoginEvent.risk_score >= 50,
+        )
+        .order_by(models.LoginEvent.created_at.desc())
+        .first()
+    )
+    if recent_companion_attack:
+        add("cross_app_threat", WEIGHTS["cross_app_threat"],
+            f"Cross-app correlation: High-risk security event (Score {recent_companion_attack.risk_score}) on '{companion_app}' 5m ago")
+
     score = min(sum(r["points"] for r in reasons), 100)
 
+    # 5-Tier Policy Action
+    action, requires_step_up, step_up_type = map_score_to_action(score)
+
+    # LinsJM's decision backward compatibility
     if failures >= RESTRICT_AFTER_FAILURES:
         decision = "restrict"
     elif score >= STEP_UP_THRESHOLD:
@@ -179,4 +292,11 @@ def evaluate(
     else:
         decision = "allow"
 
-    return RiskResult(score=score, decision=decision, reasons=reasons)
+    return RiskResult(
+        score=score,
+        decision=decision,
+        reasons=reasons,
+        action=action,
+        requires_step_up=requires_step_up,
+        step_up_type=step_up_type
+    )

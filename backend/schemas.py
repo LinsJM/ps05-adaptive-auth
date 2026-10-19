@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
 from typing import Optional
+from typing import List, Optional
 
 
 class RegisterRequest(BaseModel):
@@ -24,11 +25,18 @@ class UserOut(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class RiskInfo(BaseModel):
+    score: int
+    decision: str
+    reasons: List[dict]
+    enforced: bool
+
 
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+    risk: RiskInfo
 
 
 class LoginEventOut(BaseModel):
@@ -40,7 +48,9 @@ class LoginEventOut(BaseModel):
     country: Optional[str] = None
     success: bool
     failure_reason: Optional[str] = None
+    risk_score: Optional[int] = None
+    decision: Optional[str] = None
+    reasons_json: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-

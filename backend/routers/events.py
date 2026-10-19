@@ -21,6 +21,9 @@ def record_login_event(
     user_id: Optional[int] = None,
     device_id: Optional[str] = None,
     failure_reason: Optional[str] = None,
+    risk_score: Optional[int] = None,
+    decision: Optional[str] = None,
+    reasons_json: Optional[str] = None,
 ) -> models.LoginEvent:
     event = models.LoginEvent(
         user_id=user_id,
@@ -31,11 +34,13 @@ def record_login_event(
         country=privacy.get_country(request),
         success=success,
         failure_reason=failure_reason,
+        risk_score=risk_score,
+        decision=decision,
+        reasons_json=reasons_json,
     )
     db.add(event)
     db.commit()
     return event
-
 
 @router.get("/recent", response_model=List[schemas.LoginEventOut])
 def recent_events(

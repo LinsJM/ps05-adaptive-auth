@@ -2,15 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api";
+import { SIGNAL_LABELS } from "../labels";
 
-const SIGNAL_LABELS = {
-  new_device: "New device",
-  new_country: "New country",
-  unusual_hour: "Unusual hour",
-  repeated_failures: "Repeated failures",
-  credential_stuffing: "Many accounts failing from one network",
-  abrupt_change: "Several things changed at once",
-};
 
 const DECISION_STYLES = {
   allow: "bg-emerald-950 text-emerald-300",
@@ -50,7 +43,9 @@ function RiskBanner({ risk }) {
   };
   const titles = {
     allow: "This login looked normal",
-    step_up: "This login looked unusual",
+    step_up: risk.enforced
+      ? "This login looked unusual, and you verified it with a code"
+      : "This login looked unusual",
     restrict: "Too many failed attempts",
   };
   return (
@@ -131,9 +126,21 @@ export default function Home() {
                 return (
                   <tr key={e.id} className="border-t border-slate-800 align-top">
                     <td className="p-2">{new Date(e.created_at + "Z").toLocaleString()}</td>
-                    <td className={`p-2 ${e.success ? "text-emerald-400" : "text-red-400"}`}>
-                      {e.success ? "Success" : "Failed"}
-                      {e.failure_reason && (
+                                        <td
+                      className={`p-2 ${
+                        e.success
+                          ? "text-emerald-400"
+                          : e.failure_reason === "step_up_required"
+                          ? "text-amber-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {e.success
+                        ? "Success"
+                        : e.failure_reason === "step_up_required"
+                        ? "Challenged"
+                        : "Failed"}
+                      {e.failure_reason && e.failure_reason !== "step_up_required" && (
                         <div className="text-xs text-slate-500">{e.failure_reason}</div>
                       )}
                     </td>

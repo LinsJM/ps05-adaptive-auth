@@ -33,10 +33,13 @@ class RiskInfo(BaseModel):
 
 
 class LoginResponse(BaseModel):
-    access_token: str
+    access_token: Optional[str] = None
     token_type: str = "bearer"
-    user: UserOut
+    user: Optional[UserOut] = None
     risk: RiskInfo
+    step_up_required: bool = False
+    challenge_id: Optional[int] = None
+    demo_code: Optional[str] = None
 
 
 class LoginEventOut(BaseModel):
@@ -54,3 +57,8 @@ class LoginEventOut(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class StepUpVerifyRequest(BaseModel):
+    challenge_id: int
+    code: str = Field(min_length=6, max_length=6)
+    trust_device: bool = False

@@ -12,6 +12,9 @@ from sqlalchemy.orm import Session
 import models
 from database import get_db
 
+import hashlib
+import hmac
+import secrets
 
 load_dotenv()
 
@@ -73,3 +76,14 @@ def get_current_user(
         raise unauthorized
     return user
 
+
+def generate_otp() -> str:
+    return f"{secrets.randbelow(10**6):06d}"
+
+
+def hash_otp(code: str) -> str:
+    return hmac.new(SECRET_KEY.encode(), code.encode(), hashlib.sha256).hexdigest()
+
+
+def verify_otp(code: str, code_hash: str) -> bool:
+    return hmac.compare_digest(hash_otp(code), code_hash)

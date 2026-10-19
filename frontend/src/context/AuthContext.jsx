@@ -27,20 +27,44 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, [token]);
 
+  function finishLogin(data) {
+    localStorage.setItem("token", data.access_token);
+    setToken(data.access_token);
+    setUser(data.user);
+    setLastRisk(data.risk);
+  }
+
   async function register(email, password) {
     await api.post("/auth/register", { email, password });
   }
 
+  // Returns { stepUp: false } when logged in, or the challenge details when
+  // extra verification is required.
   async function login(email, password) {
     const { data } = await api.post("/auth/login", {
       email,
       password,
       device_id: getDeviceId(),
     });
-    localStorage.setItem("token", data.access_token);
-    setToken(data.access_token);
-    setUser(data.user);
-    setLastRisk(data.risk);
+    if (data.step_up_required) {
+      return {
+        stepUp: true,
+        challengeId: data.challenge_id,
+        demoCode: data.demo_code,
+        risk: data.risk,
+      };
+    }
+    finishLogin(data);
+    return { stepUp: false };
+  }
+
+  async function verifyStepUp(challengeId, code, trustDevice) {
+    const { data } = await api.post("/auth/verify-step-up", {
+      challenge_id: challengeId,
+      code,
+      trust_device: trustDevice,
+    });
+    finishLogin(data);
   }
 
   async function logout() {
@@ -57,7 +81,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ token, user, lastRisk, loading, register, login, logout }}
+      value={{ token, user, lastRisk, loading, register, login, verifyStepUp, logout }}
     >
       {children}
     </AuthContext.Provider>

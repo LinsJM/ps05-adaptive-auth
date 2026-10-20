@@ -1,0 +1,15 @@
+services:
+  dignitas-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dignitas_ps05_gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount SQLite database volume so events persist across restarts
+      - ./backend/adaptive_auth.db:/app/backend/adaptive_auth.db
+    restart: unless-stopped

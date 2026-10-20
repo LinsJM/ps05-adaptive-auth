@@ -75,6 +75,18 @@ class PromptVerifyRequest(BaseModel):
     new_password: Optional[str] = None
 
 
+class PasswordResetRequest(BaseModel):
+    email: str
+    new_password: str = Field(min_length=6, max_length=128)
+    current_ip: Optional[str] = None
+    reason: Optional[str] = "Compromised credential security alert"
+
+
+class BlacklistIpRequest(BaseModel):
+    ip_address: str
+    reason: Optional[str] = "Suspicious login attempt"
+
+
 class NotificationItem(BaseModel):
     id: str
     timestamp: str

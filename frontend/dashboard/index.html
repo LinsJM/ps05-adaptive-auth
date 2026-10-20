@@ -648,28 +648,85 @@
 
           <div class="gmail-email-card">
             <div class="gmail-shield-header">
-              <span class="gmail-corp-title">DIGNITAS IDENTITY</span>
-              <span class="gmail-corp-badge">ADAPTIVE OTP</span>
+              <span class="gmail-corp-title" id="phone-corp-title">DIGNITAS IDENTITY</span>
+              <span class="gmail-corp-badge" id="phone-corp-badge">ADAPTIVE SECURITY</span>
             </div>
-            <p class="gmail-lead-text">An unrecognized device has attempted to sign in to your corporate account. Verify this request using the one-time passcode below:</p>
+            <p class="gmail-lead-text" id="phone-lead-text">An unrecognized device has attempted to sign in to your corporate account. Verify this request below:</p>
 
-            <div class="gmail-otp-display-box">
+            <!-- OTP Box (Shown for Tier 3 Email OTP) -->
+            <div class="gmail-otp-display-box" id="phone-otp-box">
               <span class="gmail-otp-digits" id="gmail-otp-digits">8 4 9 2 0 1</span>
               <span class="gmail-otp-expiry">Expires in 5 minutes</span>
             </div>
 
             <div class="gmail-telemetry-specs">
               <div class="spec-row"><span>Target App:</span> <strong id="phone-spec-app">Apex Trust Bank</strong></div>
-              <div class="spec-row"><span>Attacker Device:</span> <strong id="phone-spec-device">dev-demo-laptop-unrecognized</strong></div>
+              <div class="spec-row"><span>Device:</span> <strong id="phone-spec-device">dev-demo-laptop-unrecognized</strong></div>
               <div class="spec-row"><span>Location:</span> <strong id="phone-spec-loc">Delhi, India</strong></div>
-              <div class="spec-row"><span>Anomaly:</span> <strong class="text-amber">Hardware Baseline Mismatch (+35 pts)</strong></div>
+              <div class="spec-row"><span>IP Address:</span> <strong id="phone-spec-ip">103.21.244.2</strong></div>
+              <div class="spec-row"><span>Security Anomaly:</span> <strong class="text-amber" id="phone-spec-anomaly">Hardware Mismatch (+45 pts)</strong></div>
+            </div>
+
+            <!-- Interactive Yes/No Prompt for New Device -->
+            <div class="phone-prompt-box" id="phone-prompt-box" style="margin-top:10px;">
+              <div style="font-size:0.75rem; font-weight:700; color:#1E293B; margin-bottom:4px;">Was this you signing in?</div>
+              <div class="phone-prompt-actions" style="display:flex; gap:6px;">
+                <button type="button" class="btn-phone-prompt-yes" id="btn-phone-prompt-yes" style="flex:1; padding:8px 6px; background:#16A34A; color:#FFF; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">✓ Yes, it's me</button>
+                <button type="button" class="btn-phone-prompt-no" id="btn-phone-prompt-no" style="flex:1; padding:8px 6px; background:#DC2626; color:#FFF; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">✕ No, it's not me</button>
+              </div>
             </div>
 
             <!-- Auto-Fill Bridge Button -->
-            <button class="btn-phone-autofill" id="btn-phone-autofill">
+            <button class="btn-phone-autofill" id="btn-phone-autofill" style="margin-top:8px;">
               📋 Auto-Fill Passcode on Laptop
             </button>
           </div>
+
+          <!-- CRITICAL THREAT & IMPOSSIBLE TRAVEL ALERT CARD (Shown for Tier 4 & 5) -->
+          <div class="phone-threat-card hidden" id="phone-threat-card" style="background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:12px; margin-top:10px;">
+            <div class="phone-threat-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span class="phone-threat-title" id="phone-threat-title" style="font-weight:800; font-size:0.8rem; color:#991B1B;">🚨 High Threat Intercepted</span>
+              <span class="phone-threat-badge" id="phone-threat-badge" style="background:#DC2626; color:#FFF; font-size:0.65rem; font-weight:700; padding:2px 6px; border-radius:4px;">FLAGGED</span>
+            </div>
+            <p class="phone-threat-msg" id="phone-threat-msg" style="font-size:0.72rem; color:#7F1D1D; line-height:1.4; margin-bottom:10px;">
+              Someone attempted to sign in with your matching credentials from an anomalous location.
+            </p>
+            <div class="phone-threat-actions" style="display:flex; flex-direction:column; gap:6px;">
+              <button type="button" class="btn-phone-change-pwd" id="btn-phone-change-pwd" style="padding:9px; background:#DC2626; color:#FFF; border:none; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">🔒 Change Password / Secure Account</button>
+              <button type="button" class="btn-phone-block-ip" id="btn-phone-block-ip" style="padding:7px; background:#1E293B; color:#F8FAFC; border:1px solid #334155; border-radius:6px; font-size:0.7rem; font-weight:600; cursor:pointer;">🚫 Blacklist Attacker IP</button>
+              <button type="button" class="btn-phone-prompt-yes hidden" id="btn-phone-approve-quarantine" style="padding:8px; background:#E11D48; color:#FFF; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">✓ Authorize Quarantine Session Out-of-Band</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: IN-PHONE EMERGENCY PASSWORD RESET SCREEN -->
+      <div class="phone-view phone-reset-view hidden" id="phone-view-reset" style="background:#FFF; padding:16px 12px; min-height:420px;">
+        <div class="gmail-nav-bar" style="margin-bottom:12px;">
+          <button class="btn-gmail-back" id="btn-reset-back" style="background:none; border:none; color:#2563EB; font-size:0.75rem; font-weight:700; cursor:pointer;">
+            &larr; Back
+          </button>
+          <span class="gmail-header-title" style="font-weight:700; font-size:0.8rem; color:#0F172A;">Security Reset</span>
+          <span class="gmail-avatar-tag" style="background:#DC2626; color:#FFF; font-size:0.65rem; padding:2px 6px; border-radius:4px;">Action</span>
+        </div>
+        <div style="padding:6px 2px;">
+          <div style="font-size:0.95rem; font-weight:800; color:#0F172A; margin-bottom:4px;">🔒 Secure Your Account</div>
+          <div style="font-size:0.73rem; color:#64748B; margin-bottom:14px; line-height:1.4;">
+            Your credentials were compromised in an attack attempt. Set a new password to immediately terminate all intruder sessions and blacklist the attacker.
+          </div>
+          
+          <div style="margin-bottom:10px;">
+            <label style="display:block; font-size:0.68rem; font-weight:700; color:#334155; margin-bottom:3px; text-transform:uppercase;">Account Email</label>
+            <input type="text" id="phone-reset-email" readonly style="width:100%; padding:7px 9px; border:1px solid #CBD5E1; border-radius:6px; font-size:0.78rem; background:#F1F5F9; color:#475569; box-sizing:border-box;">
+          </div>
+          
+          <div style="margin-bottom:12px;">
+            <label style="display:block; font-size:0.68rem; font-weight:700; color:#334155; margin-bottom:3px; text-transform:uppercase;">New Secure Password</label>
+            <input type="text" id="phone-reset-newpass" value="JudgeSecurePass2026!" style="width:100%; padding:7px 9px; border:1px solid #CBD5E1; border-radius:6px; font-size:0.78rem; box-sizing:border-box;">
+          </div>
+          
+          <button type="button" id="btn-phone-submit-reset" style="width:100%; padding:9px; background:#2563EB; color:#FFF; border:none; border-radius:6px; font-weight:700; font-size:0.78rem; cursor:pointer;">Update Password & Revoke Intruder</button>
+          <div id="phone-reset-feedback" style="margin-top:10px; font-size:0.72rem; line-height:1.35; text-align:center;"></div>
         </div>
       </div>
 

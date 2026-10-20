@@ -744,29 +744,136 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function triggerPhoneSimulatorAlert({ email, otp, app, device, loc, ip, deliveryMode }) {
+  let lastAttackerIp = '185.220.101.5';
+  let lastTargetEmail = 'alice@example.com';
+
+  function triggerPhoneSimulatorAlert({ email, otp, app, device, loc, ip, deliveryMode, score = 0, action = 'allow', anomaly = '' }) {
     currentPhoneOtp = otp || '849201';
+    lastAttackerIp = ip || '185.220.101.5';
+    lastTargetEmail = email || (inputEmail ? inputEmail.value.trim() : 'alice@example.com') || 'alice@example.com';
 
     if (deliveryMode) setPhoneDeliveryMode(deliveryMode);
 
     const appDisplayName = app === 'bank' ? 'Apex Trust Bank' : 'Pulse Social';
-    if (pushTitle) pushTitle.textContent = `🔐 ${appDisplayName} / DIGNITAS Alert`;
-    if (pushOtpHighlight) pushOtpHighlight.textContent = currentPhoneOtp;
-    if (pushBody) {
-      pushBody.innerHTML = `Your sign-in passcode is <strong class="push-code-highlight">${escapeHtml(currentPhoneOtp)}</strong> (valid 5 min). Unrecognized device detected in ${escapeHtml(loc || 'Delhi, IN')}.`;
+    const isThreat = action === 'block' || score >= 80;
+    const isQuarantine = action === 'quarantine_verify' || action === 'otp_password_reset' || score >= 60;
+    const isNewDevice = !isThreat && !isQuarantine && (action === 'email_otp' || score >= 45);
+
+    // 1. Lock screen Push Banner
+    if (pushTitle) {
+      if (isThreat) {
+        pushTitle.textContent = `🚨 Critical Alert: Sign-In Blocked!`;
+      } else if (isQuarantine) {
+        pushTitle.textContent = `⚠️ Security Alert: Session Quarantined`;
+      } else {
+        pushTitle.textContent = `🔔 New Sign-In from Unrecognized Device`;
+      }
     }
 
-    if (gmailToAddr) gmailToAddr.textContent = email || 'judge@gmail.com';
-    if (gmailOtpDigits) {
-      const spaced = String(currentPhoneOtp).split('').join(' ');
-      gmailOtpDigits.textContent = spaced;
+    if (pushOtpHighlight) {
+      pushOtpHighlight.textContent = isNewDevice ? currentPhoneOtp : 'ALERT';
     }
+
+    if (pushBody) {
+      if (isThreat) {
+        pushBody.innerHTML = `Intruder attempted sign-in with your password from <strong>${escapeHtml(loc || 'Moscow, RU')}</strong> (IP: ${escapeHtml(lastAttackerIp)}). Your credentials may be compromised!`;
+      } else if (isQuarantine) {
+        pushBody.innerHTML = `High-speed location jump detected from <strong>${escapeHtml(loc)}</strong> (IP: ${escapeHtml(lastAttackerIp)}). Out-of-band authorization required.`;
+      } else {
+        pushBody.innerHTML = `Sign-in attempt from <strong>${escapeHtml(device || 'Unrecognized Laptop')}</strong> in ${escapeHtml(loc || 'Delhi, IN')}. Passcode: <strong class="push-code-highlight">${escapeHtml(currentPhoneOtp)}</strong>.`;
+      }
+    }
+
+    // 2. Gmail / Alert View Details
+    if (gmailToAddr) gmailToAddr.textContent = lastTargetEmail;
     if (phoneSpecApp) phoneSpecApp.textContent = appDisplayName;
     if (phoneSpecDevice) phoneSpecDevice.textContent = device || 'dev-demo-laptop-unrecognized';
     if (phoneSpecLoc) phoneSpecLoc.textContent = loc || 'Delhi, India';
+    const phoneSpecIpEl = document.getElementById('phone-spec-ip');
+    if (phoneSpecIpEl) phoneSpecIpEl.textContent = lastAttackerIp;
+    const phoneSpecAnomalyEl = document.getElementById('phone-spec-anomaly');
+    if (phoneSpecAnomalyEl) {
+      phoneSpecAnomalyEl.textContent = anomaly || (isThreat ? 'Compromised Password / Malicious Proxy (+95 pts)' : (isQuarantine ? 'Impossible Velocity Travel (+70 pts)' : 'Hardware Baseline Mismatch (+45 pts)'));
+    }
+
+    const phonePromptBox = document.getElementById('phone-prompt-box');
+    const phoneThreatCard = document.getElementById('phone-threat-card');
+    const phoneThreatTitle = document.getElementById('phone-threat-title');
+    const phoneThreatMsg = document.getElementById('phone-threat-msg');
+    const phoneOtpBox = document.getElementById('phone-otp-box');
+    const btnPhoneAutofillEl = document.getElementById('btn-phone-autofill');
+    const btnPhoneApproveQuarantine = document.getElementById('btn-phone-approve-quarantine');
+    const phoneLeadText = document.getElementById('phone-lead-text');
+    const phoneCorpTitle = document.getElementById('phone-corp-title');
+    const phoneCorpBadge = document.getElementById('phone-corp-badge');
+    const phoneGmailSubject = document.getElementById('phone-gmail-subject');
+
+    if (isThreat || isQuarantine) {
+      // Threat Mode
+      if (phoneCorpTitle) phoneCorpTitle.textContent = 'DIGNITAS THREAT RADAR';
+      if (phoneCorpBadge) {
+        phoneCorpBadge.textContent = isThreat ? 'CRITICAL BLOCK' : 'QUARANTINE';
+        phoneCorpBadge.style.background = '#DC2626';
+      }
+      if (phoneGmailSubject) {
+        phoneGmailSubject.textContent = isThreat ? '🚨 Critical Security Alert: Suspicious sign-in blocked' : '⚠️ Security Alert: High-speed impossible travel detected';
+      }
+      if (phoneLeadText) {
+        phoneLeadText.textContent = isThreat
+          ? 'An unauthorized sign-in attempt using your matching credentials was terminated by DIGNITAS. We recommend changing your password immediately.'
+          : 'An impossible travel jump was detected on your account. The session has been placed in quarantine pending verification.';
+      }
+      if (phoneOtpBox) phoneOtpBox.classList.add('hidden');
+      if (phonePromptBox) phonePromptBox.classList.add('hidden');
+      if (btnPhoneAutofillEl) btnPhoneAutofillEl.classList.add('hidden');
+      if (phoneThreatCard) phoneThreatCard.classList.remove('hidden');
+
+      if (phoneThreatTitle) {
+        phoneThreatTitle.textContent = isThreat ? '🚨 Intruder Blocked • Leaked Password' : '⚠️ Impossible Travel • Session Isolated';
+      }
+      if (phoneThreatMsg) {
+        phoneThreatMsg.innerHTML = isThreat
+          ? `Attacker attempted sign-in from <strong>${escapeHtml(loc)}</strong> (IP: ${escapeHtml(lastAttackerIp)}). Because your password matched, your credentials may be exposed in an external leak.`
+          : `Sign-in from <strong>${escapeHtml(loc)}</strong> requires supersonic flight speed from your earlier location. Verify your identity or change your password.`;
+      }
+      if (btnPhoneApproveQuarantine) {
+        if (isQuarantine) {
+          btnPhoneApproveQuarantine.classList.remove('hidden');
+        } else {
+          btnPhoneApproveQuarantine.classList.add('hidden');
+        }
+      }
+    } else {
+      // New Device Mode (Tier 3)
+      if (phoneCorpTitle) phoneCorpTitle.textContent = 'DIGNITAS IDENTITY';
+      if (phoneCorpBadge) {
+        phoneCorpBadge.textContent = 'NEW DEVICE';
+        phoneCorpBadge.style.background = '#2563EB';
+      }
+      if (phoneGmailSubject) phoneGmailSubject.textContent = '🛡️ Security Alert: New sign-in from unrecognized device';
+      if (phoneLeadText) phoneLeadText.textContent = 'An unrecognized device has attempted to sign in to your corporate account. Was this you? Choose an option below:';
+      if (phoneOtpBox) phoneOtpBox.classList.remove('hidden');
+      if (gmailOtpDigits) gmailOtpDigits.textContent = String(currentPhoneOtp).split('').join(' ');
+      if (phonePromptBox) {
+        phonePromptBox.classList.remove('hidden');
+        phonePromptBox.innerHTML = `
+          <div style="font-size:0.75rem; font-weight:700; color:#1E293B; margin-bottom:4px;">Was this you signing in?</div>
+          <div class="phone-prompt-actions" style="display:flex; gap:6px;">
+            <button type="button" class="btn-phone-prompt-yes" id="btn-phone-prompt-yes" style="flex:1; padding:8px 6px; background:#16A34A; color:#FFF; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">✓ Yes, it's me</button>
+            <button type="button" class="btn-phone-prompt-no" id="btn-phone-prompt-no" style="flex:1; padding:8px 6px; background:#DC2626; color:#FFF; border:none; border-radius:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">✕ No, it's not me</button>
+          </div>
+        `;
+        document.getElementById('btn-phone-prompt-yes')?.addEventListener('click', handlePhonePromptYes);
+        document.getElementById('btn-phone-prompt-no')?.addEventListener('click', handlePhonePromptNo);
+      }
+      if (btnPhoneAutofillEl) btnPhoneAutofillEl.classList.remove('hidden');
+      if (phoneThreatCard) phoneThreatCard.classList.add('hidden');
+    }
 
     if (phoneViewLock) phoneViewLock.classList.remove('hidden');
     if (phoneViewGmail) phoneViewGmail.classList.add('hidden');
+    const phoneViewResetEl = document.getElementById('phone-view-reset');
+    if (phoneViewResetEl) phoneViewResetEl.classList.add('hidden');
 
     if (phonePushNotification) {
       phonePushNotification.style.animation = 'none';
@@ -777,6 +884,116 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePhoneSimulator(true);
     playNotificationChime();
   }
+
+  // Phone Simulator Action Handlers: "Yes, it's me" and "No, it's not me"
+  async function handlePhonePromptYes() {
+    const box = document.getElementById('phone-prompt-box');
+    if (box) {
+      box.innerHTML = '<div style="color:#16A34A; font-weight:700; text-align:center; padding:8px; font-size:0.75rem; background:#DCFCE7; border-radius:6px;">✓ Sign-In Approved! Trusting device...</div>';
+    }
+    await submitPromptVerification(true);
+  }
+
+  async function handlePhonePromptNo() {
+    const box = document.getElementById('phone-prompt-box');
+    if (box) {
+      box.innerHTML = '<div style="color:#DC2626; font-weight:700; text-align:center; padding:8px; font-size:0.75rem; background:#FEE2E2; border-radius:6px;">✕ Intrusion Denied! Account Emergency Locked.</div>';
+    }
+    await submitPromptVerification(false);
+  }
+
+  // Password Reset View in Phone
+  function openPhonePasswordReset() {
+    if (phoneViewGmail) phoneViewGmail.classList.add('hidden');
+    if (phoneViewLock) phoneViewLock.classList.add('hidden');
+    const phoneViewReset = document.getElementById('phone-view-reset');
+    if (phoneViewReset) phoneViewReset.classList.remove('hidden');
+
+    const phoneResetEmail = document.getElementById('phone-reset-email');
+    if (phoneResetEmail) phoneResetEmail.value = lastTargetEmail;
+    const phoneResetFeedback = document.getElementById('phone-reset-feedback');
+    if (phoneResetFeedback) phoneResetFeedback.innerHTML = '';
+  }
+
+  async function submitPhonePasswordReset() {
+    const newPass = document.getElementById('phone-reset-newpass')?.value || 'JudgeSecurePass2026!';
+    const feedback = document.getElementById('phone-reset-feedback');
+    const btn = document.getElementById('btn-phone-submit-reset');
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Updating Password...'; }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: lastTargetEmail,
+          new_password: newPass,
+          current_ip: lastAttackerIp,
+          reason: 'Emergency reset from smartphone alert'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (feedback) {
+          feedback.innerHTML = `<span style="color:#16A34A; font-weight:700;">✓ Password updated! Rogue sessions terminated & attacker IP blacklisted.</span>`;
+        }
+        if (inputPassword) inputPassword.value = newPass;
+      } else {
+        if (feedback) feedback.innerHTML = `<span style="color:#DC2626;">${data.detail || 'Failed to reset password'}</span>`;
+      }
+    } catch (err) {
+      if (feedback) feedback.innerHTML = `<span style="color:#DC2626;">Network error communicating with gateway</span>`;
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Update Password & Revoke Intruder'; }
+    }
+  }
+
+  async function blacklistAttackerIp() {
+    const btn = document.getElementById('btn-phone-block-ip');
+    if (btn) { btn.disabled = true; btn.textContent = 'Blacklisting IP...'; }
+    try {
+      const res = await fetch(`${API_BASE}/api/dashboard/blacklist-ip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ip_address: lastAttackerIp,
+          reason: 'Blacklisted from user smartphone security alert'
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (btn) {
+          btn.style.background = '#15803D';
+          btn.textContent = `✓ IP ${lastAttackerIp} Blacklisted in SQLite!`;
+        }
+      }
+    } catch (e) {
+      if (btn) btn.textContent = 'Failed to blacklist IP';
+    }
+  }
+
+  async function approveQuarantineSession() {
+    const btn = document.getElementById('btn-phone-approve-quarantine');
+    if (btn) { btn.disabled = true; btn.textContent = 'Authorizing Session...'; }
+    await submitOtpVerification(currentPhoneOtp || 'APPROVE');
+    if (btn) {
+      btn.style.background = '#15803D';
+      btn.textContent = '✓ Quarantine Session Authorized!';
+    }
+  }
+
+  // Wire up phone buttons on load
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-phone-change-pwd')?.addEventListener('click', openPhonePasswordReset);
+    document.getElementById('btn-phone-block-ip')?.addEventListener('click', blacklistAttackerIp);
+    document.getElementById('btn-phone-approve-quarantine')?.addEventListener('click', approveQuarantineSession);
+    document.getElementById('btn-reset-back')?.addEventListener('click', () => {
+      document.getElementById('phone-view-reset')?.classList.add('hidden');
+      document.getElementById('phone-view-gmail')?.classList.remove('hidden');
+    });
+    document.getElementById('btn-phone-submit-reset')?.addEventListener('click', submitPhonePasswordReset);
+  });
 
   // -------------------------------------------------------------
   // 5B. Target Enrollment (Judge Account) & SMTP Modal Handlers
@@ -1018,6 +1235,20 @@ document.addEventListener('DOMContentLoaded', () => {
         ip: ip
       });
 
+      // TRIGGER PHONE SIMULATOR FOR THREAT / BLOCK SCENARIO!
+      triggerPhoneSimulatorAlert({
+        email: email,
+        otp: null,
+        app: currentApp,
+        device: ctxDevice.value.trim() || 'dev-unknown',
+        loc: `${city}, ${country}`,
+        ip: ip,
+        deliveryMode: data.prompt_details?.delivery_mode || 'simulated',
+        score: score,
+        action: 'block',
+        anomaly: (data.reasons && data.reasons[0]?.detail) ? data.reasons[0].detail : 'Compromised credential / Malicious proxy detected'
+      });
+
       activeChallenge = null;
       return;
     }
@@ -1183,7 +1414,10 @@ document.addEventListener('DOMContentLoaded', () => {
         device: deviceId,
         loc: clientLoc,
         ip: clientIp,
-        deliveryMode: dMode
+        deliveryMode: dMode,
+        score: score,
+        action: data.action || 'email_otp',
+        anomaly: isQuarantine ? 'Impossible supersonic velocity travel detected (+70 pts)' : 'Hardware baseline mismatch (+45 pts)'
       });
 
       // Wire up PIN input navigation

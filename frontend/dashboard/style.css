@@ -4040,4 +4040,25 @@ input, select, textarea {
   background: rgba(0, 0, 0, 0.4);
 }
 
+/* Phone Simulator Prompt Actions & Reset Screen */
+.btn-phone-prompt-yes:hover {
+  background: #15803D !important;
+  transform: translateY(-1px);
+}
+.btn-phone-prompt-no:hover {
+  background: #B91C1C !important;
+  transform: translateY(-1px);
+}
+.btn-phone-change-pwd:hover {
+  background: #B91C1C !important;
+  transform: translateY(-1px);
+}
+.btn-phone-block-ip:hover {
+  background: #0F172A !important;
+}
+.btn-phone-submit-reset:hover {
+  background: #1D4ED8 !important;
+}
+
+
 

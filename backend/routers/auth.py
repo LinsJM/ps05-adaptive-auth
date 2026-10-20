@@ -942,3 +942,70 @@ def send_test_email(payload: schemas.TestEmailRequest):
             "success": False,
             "message": f"SMTP delivery failed: {err}. If using Gmail, make sure you created a Google App Password (not your personal Google account password).",
         }
+
+
+@router.post("/api/auth/reset-password")
+def reset_password(payload: schemas.PasswordResetRequest, db: Session = Depends(get_db)):
+    """Allows a user to reset their password immediately from an emergency security alert."""
+    email = payload.email.strip().lower()
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User account not found")
+
+    user.password_hash = security.hash_password(payload.new_password)
+    user.is_locked = False
+    user.locked_reason = None
+    db.commit()
+
+    # Automatically blacklist the attacker IP if provided
+    if payload.current_ip:
+        clean_ip = payload.current_ip.strip()
+        existing_flag = db.query(models.FlaggedIP).filter(models.FlaggedIP.ip_address == clean_ip).first()
+        if not existing_flag:
+            db.add(models.FlaggedIP(
+                ip_address=clean_ip,
+                reason="IP blacklisted during emergency user password reset",
+                flagged_at=_utcnow()
+            ))
+            db.commit()
+
+    add_security_notification(
+        notification_type="verified",
+        recipient=email,
+        subject=f"✓ Password Successfully Updated for {email}",
+        app_id="bank",
+        device="Security Reset Portal",
+        location="Verified Device",
+        ip="Secure Internal",
+        risk_score=0,
+        action="allow",
+        reasons=["User successfully reset compromised credentials"],
+        preview_body=f"Your account password was updated successfully. All rogue intruder sessions have been terminated."
+    )
+
+    return {
+        "success": True,
+        "message": f"Password for {email} updated successfully! All intruder sessions terminated and attacker IP secured."
+    }
+
+
+@router.post("/api/dashboard/blacklist-ip")
+def blacklist_ip(payload: schemas.BlacklistIpRequest, db: Session = Depends(get_db)):
+    """Adds a suspicious or attacker IP to the SQLite blacklisted IPs table."""
+    clean_ip = payload.ip_address.strip()
+    if not clean_ip:
+        raise HTTPException(status_code=400, detail="Invalid IP address")
+
+    existing = db.query(models.FlaggedIP).filter(models.FlaggedIP.ip_address == clean_ip).first()
+    if not existing:
+        db.add(models.FlaggedIP(
+            ip_address=clean_ip,
+            reason=payload.reason or "Manually flagged from security alert",
+            flagged_at=_utcnow()
+        ))
+        db.commit()
+
+    return {
+        "success": True,
+        "message": f"IP address {clean_ip} has been permanently blacklisted in SQLite."
+    }

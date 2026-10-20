@@ -89,7 +89,7 @@ const SCENARIOS = [
   {
     id: "takeover",
     title: "5. Possible account takeover",
-    setup: "Correct password from a new device, in a new country, at an unusual hour.",
+    setup: "Correct password from a new device, in a country this account has never used.",
     expect: "step_up",
     why: "Several weak signals together make a strong one. The attacker still has the password but is stopped at verification, while the real user is never locked out.",
     run: (a) =>

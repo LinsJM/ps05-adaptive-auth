@@ -1,13 +1,384 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIGNITAS — PS05 Adaptive Authentication Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover-border: rgba(59, 130, 246, 0.5);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.25);
+      --emerald: #10b981;
+      --purple: #8b5cf6;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.15), transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.15), transparent 50%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin: 0 auto 24px auto;
+      line-height: 1.6;
+    }
+
+    .quick-banner {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: #6ee7b7;
+      margin-bottom: 32px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, var(--card-glow, rgba(59, 130, 246, 0.1)), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--card-hover-border);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), 0 0 24px var(--accent-glow);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card.primary {
+      --card-hover-border: rgba(59, 130, 246, 0.6);
+      --accent-glow: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.3);
+      background: linear-gradient(145deg, rgba(30, 58, 138, 0.25), rgba(17, 24, 39, 0.85));
+    }
+
+    .card.gateway {
+      --card-hover-border: rgba(16, 185, 129, 0.6);
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.3);
+      background: linear-gradient(145deg, rgba(6, 78, 59, 0.25), rgba(17, 24, 39, 0.85));
+    }
+
+    .card.soc {
+      --card-hover-border: rgba(139, 92, 246, 0.6);
+      --accent-glow: rgba(139, 92, 246, 0.2);
+    }
+
+    .card.api {
+      --card-hover-border: rgba(245, 158, 11, 0.6);
+      --accent-glow: rgba(245, 158, 11, 0.2);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-badge {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge-overview { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-solution { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-soc { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-api { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .card h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #93c5fd;
+      position: relative;
+      z-index: 1;
+      transition: gap 0.2s ease;
+    }
+
+    .card:hover .card-action {
+      gap: 10px;
+      color: #ffffff;
+    }
+
+    .backend-info {
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* Keep hidden Vite container in case Vite script runs */
+    #root { display: none; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="brand-pill">
+        <span class="status-dot" id="server-status-dot"></span>
+        <span id="server-status-text">FastAPI Gateway Connected :8000</span>
+      </div>
+      <h1>DIGNITAS Security Suite</h1>
+      <p class="subtitle">
+        Problem Statement PS05: Adaptive Authentication & Explainable Suspicious Login Detection with 5-Tier Graduated Threat Mitigation.
+      </p>
+    </header>
+
+    <div class="cards-grid">
+      <!-- 1. OVERVIEW SITE -->
+      <a href="landing/index.html" class="card primary" id="link-overview">
+        <div class="card-icon">🌐</div>
+        <span class="card-badge badge-overview">Overview Site</span>
+        <h2>Product & Solution Showcase</h2>
+        <p>Complete problem PS05 breakdown, 5-tier threat architecture, sub-10ms risk calculation weights, and live matrix simulator.</p>
+        <span class="card-action">Open Overview Site &rarr;</span>
+      </a>
+
+      <!-- 2. SOLUTION SITE (INTERACTIVE GATEWAY) -->
+      <a href="dashboard/index.html" class="card gateway" id="link-solution">
+        <div class="card-icon">🛡️</div>
+        <span class="card-badge badge-solution">Solution Site</span>
+        <h2>Interactive Threat Gateway</h2>
+        <p>Interactive customer sign-in checkpoint with Scenarios 1–8, biometric fingerprinting, Turnstile CAPTCHA, OTP trust, and device isolation.</p>
+        <span class="card-action">Launch Solution Site &rarr;</span>
+      </a>
+
+      <!-- 3. SOC THREAT FEED -->
+      <a href="dashboard/soc.html" class="card soc" id="link-soc">
+        <div class="card-icon">📊</div>
+        <span class="card-badge badge-soc">SOC Live Feed</span>
+        <h2>Security Operations Center</h2>
+        <p>Real-time audit log ledger, live threat scoring, ACID SQLite database inspector, and emergency user lock/unlock controls.</p>
+        <span class="card-action">Open SOC Telemetry &rarr;</span>
+      </a>
+
+      <!-- 4. API DOCS -->
+      <a href="http://127.0.0.1:8000/docs" target="_blank" class="card api" id="link-api">
+        <div class="card-icon">⚡</div>
+        <span class="card-badge badge-api">REST Engine</span>
+        <h2>OpenAPI Swagger Docs</h2>
+        <p>Interactive REST API documentation for <span class="mono">POST /api/login</span>, risk scoring algorithms, and SMTP notification relays.</p>
+        <span class="card-action">View Swagger Docs &rarr;</span>
+      </a>
+    </div>
+
+    <footer class="backend-info">
+      <div>
+        <span>Active Server: </span>
+        <strong class="mono" id="server-url">http://localhost:8000</strong>
+      </div>
+      <div>
+        <span>Quick Terminal Command: </span>
+        <span class="mono">python -m uvicorn main:app --port 8000</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Dynamically check backend connectivity
+    async function checkHealth() {
+      const dot = document.getElementById('server-status-dot');
+      const text = document.getElementById('server-status-text');
+      const host = window.location.hostname || '127.0.0.1';
+      const port = (window.location.port === '8000') ? '8000' : '8000';
+      const healthUrl = `http://${host}:${port}/api/health`;
+
+      try {
+        const res = await fetch(healthUrl, { method: 'GET', mode: 'cors' });
+        if (res.ok) {
+          const data = await res.json();
+          dot.style.background = '#10b981';
+          dot.style.boxShadow = '0 0 10px #10b981';
+          text.textContent = 'FastAPI Gateway Live (Port 8000)';
+          
+          // If accessing via the FastAPI server directly at root, redirect to landing
+          if (window.location.port === '8000' && window.location.pathname === '/') {
+            window.location.replace('/landing/');
+          }
+        } else {
+          dot.style.background = '#f59e0b';
+          text.textContent = 'Server reachable with warnings';
+        }
+      } catch (err) {
+        dot.style.background = '#f43f5e';
+        dot.style.boxShadow = '0 0 10px #f43f5e';
+        text.textContent = 'Connecting to backend...';
+      }
+    }
+
+    checkHealth();
+  </script>
+
+  <!-- Vite fallback script -->
+  <script type="module" src="/src/main.jsx"></script>
+</body>
 </html>

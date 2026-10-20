@@ -62,7 +62,7 @@ def get_stats(db: Session = Depends(get_db)):
         (models.LoginEvent.action == "block") | (models.LoginEvent.decision == "restrict")
     ).count()
     challenged = db.query(models.LoginEvent).filter(
-        (models.LoginEvent.action.in_(["captcha", "email_otp", "otp_password_reset"])) |
+        (models.LoginEvent.action.in_(["captcha", "email_otp", "quarantine_verify", "otp_password_reset"])) |
         (models.LoginEvent.decision == "step_up")
     ).count()
     allowed = db.query(models.LoginEvent).filter(
@@ -124,5 +124,7 @@ def unlock_user(email: str, db: Session = Depends(get_db)):
 def reset_demo_data(db: Session = Depends(get_db)):
     """Wipes events and resets clean seed data for the 4-minute live demo."""
     import seed
+    from routers.auth import CONSECUTIVE_UNRECOGNIZED_ATTEMPTS
+    CONSECUTIVE_UNRECOGNIZED_ATTEMPTS.clear()
     seed.seed_database(db, wipe=True)
     return {"message": "Demo data reset successfully to clean pristine state."}

@@ -78,13 +78,13 @@ def run_full_simulation():
         is_vpn=False,
     )
     lat2 = round((time.perf_counter() - t0) * 1000.0, 2)
-    s2_pass = r2.score == 35 and r2.action in ["captcha", "email_otp"]
+    s2_pass = r2.score == 45 and r2.action == "email_otp"
     results.append({
         "scenario": "2. First-Time Device Login",
         "app": "Apex Bank",
         "user": "alice@example.com",
         "context": "Delhi, IN • Unrecognized Mobile • 10:00 UTC",
-        "expected": "Step-Up Challenge (CAPTCHA/OTP)",
+        "expected": "Tier 3: Step-Up MFA & Device Trust (Email OTP)",
         "score": r2.score,
         "action": r2.action,
         "latency_ms": lat2,

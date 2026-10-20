@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from database import Base, engine, SessionLocal
 import models
-from routers import auth, events, dashboard
+from routers import auth, events, dashboard, db_inspector
 import seed
 
 RETENTION_DAYS = 30
@@ -67,6 +67,7 @@ from fastapi.responses import RedirectResponse
 app.include_router(auth.router)
 app.include_router(events.router)
 app.include_router(dashboard.router)
+app.include_router(db_inspector.router)
 
 
 @app.get("/api/health")
@@ -74,13 +75,23 @@ def health():
     return {"status": "ok", "project": "ps05-adaptive-auth"}
 
 
-# Serve static dashboard and frontend application
+# Serve static landing page, dashboard, and frontend applications
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
+landing_dir = os.path.join(frontend_dir, "landing")
 dashboard_dir = os.path.join(frontend_dir, "dashboard")
 
+# Mount Dashboard (Interactive Gateway & SOC Feed)
 if os.path.exists(dashboard_dir):
     app.mount("/dashboard", StaticFiles(directory=dashboard_dir, html=True), name="dashboard")
 
+# Mount Landing Page (PS05 Product & Solution Showcase)
+if os.path.exists(landing_dir):
+    app.mount("/landing", StaticFiles(directory=landing_dir, html=True), name="landing")
+
+    @app.get("/")
+    def root():
+        return RedirectResponse(url="/landing")
+elif os.path.exists(dashboard_dir):
     @app.get("/")
     def root():
         return RedirectResponse(url="/dashboard")

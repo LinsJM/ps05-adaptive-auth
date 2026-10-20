@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   let currentFilter = 'all';
   let pollInterval = null;
+  const API_BASE = (window.location.protocol === 'file:') ? 'http://127.0.0.1:8000' : '';
 
   // DOM Elements - Metrics
   const statTotal = document.getElementById('stat-total');
@@ -51,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      await fetch('/api/login', {
+      await fetch(`${API_BASE}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function refreshSocData() {
     try {
       // 1. Fetch Stats
-      const statsRes = await fetch('/api/dashboard/stats');
+      const statsRes = await fetch(`${API_BASE}/api/dashboard/stats`);
       if (statsRes.ok) {
         const stats = await statsRes.json();
         if (statTotal) statTotal.textContent = stats.total_events || 0;
@@ -107,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 2. Fetch Events
       const url = currentFilter === 'all' 
-        ? '/api/dashboard/events?limit=40' 
-        : `/api/dashboard/events?app_id=${currentFilter}&limit=40`;
+        ? `${API_BASE}/api/dashboard/events?limit=40` 
+        : `${API_BASE}/api/dashboard/events?app_id=${currentFilter}&limit=40`;
       
       const eventsRes = await fetch(url);
       if (eventsRes.ok) {
@@ -137,13 +138,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const score = ev.score ?? 0;
 
       let tagClass = 'tag-allow';
-      let tagText = 'ALLOW';
       if (ev.action === 'block' || ev.decision === 'restrict' || score >= 80) {
         tagClass = 'tag-block';
         tagText = 'BLOCK';
-      } else if (ev.action !== 'allow' || score >= 30) {
-        tagClass = 'tag-stepup';
-        tagText = (ev.action || 'CHALLENGE').toUpperCase();
+      } else if (ev.action === 'quarantine_verify' || ev.action === 'otp_password_reset' || score >= 60) {
+        tagClass = 'tag-reset';
+        tagText = 'QUARANTINE';
+      } else if (ev.action === 'email_otp' || score >= 45) {
+        tagClass = 'tag-otp';
+        tagText = 'EMAIL OTP';
+      } else if (ev.action === 'captcha' || score >= 30) {
+        tagClass = 'tag-captcha';
+        tagText = 'CAPTCHA';
+      } else {
+        tagClass = 'tag-allow';
+        tagText = 'ALLOW';
       }
 
       const reasonsSnippet = (ev.reasons || []).map(r => {
@@ -188,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = inputLockEmail.value.trim();
       if (!email) return;
       try {
-        const res = await fetch(`/api/dashboard/user/${encodeURIComponent(email)}/lock`, { method: 'POST' });
+        const res = await fetch(`${API_BASE}/api/dashboard/user/${encodeURIComponent(email)}/lock`, { method: 'POST' });
         if (res.ok) {
           lockFeedback.textContent = `Account ${email} locked.`;
           lockFeedback.style.color = '#DC2626';
@@ -205,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = inputLockEmail.value.trim();
       if (!email) return;
       try {
-        const res = await fetch(`/api/dashboard/user/${encodeURIComponent(email)}/unlock`, { method: 'POST' });
+        const res = await fetch(`${API_BASE}/api/dashboard/user/${encodeURIComponent(email)}/unlock`, { method: 'POST' });
         if (res.ok) {
           lockFeedback.textContent = `Account ${email} unlocked.`;
           lockFeedback.style.color = '#16A34A';
@@ -220,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Reset Demo State from SOC
   window.handleSocReset = async function() {
     try {
-      await fetch('/api/dashboard/reset-demo', { method: 'POST' });
+      await fetch(`${API_BASE}/api/dashboard/reset-demo`, { method: 'POST' });
       refreshSocData();
     } catch (err) {
       console.error('Reset error:', err);
@@ -237,9 +246,178 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#039;');
   }
 
+  // -------------------------------------------------------------
+  // Real Database Explorer (ACID SQL Schema & Table Inspector)
+  // -------------------------------------------------------------
+  const tabBtnStream = document.getElementById('tab-btn-stream');
+  const tabBtnDb = document.getElementById('tab-btn-db');
+  const socViewStream = document.getElementById('soc-view-stream');
+  const socViewDatabase = document.getElementById('soc-view-database');
+
+  const dbEngineName = document.getElementById('db-engine-name');
+  const dbLocationMeta = document.getElementById('db-location-meta');
+  const dbFileSize = document.getElementById('db-file-size');
+  const dbCountUsers = document.getElementById('db-count-users');
+  const dbCountLogins = document.getElementById('db-count-logins');
+  const dbCountDevices = document.getElementById('db-count-devices');
+  const dbCountFlagged = document.getElementById('db-count-flagged');
+
+  const dbTableTabs = document.querySelectorAll('.db-table-tab');
+  const dbSearchFilter = document.getElementById('db-search-filter');
+  const btnRefreshDb = document.getElementById('btn-refresh-db');
+  const dbTableThead = document.getElementById('db-table-thead');
+  const dbTableTbody = document.getElementById('db-table-tbody');
+
+  let currentDbTable = 'users';
+  let cachedTableData = null;
+
+  function setSocView(viewName) {
+    if (viewName === 'database') {
+      tabBtnStream?.classList.remove('active');
+      tabBtnDb?.classList.add('active');
+      socViewStream?.classList.add('hidden');
+      socViewDatabase?.classList.remove('hidden');
+      refreshDatabaseExplorer();
+    } else {
+      tabBtnDb?.classList.remove('active');
+      tabBtnStream?.classList.add('active');
+      socViewDatabase?.classList.add('hidden');
+      socViewStream?.classList.remove('hidden');
+      refreshSocData();
+    }
+  }
+
+  if (tabBtnStream) tabBtnStream.addEventListener('click', () => setSocView('stream'));
+  if (tabBtnDb) tabBtnDb.addEventListener('click', () => setSocView('database'));
+
+  async function refreshDatabaseExplorer() {
+    try {
+      // 1. Fetch Status & Table Counts
+      const statusRes = await fetch(`${API_BASE}/api/database/status`);
+      if (statusRes.ok) {
+        const status = await statusRes.json();
+        if (dbEngineName) dbEngineName.textContent = status.engine || 'SQLite 3.42 (Local ACID Engine)';
+        if (dbLocationMeta) dbLocationMeta.textContent = status.database_location || 'adaptive_auth.db';
+        if (dbFileSize) dbFileSize.textContent = status.file_size_formatted || '68.0 KB';
+
+        if (status.tables) {
+          if (dbCountUsers) dbCountUsers.textContent = status.tables.users ?? 0;
+          if (dbCountLogins) dbCountLogins.textContent = status.tables.login_events ?? 0;
+          if (dbCountDevices) dbCountDevices.textContent = status.tables.known_devices ?? 0;
+          if (dbCountFlagged) dbCountFlagged.textContent = status.tables.flagged_ips ?? 0;
+        }
+      }
+
+      // 2. Fetch Selected Table Rows
+      await loadTableRows(currentDbTable);
+    } catch (err) {
+      console.error('Error refreshing database explorer:', err);
+    }
+  }
+
+  async function loadTableRows(tableName) {
+    if (!dbTableTbody) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/database/table/${encodeURIComponent(tableName)}?limit=100`);
+      if (res.ok) {
+        cachedTableData = await res.json();
+        renderTableRows(cachedTableData, dbSearchFilter?.value || '');
+      } else {
+        dbTableTbody.innerHTML = `<tr><td colspan="8" class="table-empty text-danger">Failed to load table ${escapeHtml(tableName)}</td></tr>`;
+      }
+    } catch (err) {
+      console.error('Error loading table rows:', err);
+    }
+  }
+
+  function renderTableRows(tableData, filterKeyword) {
+    if (!tableData || !dbTableThead || !dbTableTbody) return;
+
+    const cols = tableData.columns || [];
+    const rows = tableData.rows || [];
+    const keyword = (filterKeyword || '').trim().toLowerCase();
+
+    // Render Columns
+    dbTableThead.innerHTML = `<tr>${cols.map(c => `<th>${escapeHtml(c.replace(/_/g, ' '))}</th>`).join('')}</tr>`;
+
+    // Filter Rows
+    const filtered = rows.filter(r => {
+      if (!keyword) return true;
+      return Object.values(r).some(val => String(val || '').toLowerCase().includes(keyword));
+    });
+
+    if (filtered.length === 0) {
+      dbTableTbody.innerHTML = `<tr><td colspan="${cols.length}" class="table-empty">No matching records found in table '${escapeHtml(tableData.table)}'.</td></tr>`;
+      return;
+    }
+
+    dbTableTbody.innerHTML = filtered.map(row => {
+      const isJudge = String(row.email || row.email_attempted || row.device_id || '').toLowerCase().includes('judge');
+      const rowClass = isJudge ? 'highlight-judge' : '';
+
+      const cells = cols.map(c => {
+        let val = row[c];
+        if (val === null || val === undefined) return '<span style="color:var(--ink-faint);">NULL</span>';
+
+        if (c === 'created_at' || c === 'flagged_at' || c === 'first_seen_at' || c === 'last_seen_at') {
+          return `<span style="font-size:0.65rem;">${new Date(val).toLocaleString()}</span>`;
+        }
+
+        if (c === 'password_hash') {
+          return `<span style="color:#0284C7; font-weight:700; font-size:0.65rem;">${escapeHtml(val)}</span>`;
+        }
+
+        if (c === 'is_locked') {
+          return val ? '<span class="badge-db-locked">LOCKED</span>' : '<span class="badge-db-active">ACTIVE</span>';
+        }
+
+        if (c === 'trusted') {
+          return val ? '<span class="badge-db-active">TRUE</span>' : '<span class="badge-db-locked">FALSE</span>';
+        }
+
+        if (c === 'success') {
+          return val ? '<span class="badge-db-active">SUCCESS</span>' : '<span class="badge-db-locked">FAILED</span>';
+        }
+
+        return escapeHtml(String(val));
+      }).join('</td><td>');
+
+      return `<tr class="${rowClass}"><td>${cells}</td></tr>`;
+    }).join('');
+  }
+
+  // Hook Table Tabs
+  dbTableTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      dbTableTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentDbTable = tab.dataset.table || 'users';
+      loadTableRows(currentDbTable);
+    });
+  });
+
+  // Search Filter in DB Explorer
+  if (dbSearchFilter) {
+    dbSearchFilter.addEventListener('input', () => {
+      if (cachedTableData) {
+        renderTableRows(cachedTableData, dbSearchFilter.value);
+      }
+    });
+  }
+
+  if (btnRefreshDb) {
+    btnRefreshDb.addEventListener('click', refreshDatabaseExplorer);
+  }
+
   // Initial load & Polling (every 2.5s)
   refreshSocData();
-  pollInterval = setInterval(refreshSocData, 2500);
+  pollInterval = setInterval(() => {
+    if (socViewStream && !socViewStream.classList.contains('hidden')) {
+      refreshSocData();
+    } else if (socViewDatabase && !socViewDatabase.classList.contains('hidden')) {
+      refreshDatabaseExplorer();
+    }
+  }, 2500);
 
   window.addEventListener('beforeunload', () => {
     if (pollInterval) clearInterval(pollInterval);

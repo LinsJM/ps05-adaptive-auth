@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentFilter = 'all';
   let activeChallenge = null;
   let lastScore = 0;
+  const API_BASE = (window.location.protocol === 'file:') ? 'http://127.0.0.1:8000' : '';
 
   // DOM Elements - Header Navigation & Telemetry
   const globalLatencyVal = document.getElementById('global-latency-val');
@@ -79,6 +80,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const emailModalLoc = document.getElementById('email-modal-loc');
   const emailModalIp = document.getElementById('email-modal-ip');
   const btnModalUseCode = document.getElementById('btn-modal-use-code');
+
+  // DOM Elements - Target Enrollment Modal
+  const btnOpenEnrollModal = document.getElementById('btn-open-enroll-modal');
+  const targetModalBackdrop = document.getElementById('target-modal-backdrop');
+  const btnCloseTargetModal = document.getElementById('btn-close-target-modal');
+  const btnCancelTargetModal = document.getElementById('btn-cancel-target-modal');
+  const btnSubmitEnrollTarget = document.getElementById('btn-submit-enroll-target');
+  const inputTargetEmail = document.getElementById('input-target-email');
+  const inputTargetDevice = document.getElementById('input-target-device');
+  const inputTargetPassword = document.getElementById('input-target-password');
+
+  // DOM Elements - SMTP Settings Modal
+  const btnOpenSmtp = document.getElementById('btn-open-smtp');
+  const smtpModalBackdrop = document.getElementById('smtp-modal-backdrop');
+  const btnCloseSmtpModal = document.getElementById('btn-close-smtp-modal');
+  const btnSaveSmtp = document.getElementById('btn-save-smtp');
+  const btnTestSmtp = document.getElementById('btn-test-smtp');
+  const inputSmtpHost = document.getElementById('input-smtp-host');
+  const inputSmtpPort = document.getElementById('input-smtp-port');
+  const inputSmtpUser = document.getElementById('input-smtp-user');
+  const inputSmtpPass = document.getElementById('input-smtp-pass');
+  const inputSmtpFrom = document.getElementById('input-smtp-from');
+  const smtpStatusFeedback = document.getElementById('smtp-status-feedback');
 
   function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -198,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. API Communication
   // -------------------------------------------------------------
   async function apiLogin(payload) {
-    const res = await fetch('/api/login', {
+    const res = await fetch(`${API_BASE}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -207,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function apiVerifyPrompt(payload) {
-    const res = await fetch('/api/verify-prompt', {
+    const res = await fetch(`${API_BASE}/api/verify-prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -216,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function apiVerifyStepUp(payload) {
-    const res = await fetch('/api/verify-stepup', {
+    const res = await fetch(`${API_BASE}/api/verify-stepup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -225,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function apiResetDemo() {
-    const res = await fetch('/api/dashboard/reset-demo', { method: 'POST' });
+    const res = await fetch(`${API_BASE}/api/dashboard/reset-demo`, { method: 'POST' });
     return await res.json();
   }
 
@@ -330,24 +354,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (action === 'block' || decision === 'restrict' || score >= 80) {
       bannerDecisionBadge.classList.add('badge-block');
-      bannerDecisionBadge.textContent = 'BLOCK & LOCK (80–100)';
-      bannerHeadline.textContent = 'Intrusion Blocked • Account Locked';
-    } else if (action === 'otp_password_reset' || score >= 61) {
+      bannerDecisionBadge.textContent = 'BLOCK & ADVISORY (80–100)';
+      bannerHeadline.textContent = 'Intrusion Blocked • Breach Alert Dispatched';
+    } else if (action === 'quarantine_verify' || action === 'otp_password_reset' || score >= 60) {
       bannerDecisionBadge.classList.add('badge-reset');
-      bannerDecisionBadge.textContent = 'RESET REQUIRED (61–79)';
-      bannerHeadline.textContent = 'Suspicious Login • OTP & Reset';
+      bannerDecisionBadge.textContent = 'SESSION QUARANTINE (60–79)';
+      bannerHeadline.textContent = 'High-Risk Anomaly • Out-of-Band Approval';
     } else if (action === 'email_otp' || score >= 45) {
       bannerDecisionBadge.classList.add('badge-otp');
-      bannerDecisionBadge.textContent = 'EMAIL OTP (45–60)';
-      bannerHeadline.textContent = 'Step-Up MFA Required';
+      bannerDecisionBadge.textContent = 'EMAIL OTP & TRUST (45–59)';
+      bannerHeadline.textContent = 'Step-Up MFA & Device Enrollment';
     } else if (action === 'captcha' || score >= 30) {
       bannerDecisionBadge.classList.add('badge-captcha');
       bannerDecisionBadge.textContent = 'CAPTCHA (30–44)';
-      bannerHeadline.textContent = 'Light Friction Challenge';
+      bannerHeadline.textContent = 'Human Presence Bot Verification';
     } else {
       bannerDecisionBadge.classList.add('badge-allow');
       bannerDecisionBadge.textContent = 'ALLOW (0–29)';
-      bannerHeadline.textContent = 'Frictionless Sign-In Approved';
+      bannerHeadline.textContent = 'Frictionless Sign-In Approved (<10ms)';
     }
   }
 
@@ -430,37 +454,49 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!mailToastContainer) return;
 
     const toast = document.createElement('div');
-    toast.className = `mail-toast ${type === 'threat' ? 'mail-toast-threat' : ''}`;
+    const isThreat = type === 'threat';
+    const isQuarantine = type === 'quarantine';
+    toast.className = `mail-toast ${isThreat ? 'mail-toast-threat' : (isQuarantine ? 'mail-toast-quarantine' : '')}`;
 
     const appName = app === 'bank' ? 'Apex Trust Bank' : 'Pulse Social';
-    const isThreat = type === 'threat';
+
+    let senderBadge = '✉️ DIGNITAS IDENTITY MAIL';
+    let subjectText = '🔐 Your Single-Use Sign-In Passcode';
+    let snippetHtml = `Authentication challenge for <strong>${escapeHtml(appName)}</strong>. Enter the 6-digit code below to verify your login and trust this device.`;
+
+    if (isThreat) {
+      senderBadge = '🚨 DIGNITAS INTRUSION MITIGATOR';
+      subjectText = '🚨 Critical Security Alert: Suspicious sign-in blocked';
+      snippetHtml = `Blocked unauthorized sign-in on <strong>${escapeHtml(appName)}</strong> for <code>${escapeHtml(email)}</code> from IP <code>${escapeHtml(ip || '185.220.101.5')}</code>.<br><br>⚠️ <strong>Password Compromised:</strong> The intruder possessed your correct password. We blocked them, but please reset your password immediately.`;
+    } else if (isQuarantine) {
+      senderBadge = '⚠️ DIGNITAS SESSION QUARANTINE';
+      subjectText = '⚠️ Urgent Security Notice: Unusual sign-in quarantined';
+      snippetHtml = `Unusual sign-in from <code>${escapeHtml(loc || 'Foreign')}</code> (IP <code>${escapeHtml(ip || 'Unknown')}</code>). High-risk anomaly detected. This session is in <strong>Quarantine</strong>. Out-of-band email approval required.`;
+    }
 
     toast.innerHTML = `
       <div class="mail-toast-header">
         <div class="toast-sender-badge">
-          ${isThreat ? '🚨' : '✉️'} ${isThreat ? 'DIGNITAS INTRUSION MITIGATOR' : 'DIGNITAS IDENTITY MAIL'}
+          ${senderBadge}
         </div>
         <button class="toast-btn-close" title="Dismiss notification">✕</button>
       </div>
       <div class="mail-toast-body">
-        <div class="toast-subject">${isThreat ? '🚨 Intrusion Intercepted & Account Locked' : '🔐 Your Single-Use Sign-In Passcode'}</div>
+        <div class="toast-subject">${subjectText}</div>
         <div class="toast-snippet">
-          ${isThreat
-            ? `Blocked suspicious access attempt on <strong>${escapeHtml(appName)}</strong> for <code>${escapeHtml(email)}</code> from IP <code>${escapeHtml(ip || '185.220.101.5')}</code>.`
-            : `Authentication challenge for <strong>${escapeHtml(appName)}</strong>. Enter the 6-digit code below to verify your login.`
-          }
+          ${snippetHtml}
         </div>
         ${!isThreat && otp ? `
           <div class="toast-passcode-callout">
             <span class="toast-passcode-value">${escapeHtml(otp)}</span>
-            <button class="toast-btn-copy" id="toast-btn-copy-action">📋 Copy Passcode</button>
+            <button class="toast-btn-copy" id="toast-btn-copy-action">${isQuarantine ? '✓ Approve Session' : '📋 Copy Passcode'}</button>
           </div>
         ` : ''}
       </div>
       <div class="mail-toast-footer">
         <span class="toast-time">Just now</span>
         <div class="toast-actions-right">
-          ${!isThreat ? `<button class="toast-btn-view" id="toast-btn-view-action">✉️ View Email</button>` : `<a href="soc.html" class="toast-btn-view" style="text-decoration:none;">Inspect SOC →</a>`}
+          ${!isThreat ? `<button class="toast-btn-view" id="toast-btn-view-action">✉️ View Email</button>` : `<a href="soc.html" class="toast-btn-view" style="text-decoration:none;">Inspect SOC Feed →</a>`}
         </div>
       </div>
     `;
@@ -479,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (navigator.clipboard) {
             navigator.clipboard.writeText(otp).catch(() => {});
           }
-          copyBtn.textContent = '✓ Copied & Filled!';
+          copyBtn.textContent = isQuarantine ? '✓ Approved!' : '✓ Copied & Filled!';
           copyBtn.style.background = '#15803D';
           fillAndSubmitOtp(otp);
         });
@@ -553,6 +589,396 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       submitOtpVerification(otp);
     }
+  }
+
+  // -------------------------------------------------------------
+  // 5AA. Web Audio API Notification Synthesizer (Zero-Asset Apple Chime)
+  // -------------------------------------------------------------
+  function playNotificationChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const now = ctx.currentTime;
+
+      // Note 1: E6 (~1318.5 Hz)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(1318.5, now);
+      gain1.gain.setValueAtTime(0.2, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.35);
+
+      // Note 2: B6 (~1975.5 Hz)
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1975.5, now + 0.08);
+      gain2.gain.setValueAtTime(0.26, now + 0.08);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.08);
+      osc2.stop(now + 0.55);
+    } catch (e) {
+      console.warn('Notification chime error:', e);
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 5AB. Smartphone Simulator (iPhone 15 Pro) Controller
+  // -------------------------------------------------------------
+  const deliveryModePill = document.getElementById('delivery-mode-pill');
+  const deliveryModeText = document.getElementById('delivery-mode-text');
+  const btnTogglePhone = document.getElementById('btn-toggle-phone');
+  const phoneSimulatorDrawer = document.getElementById('phone-simulator-drawer');
+  const btnClosePhone = document.getElementById('btn-close-phone');
+  const phoneClockStatus = document.getElementById('phone-clock-status');
+  const phoneLockClock = document.getElementById('phone-lock-clock');
+  const phoneLockDate = document.getElementById('phone-lock-date');
+  const phoneViewLock = document.getElementById('phone-view-lock');
+  const phoneViewGmail = document.getElementById('phone-view-gmail');
+  const phonePushNotification = document.getElementById('phone-push-notification');
+  const pushTitle = document.getElementById('push-title');
+  const pushBody = document.getElementById('push-body');
+  const pushOtpHighlight = document.getElementById('push-otp-highlight');
+  const btnGmailBack = document.getElementById('btn-gmail-back');
+  const phoneGmailSubject = document.getElementById('phone-gmail-subject');
+  const gmailToAddr = document.getElementById('gmail-to-addr');
+  const gmailOtpDigits = document.getElementById('gmail-otp-digits');
+  const phoneSpecApp = document.getElementById('phone-spec-app');
+  const phoneSpecDevice = document.getElementById('phone-spec-device');
+  const phoneSpecLoc = document.getElementById('phone-spec-loc');
+  const btnPhoneAutofill = document.getElementById('btn-phone-autofill');
+
+  let currentPhoneOtp = '849201';
+
+  function updatePhoneClock() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const timeStr = `${hours}:${mins}`;
+    if (phoneClockStatus) phoneClockStatus.textContent = timeStr;
+    if (phoneLockClock) phoneLockClock.textContent = timeStr;
+
+    const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    if (phoneLockDate) phoneLockDate.textContent = now.toLocaleDateString('en-US', options);
+  }
+  updatePhoneClock();
+  setInterval(updatePhoneClock, 30000);
+
+  function setPhoneDeliveryMode(mode) {
+    if (!deliveryModePill || !deliveryModeText) return;
+    if (mode === 'live_smtp' || mode === 'smtp') {
+      deliveryModePill.classList.add('mode-live');
+      deliveryModeText.textContent = 'RELAY: LIVE GMAIL';
+      deliveryModePill.title = 'Active Live SMTP: Outbound security alerts dispatch directly to user inbox';
+    } else {
+      deliveryModePill.classList.remove('mode-live');
+      deliveryModeText.textContent = 'RELAY: SIMULATOR';
+      deliveryModePill.title = 'Offline Simulation: Security alerts arrive on simulated iPhone 15 Pro';
+    }
+  }
+
+  async function checkInitialDeliveryMode() {
+    try {
+      const res = await fetch(`${API_BASE}/api/settings/smtp`);
+      if (res.ok) {
+        const data = await res.json();
+        setPhoneDeliveryMode(data.configured ? 'live_smtp' : 'simulated');
+      }
+    } catch (e) {}
+  }
+  checkInitialDeliveryMode();
+
+  function togglePhoneSimulator(forceOpen = null) {
+    if (!phoneSimulatorDrawer) return;
+    const shouldOpen = forceOpen !== null ? forceOpen : phoneSimulatorDrawer.classList.contains('hidden');
+    if (shouldOpen) {
+      phoneSimulatorDrawer.classList.remove('hidden');
+      if (btnTogglePhone) btnTogglePhone.classList.add('active');
+    } else {
+      phoneSimulatorDrawer.classList.add('hidden');
+      if (btnTogglePhone) btnTogglePhone.classList.remove('active');
+    }
+  }
+
+  if (btnTogglePhone) {
+    btnTogglePhone.addEventListener('click', () => togglePhoneSimulator());
+  }
+
+  if (btnClosePhone) {
+    btnClosePhone.addEventListener('click', () => togglePhoneSimulator(false));
+  }
+
+  if (phonePushNotification) {
+    phonePushNotification.addEventListener('click', () => {
+      if (phoneViewLock) phoneViewLock.classList.add('hidden');
+      if (phoneViewGmail) phoneViewGmail.classList.remove('hidden');
+    });
+  }
+
+  if (btnGmailBack) {
+    btnGmailBack.addEventListener('click', () => {
+      if (phoneViewGmail) phoneViewGmail.classList.add('hidden');
+      if (phoneViewLock) phoneViewLock.classList.remove('hidden');
+    });
+  }
+
+  if (btnPhoneAutofill) {
+    btnPhoneAutofill.addEventListener('click', () => {
+      btnPhoneAutofill.textContent = '✓ Auto-Filled & Verifying...';
+      btnPhoneAutofill.style.background = '#15803D';
+      fillAndSubmitOtp(currentPhoneOtp);
+      setTimeout(() => {
+        btnPhoneAutofill.textContent = '📋 Auto-Fill Passcode on Laptop';
+        btnPhoneAutofill.style.background = '#2563EB';
+      }, 2500);
+    });
+  }
+
+  function triggerPhoneSimulatorAlert({ email, otp, app, device, loc, ip, deliveryMode }) {
+    currentPhoneOtp = otp || '849201';
+
+    if (deliveryMode) setPhoneDeliveryMode(deliveryMode);
+
+    const appDisplayName = app === 'bank' ? 'Apex Trust Bank' : 'Pulse Social';
+    if (pushTitle) pushTitle.textContent = `🔐 ${appDisplayName} / DIGNITAS Alert`;
+    if (pushOtpHighlight) pushOtpHighlight.textContent = currentPhoneOtp;
+    if (pushBody) {
+      pushBody.innerHTML = `Your sign-in passcode is <strong class="push-code-highlight">${escapeHtml(currentPhoneOtp)}</strong> (valid 5 min). Unrecognized device detected in ${escapeHtml(loc || 'Delhi, IN')}.`;
+    }
+
+    if (gmailToAddr) gmailToAddr.textContent = email || 'judge@gmail.com';
+    if (gmailOtpDigits) {
+      const spaced = String(currentPhoneOtp).split('').join(' ');
+      gmailOtpDigits.textContent = spaced;
+    }
+    if (phoneSpecApp) phoneSpecApp.textContent = appDisplayName;
+    if (phoneSpecDevice) phoneSpecDevice.textContent = device || 'dev-demo-laptop-unrecognized';
+    if (phoneSpecLoc) phoneSpecLoc.textContent = loc || 'Delhi, India';
+
+    if (phoneViewLock) phoneViewLock.classList.remove('hidden');
+    if (phoneViewGmail) phoneViewGmail.classList.add('hidden');
+
+    if (phonePushNotification) {
+      phonePushNotification.style.animation = 'none';
+      void phonePushNotification.offsetWidth;
+      phonePushNotification.style.animation = 'pushBannerDrop 0.45s cubic-bezier(0.16, 1, 0.3, 1)';
+    }
+
+    togglePhoneSimulator(true);
+    playNotificationChime();
+  }
+
+  // -------------------------------------------------------------
+  // 5B. Target Enrollment (Judge Account) & SMTP Modal Handlers
+  // -------------------------------------------------------------
+  function openTargetModal() {
+    if (targetModalBackdrop) {
+      targetModalBackdrop.classList.remove('hidden');
+      if (inputTargetEmail) {
+        inputTargetEmail.focus();
+      }
+    }
+  }
+
+  function closeTargetModal() {
+    if (targetModalBackdrop) {
+      targetModalBackdrop.classList.add('hidden');
+    }
+  }
+
+  if (btnOpenEnrollModal) {
+    btnOpenEnrollModal.addEventListener('click', openTargetModal);
+  }
+  if (btnCloseTargetModal) {
+    btnCloseTargetModal.addEventListener('click', closeTargetModal);
+  }
+  if (btnCancelTargetModal) {
+    btnCancelTargetModal.addEventListener('click', closeTargetModal);
+  }
+  if (targetModalBackdrop) {
+    targetModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === targetModalBackdrop) closeTargetModal();
+    });
+  }
+
+  async function handleEnrollTarget() {
+    const email = (inputTargetEmail.value || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid judge email address (e.g. judge@gmail.com)');
+      return;
+    }
+    const phoneName = (inputTargetDevice.value || '').trim() || "Judge's Primary Smartphone (iPhone / Pixel)";
+    const pass = (inputTargetPassword.value || '').trim() || "JudgePass2026!";
+
+    btnSubmitEnrollTarget.disabled = true;
+    btnSubmitEnrollTarget.textContent = 'Enrolling Target in SQL DB...';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/enroll-target`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          phone_device_name: phoneName,
+          trusted_phone_id: 'judge-primary-phone',
+          password: pass
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        // Set input fields for judge
+        inputEmail.value = email;
+        inputPassword.value = pass;
+
+        // Configure client telemetry: Laptop is UNRECOGNIZED hardware mismatch!
+        ctxDevice.value = 'dev-demo-laptop-unrecognized';
+        ctxIp.value = '103.21.244.2';
+        ctxCity.value = 'Delhi';
+        ctxCountry.value = 'IN';
+        ctxHour.value = 10;
+        ctxMins.value = '';
+        ctxVpn.checked = false;
+        updateTelemetrySummary();
+
+        closeTargetModal();
+
+        // Inform user & automatically trigger Attempt 1: Laptop tries to access Judge's account
+        bannerHeadline.textContent = 'Target Enrolled — Live Attack Evaluated';
+        setTimeout(() => {
+          executeLoginEvaluation(email, pass);
+        }, 300);
+      } else {
+        alert(data.detail || 'Could not enroll target');
+      }
+    } catch (err) {
+      console.error('Target enrollment failed:', err);
+      alert('Failed to enroll target account');
+    } finally {
+      btnSubmitEnrollTarget.disabled = false;
+      btnSubmitEnrollTarget.textContent = '🎯 Enroll & Setup Demo Laptop as Attacker';
+    }
+  }
+
+  if (btnSubmitEnrollTarget) {
+    btnSubmitEnrollTarget.addEventListener('click', handleEnrollTarget);
+  }
+
+  // SMTP Settings Handlers
+  async function openSmtpModal() {
+    if (!smtpModalBackdrop) return;
+    smtpModalBackdrop.classList.remove('hidden');
+    if (smtpStatusFeedback) smtpStatusFeedback.textContent = 'Loading SMTP settings...';
+    try {
+      const res = await fetch(`${API_BASE}/api/settings/smtp`);
+      if (res.ok) {
+        const data = await res.json();
+        if (inputSmtpHost) inputSmtpHost.value = data.smtp_host || 'smtp.gmail.com';
+        if (inputSmtpPort) inputSmtpPort.value = data.smtp_port || 587;
+        if (inputSmtpUser) inputSmtpUser.value = data.smtp_user || '';
+        if (inputSmtpFrom) inputSmtpFrom.value = data.smtp_from || '';
+        if (smtpStatusFeedback) {
+          smtpStatusFeedback.innerHTML = data.configured
+            ? `<span style="color:#16A34A;">● Active Mode: ${escapeHtml(data.mode)} (${escapeHtml(data.smtp_user)})</span>`
+            : `<span style="color:#D97706;">● Fallback Mode: ${escapeHtml(data.mode)} (Set Gmail + App Password to enable live inbox delivery)</span>`;
+        }
+      }
+    } catch (err) {
+      if (smtpStatusFeedback) smtpStatusFeedback.textContent = 'Could not load SMTP settings';
+    }
+  }
+
+  function closeSmtpModal() {
+    if (smtpModalBackdrop) smtpModalBackdrop.classList.add('hidden');
+  }
+
+  if (btnOpenSmtp) btnOpenSmtp.addEventListener('click', openSmtpModal);
+  if (btnCloseSmtpModal) btnCloseSmtpModal.addEventListener('click', closeSmtpModal);
+  if (smtpModalBackdrop) {
+    smtpModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === smtpModalBackdrop) closeSmtpModal();
+    });
+  }
+
+  if (btnSaveSmtp) {
+    btnSaveSmtp.addEventListener('click', async () => {
+      const host = inputSmtpHost.value.trim();
+      const port = parseInt(inputSmtpPort.value.trim(), 10) || 587;
+      const user = inputSmtpUser.value.trim();
+      const pass = inputSmtpPass.value.trim();
+      const fromAddr = inputSmtpFrom.value.trim();
+
+      if (!host || !user || !pass) {
+        alert('Please fill in SMTP Host, Username/Email, and App Password');
+        return;
+      }
+
+      btnSaveSmtp.disabled = true;
+      btnSaveSmtp.textContent = 'Saving...';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/settings/smtp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            smtp_host: host,
+            smtp_port: port,
+            smtp_user: user,
+            smtp_pass: pass,
+            smtp_from: fromAddr || user
+          })
+        });
+        const data = await res.json();
+        if (smtpStatusFeedback) {
+          smtpStatusFeedback.innerHTML = `<span style="color:#16A34A;">✓ Configuration saved! Real email delivery active.</span>`;
+        }
+        setTimeout(closeSmtpModal, 1200);
+      } catch (err) {
+        alert('Failed to save SMTP configuration');
+      } finally {
+        btnSaveSmtp.disabled = false;
+        btnSaveSmtp.textContent = 'Save Configuration';
+      }
+    });
+  }
+
+  if (btnTestSmtp) {
+    btnTestSmtp.addEventListener('click', async () => {
+      const recipient = inputTargetEmail?.value.trim() || inputEmail?.value.trim() || inputSmtpUser?.value.trim();
+      if (!recipient) {
+        alert('Please specify an email address to test delivery');
+        return;
+      }
+      btnTestSmtp.disabled = true;
+      btnTestSmtp.textContent = 'Sending test...';
+      try {
+        const res = await fetch(`${API_BASE}/api/settings/test-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipient })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`Test email successfully delivered to ${recipient}! Check your inbox or phone.`);
+        } else {
+          alert(`Delivery notice: ${data.message}`);
+        }
+      } catch (err) {
+        alert('Error connecting to SMTP dispatch test');
+      } finally {
+        btnTestSmtp.disabled = false;
+        btnTestSmtp.textContent = '✉️ Send Test Dispatch';
+      }
+    });
   }
 
   function handleChallengeDisplay(data, email) {
@@ -631,10 +1057,20 @@ document.addEventListener('DOMContentLoaded', () => {
       otp_code: otpCode
     };
 
-    // SUB-CASE 3A: Cloudflare Turnstile CAPTCHA (Score 30-44)
+    // SUB-CASE 3A: Cloudflare Turnstile CAPTCHA (Score 30-44 or Repeated Attempts)
     if (data.action === 'captcha' || data.step_up_type === 'captcha') {
       if (activeChallengeType) activeChallengeType.textContent = 'CLOUDFLARE TURNSTILE CAPTCHA';
+      
+      const isRepeatedAttempt = data.score >= 50 || (data.reasons && data.reasons.some(r => (r.signal || '').includes('attempt') || (r.detail || '').includes('Multiple')));
+      const anomalyBanner = isRepeatedAttempt ? `
+        <div class="captcha-anomaly-warning">
+          <span>⚠️</span>
+          <span><strong>Security Anomaly:</strong> Multiple failed sign-ins detected for this account. Human presence verification (Cloudflare Turnstile) enforced.</span>
+        </div>
+      ` : '';
+
       activeChallengeContent.innerHTML = `
+        ${anomalyBanner}
         <div class="turnstile-card" id="turnstile-widget" tabindex="0" role="button" aria-label="Verify you are human">
           <div class="turnstile-checkbox" id="turnstile-box">
             <span class="turnstile-spinner" id="turnstile-spin"></span>
@@ -680,18 +1116,28 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // SUB-CASE 3B: Segmented 6-Box Email OTP / Password Reset (Score 45-79)
-    if (data.action === 'email_otp' || data.action === 'otp_password_reset' || data.step_up_type === 'email_otp' || data.step_up_type === 'otp_password_reset') {
-      const isReset = data.action === 'otp_password_reset' || data.step_up_type === 'otp_password_reset';
+    // SUB-CASE 3B: Segmented 6-Box Email OTP / Quarantine Approval (Score 45-79)
+    if (data.action === 'email_otp' || data.action === 'quarantine_verify' || data.action === 'otp_password_reset' || data.step_up_type === 'email_otp' || data.step_up_type === 'quarantine_verify' || data.step_up_type === 'otp_password_reset') {
+      const isQuarantine = data.action === 'quarantine_verify' || data.action === 'otp_password_reset' || data.step_up_type === 'quarantine_verify' || data.step_up_type === 'otp_password_reset';
       if (activeChallengeType) {
-        activeChallengeType.textContent = isReset ? 'OTP & PASSWORD RESET REQUIRED' : '6-DIGIT EMAIL PASSCODE';
+        activeChallengeType.textContent = isQuarantine ? 'SESSION QUARANTINE • OUT-OF-BAND APPROVAL' : 'STEP-UP EMAIL OTP • DEVICE TRUST';
       }
+
+      const quarantineAlertBanner = isQuarantine ? `
+        <div class="quarantine-anomaly-warning" style="background:rgba(225,29,72,0.12); border:1px solid rgba(225,29,72,0.3); border-radius:8px; padding:10px 14px; margin-bottom:12px; display:flex; gap:8px; align-items:flex-start; font-size:0.82rem; color:#FB7185;">
+          <span>⚠️</span>
+          <span><strong>High-Risk Threat Intercepted:</strong> Impossible travel or proxy detected. This session has been placed in <strong>Quarantine</strong>. Out-of-band email authorization required.</span>
+        </div>
+      ` : `
+        <div class="device-trust-banner" style="background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.3); border-radius:8px; padding:10px 14px; margin-bottom:12px; display:flex; gap:8px; align-items:flex-start; font-size:0.82rem; color:#A5B4FC;">
+          <span>📱</span>
+          <span><strong>New Hardware Detected:</strong> Single-use passcode dispatched to <strong>${escapeHtml(email)}</strong>. Verifying will enroll this device into trusted baseline.</span>
+        </div>
+      `;
 
       activeChallengeContent.innerHTML = `
         <div class="otp-challenge-view">
-          <div class="otp-view-instruction">
-            Single-use verification passcode dispatched to <strong>${escapeHtml(email)}</strong>.
-          </div>
+          ${quarantineAlertBanner}
           <div class="otp-pin-wrap" id="otp-pin-container">
             <input type="text" class="pin-digit" maxlength="1" data-index="0" inputmode="numeric" autocomplete="one-time-code" autofocus>
             <input type="text" class="pin-digit" maxlength="1" data-index="1" inputmode="numeric">
@@ -700,22 +1146,44 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="text" class="pin-digit" maxlength="1" data-index="4" inputmode="numeric">
             <input type="text" class="pin-digit" maxlength="1" data-index="5" inputmode="numeric">
           </div>
+          ${!isQuarantine ? `
+          <div class="trust-device-option" style="display:flex; align-items:center; justify-content:center; gap:8px; margin:10px 0 6px 0; font-size:0.83rem; color:#94A3B8;">
+            <input type="checkbox" id="check-trust-device" checked style="accent-color:#6366F1; width:15px; height:15px; cursor:pointer;">
+            <label for="check-trust-device" style="cursor:pointer; user-select:none;">Trust this device for 30 days (frictionless next sign-in)</label>
+          </div>
+          ` : `
+          <div class="quarantine-status-pill" style="display:flex; align-items:center; justify-content:center; gap:6px; margin:8px 0; font-size:0.82rem; color:#FB7185;">
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#E11D48; box-shadow:0 0 8px #E11D48;"></span>
+            <span>Session Status: <strong>Quarantined</strong> • Waiting for Out-of-Band Email Approval</span>
+          </div>
+          `}
           <div class="otp-actions-bar">
             <button type="button" class="btn-otp-action" id="btn-open-email-preview">✉️ View Email Preview</button>
-            <button type="button" class="btn-otp-action btn-otp-verify-action" id="btn-submit-pin">Verify OTP →</button>
+            ${isQuarantine ? `<button type="button" class="btn-otp-action btn-otp-verify-action" id="btn-approve-quarantine" style="background:linear-gradient(135deg, #E11D48, #BE123C);">✓ Approve Session Out-of-Band</button>` : `<button type="button" class="btn-otp-action btn-otp-verify-action" id="btn-submit-pin">Verify OTP & Trust Device →</button>`}
           </div>
         </div>
       `;
 
-      // Trigger incoming email notification toast
+      // Trigger incoming email notification toast and simulated iPhone alert
+      const dMode = data.prompt_details?.delivery_mode || 'simulated';
       showMailToast({
-        type: 'otp',
+        type: isQuarantine ? 'quarantine' : 'otp',
         email: email,
         otp: otpCode,
         app: currentApp,
         device: deviceId,
         loc: clientLoc,
         ip: clientIp
+      });
+
+      triggerPhoneSimulatorAlert({
+        email: email,
+        otp: otpCode,
+        app: currentApp,
+        device: deviceId,
+        loc: clientLoc,
+        ip: clientIp,
+        deliveryMode: dMode
       });
 
       // Wire up PIN input navigation
@@ -787,6 +1255,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSubmitPin.addEventListener('click', () => {
           const entered = pinInputs.map(p => p.value).join('');
           submitOtpVerification(entered || otpCode);
+        });
+      }
+
+      const btnApproveQuarantine = document.getElementById('btn-approve-quarantine');
+      if (btnApproveQuarantine) {
+        btnApproveQuarantine.addEventListener('click', () => {
+          const entered = pinInputs.map(p => p.value).join('');
+          submitOtpVerification(entered || otpCode || 'APPROVE');
         });
       }
 

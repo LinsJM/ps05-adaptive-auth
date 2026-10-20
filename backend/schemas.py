@@ -124,3 +124,32 @@ class DashboardStatsResponse(BaseModel):
     average_latency_ms: float
     honeytoken_hits: int
     active_flagged_ips: int
+
+
+class TargetEnrollRequest(BaseModel):
+    email: str
+    phone_device_name: Optional[str] = "Judge's Primary Phone (iOS/Android)"
+    trusted_phone_id: Optional[str] = "judge-primary-phone"
+    password: Optional[str] = "JudgePass2026!"
+
+
+class TargetEnrollResponse(BaseModel):
+    success: bool
+    message: str
+    email: str
+    trusted_device_id: str
+    trusted_device_name: str
+    user_id: int
+
+
+class SmtpConfigRequest(BaseModel):
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str
+    smtp_pass: str
+    smtp_from: Optional[str] = None
+
+
+class TestEmailRequest(BaseModel):
+    recipient: str
+

@@ -27,8 +27,12 @@
       </div>
     </div>
 
-    <!-- Central Navigation to Dedicated SOC Page -->
+    <!-- Central Navigation to Dedicated SOC Page and Landing Page -->
     <nav class="nav-modes">
+      <a href="../landing/index.html" class="mode-tab-link" id="link-to-landing" title="Back to Solution Overview & Problem Statement">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Overview & Solution
+      </a>
       <a href="soc.html" class="mode-tab-link" id="link-to-soc" title="Open Security Operations Center (Audit Feed & Threat Matrix)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
         Security Operations (SOC Feed) ↗
@@ -42,6 +46,17 @@
         <span class="latency-label">Gateway:</span>
         <strong class="latency-val" id="global-latency-val">4.5 ms</strong>
       </div>
+      <div class="delivery-mode-pill" id="delivery-mode-pill" title="Outbound Email Delivery Channel">
+        <span class="delivery-pulse-dot" id="delivery-dot"></span>
+        <span class="delivery-mode-text" id="delivery-mode-text">RELAY: SIMULATOR</span>
+      </div>
+      <button class="btn-header-phone" id="btn-toggle-phone" title="Toggle Judge's Smartphone Simulator (iPhone 15 Pro)">
+        📱 Phone Sim
+      </button>
+      <button class="btn-header-smtp" id="btn-open-smtp" title="Configure Live SMTP Relay (e.g. Gmail / Mailgun / AWS SES)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        SMTP Relay
+      </button>
       <button class="btn-reset-top" id="btn-top-reset" title="Reset all users and devices to clean baseline">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
         Reset State
@@ -167,6 +182,7 @@
                 <button type="button" class="btn-quick" id="btn-fill-alice">Alice (Familiar)</button>
                 <button type="button" class="btn-quick" id="btn-fill-bob">Bob (Cross-App Target)</button>
                 <button type="button" class="btn-quick text-danger" id="btn-fill-honey">backup_admin (Decoy)</button>
+                <button type="button" class="btn-quick btn-quick-target" id="btn-open-enroll-modal" title="Enroll Judge's email to demonstrate live smartphone attack detection">🎯 Enroll Live Target</button>
               </div>
 
               <!-- Integration Footer Note -->
@@ -206,17 +222,17 @@
               <div class="gauge-labels-row">
                 <span class="gauge-label-tier tier-allow">ALLOW (0–29)</span>
                 <span class="gauge-label-tier tier-captcha">CAPTCHA (30–44)</span>
-                <span class="gauge-label-tier tier-otp">EMAIL OTP (45–60)</span>
-                <span class="gauge-label-tier tier-reset">RESET (61–79)</span>
+                <span class="gauge-label-tier tier-otp">OTP &amp; TRUST (45–59)</span>
+                <span class="gauge-label-tier tier-reset">QUARANTINE (60–79)</span>
                 <span class="gauge-label-tier tier-block">BLOCK (80–100)</span>
               </div>
               <div class="gauge-track-wrapper">
                 <div class="gauge-track">
                   <div class="gauge-segment seg-allow" title="0–29: Allow (Frictionless)"></div>
-                  <div class="gauge-segment seg-captcha" title="30–44: CAPTCHA"></div>
-                  <div class="gauge-segment seg-otp" title="45–60: Email OTP"></div>
-                  <div class="gauge-segment seg-reset" title="61–79: OTP + Password Reset"></div>
-                  <div class="gauge-segment seg-block" title="80–100: Block & Lock"></div>
+                  <div class="gauge-segment seg-captcha" title="30–44: CAPTCHA (Turnstile)"></div>
+                  <div class="gauge-segment seg-otp" title="45–59: Email OTP &amp; Device Trust"></div>
+                  <div class="gauge-segment seg-reset" title="60–79: Session Quarantine &amp; Out-of-Band Approval"></div>
+                  <div class="gauge-segment seg-block" title="80–100: Hard Block &amp; Password Compromise Advisory"></div>
                 </div>
                 <!-- Animated Needle Pin -->
                 <div class="gauge-pin" id="gauge-pin" style="left: 0%;">
@@ -341,7 +357,7 @@
       <button class="btn-scenario sc-2" data-scenario="2" id="btn-sc-2" title="Shortcut key: 2" onclick="window.triggerScenario && window.triggerScenario(2)">
         <span class="sc-key">2</span>
         <span class="sc-name">New Device</span>
-        <span class="sc-meta">35 pts • Step-Up</span>
+        <span class="sc-meta">45 pts • Email OTP</span>
       </button>
 
       <button class="btn-scenario sc-3" data-scenario="3" id="btn-sc-3" title="Shortcut key: 3" onclick="window.triggerScenario && window.triggerScenario(3)">
@@ -353,7 +369,7 @@
       <button class="btn-scenario sc-4" data-scenario="4" id="btn-sc-4" title="Shortcut key: 4" onclick="window.triggerScenario && window.triggerScenario(4)">
         <span class="sc-key">4</span>
         <span class="sc-name">Brute Force</span>
-        <span class="sc-meta">30 pts • Cooldown</span>
+        <span class="sc-meta">30 pts • CAPTCHA</span>
       </button>
 
       <button class="btn-scenario sc-5" data-scenario="5" id="btn-sc-5" title="Shortcut key: 5" onclick="window.triggerScenario && window.triggerScenario(5)">
@@ -377,7 +393,7 @@
       <button class="btn-scenario sc-8" data-scenario="8" id="btn-sc-8" title="Shortcut key: 8" onclick="window.triggerScenario && window.triggerScenario(8)">
         <span class="sc-key">8</span>
         <span class="sc-name">Velocity</span>
-        <span class="sc-meta">70 pts • Travel</span>
+        <span class="sc-meta">70 pts • Quarantine</span>
       </button>
     </div>
 
@@ -450,6 +466,215 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ================= 🎯 ENROLL LIVE TARGET (JUDGE EMAIL) MODAL ================= -->
+  <div class="email-modal-backdrop hidden" id="target-modal-backdrop">
+    <div class="target-enroll-dialog">
+      <div class="target-modal-header">
+        <div class="target-modal-title">
+          <span>🎯</span> Enroll Live Target (Judge's Account)
+        </div>
+        <button class="btn-close-modal" id="btn-close-target-modal" title="Close modal">✕</button>
+      </div>
+
+      <div class="target-modal-body">
+        <div class="target-explainer-banner">
+          <strong>Interactive Attack Demonstration Flow:</strong>
+          <div class="target-steps-flow">
+            <div class="flow-step-item">
+              <span class="flow-step-num">1</span>
+              <span>Enrolls judge's email with a baseline trusted mobile phone in the real SQL database.</span>
+            </div>
+            <div class="flow-step-item">
+              <span class="flow-step-num">2</span>
+              <span>Demo laptop attempts sign-in &rarr; Gateway flags laptop as <strong>unrecognized device (+35 pts)</strong>.</span>
+            </div>
+            <div class="flow-step-item">
+              <span class="flow-step-num">3</span>
+              <span>Real 6-digit OTP security alert pops up on the Judge's smartphone in real time!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="target-form-group">
+          <label for="input-target-email">Judge's Real Email Address</label>
+          <input type="email" id="input-target-email" placeholder="judge@gmail.com" value="" autocomplete="email" required>
+        </div>
+
+        <div class="target-form-group">
+          <label for="input-target-device">Baseline Trusted Device Name</label>
+          <input type="text" id="input-target-device" value="Judge's Primary Smartphone (iPhone / Pixel)" placeholder="e.g. Judge's iPhone 15">
+        </div>
+
+        <div class="target-form-group">
+          <label for="input-target-password">Demo Account Password</label>
+          <input type="text" id="input-target-password" value="JudgePass2026!" placeholder="Password">
+        </div>
+      </div>
+
+      <div class="target-modal-footer">
+        <button type="button" class="btn-modal-cancel" id="btn-cancel-target-modal">Cancel</button>
+        <button type="button" class="btn-modal-submit" id="btn-submit-enroll-target">🎯 Enroll & Setup Demo Laptop as Attacker</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ⚙️ SMTP RELAY SETTINGS MODAL ================= -->
+  <div class="email-modal-backdrop hidden" id="smtp-modal-backdrop">
+    <div class="smtp-dialog">
+      <div class="smtp-modal-header">
+        <div class="smtp-modal-title">
+          <span>⚙️</span> SMTP Relay Server Configuration
+        </div>
+        <button class="btn-close-modal" id="btn-close-smtp-modal" title="Close modal">✕</button>
+      </div>
+
+      <div class="smtp-modal-body">
+        <div class="target-explainer-banner">
+          Configure real SMTP delivery to send alerts directly to judges' Gmail, Outlook, or corporate inboxes.
+          <em>(For Gmail: use <code>smtp.gmail.com</code> port <code>587</code> with a 16-character Google App Password).</em>
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-smtp-host">SMTP Host</label>
+          <input type="text" id="input-smtp-host" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-smtp-port">SMTP Port</label>
+          <input type="number" id="input-smtp-port" placeholder="587" value="587">
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-smtp-user">SMTP Username / Email</label>
+          <input type="text" id="input-smtp-user" placeholder="your-email@gmail.com" value="">
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-smtp-pass">SMTP Password / App Password</label>
+          <input type="password" id="input-smtp-pass" placeholder="16-character Google App Password" value="">
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-smtp-from">From Address (Optional)</label>
+          <input type="text" id="input-smtp-from" placeholder="security@dignitas-auth.io" value="">
+        </div>
+
+        <div id="smtp-status-feedback" style="font-size: 0.76rem; font-weight: 600; padding: 4px 0;"></div>
+      </div>
+
+      <div class="smtp-modal-footer">
+        <button type="button" class="btn-modal-cancel" id="btn-test-smtp">✉️ Send Test Dispatch</button>
+        <button type="button" class="btn-modal-submit" id="btn-save-smtp">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 📱 JUDGE'S SMARTPHONE SIMULATOR (IPHONE 15 PRO) ================= -->
+  <div class="phone-simulator-drawer hidden" id="phone-simulator-drawer">
+    <div class="phone-chassis">
+      <!-- Screen Bezel & Dynamic Island Status Bar -->
+      <div class="phone-screen-header">
+        <span class="phone-clock-status" id="phone-clock-status">9:41</span>
+        <div class="dynamic-island" id="dynamic-island">
+          <div class="island-camera"></div>
+          <div class="island-sensor"></div>
+        </div>
+        <div class="phone-status-icons">
+          <span class="icon-signal">5G</span>
+          <svg class="icon-wifi" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+          <span class="icon-battery">100%</span>
+        </div>
+      </div>
+
+      <!-- Close / Minimize Drawer Floating Pill -->
+      <button class="phone-close-btn" id="btn-close-phone" title="Minimize Phone Simulator">✕</button>
+
+      <!-- VIEW 1: LOCK SCREEN WITH PUSH BANNER -->
+      <div class="phone-view phone-lock-view" id="phone-view-lock">
+        <div class="lock-date" id="phone-lock-date">Tuesday, October 20</div>
+        <div class="lock-clock" id="phone-lock-clock">09:41</div>
+
+        <!-- Animated Push Notification Banner -->
+        <div class="phone-push-notification" id="phone-push-notification" title="Tap to view message in Gmail">
+          <div class="push-top-row">
+            <div class="push-app-badge">
+              <span class="push-app-icon">✉️</span>
+              <span class="push-app-name">GMAIL</span>
+              <span class="push-app-dot">•</span>
+              <span class="push-time-ago">now</span>
+            </div>
+            <span class="push-expand-arrow">›</span>
+          </div>
+          <div class="push-title" id="push-title">🔐 Apex Bank / DIGNITAS Security Alert</div>
+          <div class="push-body" id="push-body">
+            Your single-use sign-in passcode is <strong class="push-code-highlight" id="push-otp-highlight">849201</strong> (valid 5 min). An unrecognized device was detected in Delhi, IN.
+          </div>
+          <div class="push-tap-hint">
+            <span>Tap to open in Gmail</span> &rarr;
+          </div>
+        </div>
+
+        <div class="lock-footer-hint">
+          <span class="lock-swipe-text">Tap notification or swipe up to inspect</span>
+        </div>
+      </div>
+
+      <!-- VIEW 2: GMAIL APP INBOX MESSAGE -->
+      <div class="phone-view phone-gmail-view hidden" id="phone-view-gmail">
+        <div class="gmail-nav-bar">
+          <button class="btn-gmail-back" id="btn-gmail-back">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Inbox
+          </button>
+          <span class="gmail-header-title">DIGNITAS Security</span>
+          <span class="gmail-avatar-tag">Judge</span>
+        </div>
+
+        <div class="gmail-scroll-content">
+          <div class="gmail-subject-line" id="phone-gmail-subject">
+            🔐 One-Time Authentication Passcode
+          </div>
+          <div class="gmail-sender-card">
+            <div class="gmail-avatar-circle">D</div>
+            <div class="gmail-sender-meta">
+              <div class="gmail-sender-name">DIGNITAS Security Gateway</div>
+              <div class="gmail-recipient-to">to <span id="gmail-to-addr">judge@gmail.com</span></div>
+            </div>
+            <span class="gmail-time-stamp">Just now</span>
+          </div>
+
+          <div class="gmail-email-card">
+            <div class="gmail-shield-header">
+              <span class="gmail-corp-title">DIGNITAS IDENTITY</span>
+              <span class="gmail-corp-badge">ADAPTIVE OTP</span>
+            </div>
+            <p class="gmail-lead-text">An unrecognized device has attempted to sign in to your corporate account. Verify this request using the one-time passcode below:</p>
+
+            <div class="gmail-otp-display-box">
+              <span class="gmail-otp-digits" id="gmail-otp-digits">8 4 9 2 0 1</span>
+              <span class="gmail-otp-expiry">Expires in 5 minutes</span>
+            </div>
+
+            <div class="gmail-telemetry-specs">
+              <div class="spec-row"><span>Target App:</span> <strong id="phone-spec-app">Apex Trust Bank</strong></div>
+              <div class="spec-row"><span>Attacker Device:</span> <strong id="phone-spec-device">dev-demo-laptop-unrecognized</strong></div>
+              <div class="spec-row"><span>Location:</span> <strong id="phone-spec-loc">Delhi, India</strong></div>
+              <div class="spec-row"><span>Anomaly:</span> <strong class="text-amber">Hardware Baseline Mismatch (+35 pts)</strong></div>
+            </div>
+
+            <!-- Auto-Fill Bridge Button -->
+            <button class="btn-phone-autofill" id="btn-phone-autofill">
+              📋 Auto-Fill Passcode on Laptop
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Home Indicator -->
+      <div class="phone-home-indicator"></div>
     </div>
   </div>
 

@@ -9,7 +9,7 @@ import models
 
 # ---- Tunable settings ----
 WEIGHTS = {
-    "new_device": 35,
+    "new_device": 45,           # Unrecognized device / hardware (Tier 3: 45–59 pts)
     "new_country": 25,
     "unusual_hour": 10,
     "abrupt_change": 15,        # new device AND new country together
@@ -79,17 +79,17 @@ def _recent_failures(db: Session, email: str, window_start: datetime) -> int:
 
 def map_score_to_action(score: int) -> tuple[str, bool, Optional[str]]:
     """
-    Project Risk Policy:
-    0-29  : Allow
-    30-44 : CAPTCHA
-    45-60 : Email OTP
-    61-79 : OTP + forced password reset
-    80-100: Block and lock account
+    DIGNITAS 5-Tier Adaptive Threat Policy:
+    0-29  : Allow (Frictionless pass in <10ms)
+    30-44 : CAPTCHA (Cloudflare Turnstile)
+    45-59 : Email OTP + Device Trust Enrollment
+    60-79 : Session Quarantine & Out-of-Band Email Approval
+    80-100: Block + SQLite IP Blacklist + Compromised Password Alert Email
     """
     if score >= 80:
         return "block", False, None
-    elif score >= 61:
-        return "otp_password_reset", True, "otp_password_reset"
+    elif score >= 60:
+        return "quarantine_verify", True, "quarantine_verify"
     elif score >= 45:
         return "email_otp", True, "email_otp"
     elif score >= 30:
@@ -282,10 +282,15 @@ def evaluate(
     score = min(sum(r["points"] for r in reasons), 100)
 
     # 5-Tier Policy Action
+    # 0–29  : Allow (Frictionless pass in <10ms)
+    # 30–44 : CAPTCHA (Cloudflare Turnstile)
+    # 45–59 : Email OTP + Device Trust Enrollment
+    # 60–79 : Session Quarantine & Out-of-Band Email Approval
+    # 80–100: Block + SQLite IP Blacklist + Compromised Password Alert Email
     action, requires_step_up, step_up_type = map_score_to_action(score)
 
-    # LinsJM's decision backward compatibility
-    if failures >= RESTRICT_AFTER_FAILURES:
+    # LinsJM's decision backward compatibility (allow / step_up / restrict)
+    if failures >= RESTRICT_AFTER_FAILURES or score >= 80:
         decision = "restrict"
     elif score >= STEP_UP_THRESHOLD:
         decision = "step_up"

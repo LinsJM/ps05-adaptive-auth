@@ -45,7 +45,7 @@ check("2. First-time device", user, "a@x.com", 35, "step_up",
       device_id="dev-new", country="IN", hour=10)
 check("3. Legitimate travel (known device)", user, "a@x.com", 25, "allow",
       device_id="dev-home", country="US", hour=10)
-check("4. Possible account takeover", user, "a@x.com", 85, "step_up",
+check("4. Possible account takeover", user, "a@x.com", 75, "step_up",
       device_id="dev-new", country="RU", hour=3)
 check("5. Brand-new account (cold start)", newbie, "b@x.com", 0, "allow",
       device_id="dev-x", country="IN", hour=3)

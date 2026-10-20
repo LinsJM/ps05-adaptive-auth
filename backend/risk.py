@@ -164,8 +164,9 @@ def evaluate(
                     f"Login from {country}; earlier successful logins were from "
                     f"{', '.join(sorted(known))}")
 
-        # Hour: cold-start rule, needs enough history first
-        if hour is not None and len(successes) >= MIN_LOGINS_FOR_HOUR:
+        # Hour: needs enough history, and is only compared in a familiar country,
+        # because UTC hours are not comparable across time zones
+        if hour is not None and len(successes) >= MIN_LOGINS_FOR_HOUR and not new_country:
             nearest = min(_hour_distance(hour, t.hour) for _, t in successes)
             if nearest > HOUR_TOLERANCE:
                 add("unusual_hour", WEIGHTS["unusual_hour"],

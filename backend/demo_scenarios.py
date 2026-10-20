@@ -45,7 +45,7 @@ print(f"Using test account {email}\n")
 report("1. Familiar login", login("dev-home"), 0, "allow")
 report("2. First-time device", login("dev-second"), 35, "step_up")
 report("3. Legitimate travel (known device)", login("dev-home", country="US"), 25, "allow")
-report("4. Possible account takeover", login("dev-third", country="RU", hour=odd_hour), 85, "step_up")
+report("4. Possible account takeover", login("dev-third", country="RU", hour=odd_hour), 75, "step_up")
 
 print()
 for i in range(1, 6):

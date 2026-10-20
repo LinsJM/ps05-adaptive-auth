@@ -260,7 +260,57 @@
                 </div>
 
                 <div class="challenge-box-body" id="active-challenge-content">
-                  <!-- Dynamically populated by app.js (Prompt, OTP, or CAPTCHA) -->
+                  <!-- Dynamically populated by app.js (Turnstile CAPTCHA, 6-Box OTP PIN, or Google Prompt) -->
+                </div>
+              </div>
+
+              <!-- Threat Visualizer HUD (Shown when an attack scenario is blocked) -->
+              <div class="threat-hud-box hidden" id="panel-state-threat">
+                <div class="threat-hud-header">
+                  <div class="threat-pill">🚨 INTRUSION MITIGATED</div>
+                  <span class="threat-waf-status">Global Tier-1 Firewall Active</span>
+                </div>
+                
+                <!-- Geolocation Attack Route Graphic -->
+                <div class="attack-route-graphic">
+                  <div class="route-node node-origin">
+                    <span class="node-flag" id="threat-origin-flag">🇷🇺</span>
+                    <div class="node-text">
+                      <strong class="node-name" id="threat-origin-city">Moscow, Russia</strong>
+                      <span class="node-meta" id="threat-origin-ip">Tor Node: 185.220.101.5</span>
+                    </div>
+                  </div>
+                  <div class="route-vector">
+                    <span class="vector-line"></span>
+                    <div class="vector-badge">INTERCEPTED</div>
+                  </div>
+                  <div class="route-node node-dest">
+                    <span class="node-flag">🛡️</span>
+                    <div class="node-text">
+                      <strong class="node-name">DIGNITAS Gateway</strong>
+                      <span class="node-meta" id="threat-dest-server">Apex Core (Delhi, IN)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Automated Defense Actions Grid -->
+                <div class="threat-defense-grid">
+                  <div class="defense-step">
+                    <span class="step-icon">🛑</span>
+                    <span class="step-desc">IP Blacklisted</span>
+                  </div>
+                  <div class="defense-step">
+                    <span class="step-icon">🔒</span>
+                    <span class="step-desc">Account Locked</span>
+                  </div>
+                  <div class="defense-step">
+                    <span class="step-icon">⚡</span>
+                    <span class="step-desc">Pre-Session Block</span>
+                  </div>
+                  <div class="defense-step">
+                    <span class="step-icon">📧</span>
+                    <span class="step-desc">Incident Alert Dispatched</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,6 +387,71 @@
       </button>
     </div>
   </footer>
+
+  <!-- ================= INCOMING MAIL TOAST CONTAINER ================= -->
+  <div class="mail-toast-container" id="mail-toast-container"></div>
+
+  <!-- ================= AUTHENTIC CORPORATE EMAIL MODAL ================= -->
+  <div class="email-modal-backdrop hidden" id="email-modal-backdrop">
+    <div class="email-modal-dialog">
+      <div class="email-modal-header">
+        <div class="email-client-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          DIGNITAS Corporate Mail Client
+        </div>
+        <button class="btn-close-modal" id="btn-close-email-modal" title="Close email">✕</button>
+      </div>
+
+      <div class="email-modal-meta">
+        <div class="meta-row">
+          <span class="meta-label">From:</span>
+          <span class="meta-val">DIGNITAS Security Gateway &lt;security@dignitas-auth.io&gt;</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">To:</span>
+          <span class="meta-val" id="email-modal-to">alice@example.com</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Subject:</span>
+          <strong class="meta-val subject-val" id="email-modal-subject">🔐 Your One-Time Authentication Passcode</strong>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Date:</span>
+          <span class="meta-val" id="email-modal-date">Today at 10:00 UTC (0 seconds ago)</span>
+        </div>
+      </div>
+
+      <div class="email-modal-body">
+        <div class="email-template-card">
+          <div class="email-corp-header">
+            <div class="email-brand-logo">DIGNITAS</div>
+            <div class="email-shield-tag">IDENTITY GATEWAY</div>
+          </div>
+          <div class="email-content-main">
+            <h3>One-Time Passcode (OTP) Verification</h3>
+            <p>We received an adaptive sign-in request that requires secondary identity verification. Please use the passcode below to verify your session:</p>
+            
+            <div class="email-passcode-callout">
+              <span class="passcode-code" id="email-modal-passcode">849201</span>
+              <span class="passcode-expiry">Expires in 5 minutes</span>
+            </div>
+
+            <div class="email-telemetry-box">
+              <div class="telem-row"><strong>Target Application:</strong> <span id="email-modal-app">Apex Trust Bank</span></div>
+              <div class="telem-row"><strong>Device:</strong> <span id="email-modal-device">dev-alice-laptop</span></div>
+              <div class="telem-row"><strong>Location:</strong> <span id="email-modal-loc">Delhi, India</span></div>
+              <div class="telem-row"><strong>IP Address:</strong> <span id="email-modal-ip">103.21.244.2</span></div>
+            </div>
+
+            <p class="email-warning-text">If you did not initiate this request, someone may be attempting to access your account. Your security policy will automatically restrict access if this code is not entered.</p>
+          </div>
+          <div class="email-corp-footer">
+            <button class="btn-use-code" id="btn-modal-use-code">📋 Copy & Auto-Fill Passcode</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>

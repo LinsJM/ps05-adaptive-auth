@@ -54,12 +54,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const pinTooltip = document.getElementById('pin-tooltip');
   const reasonsStack = document.getElementById('reasons-stack');
 
-  // DOM Elements - Verification / Challenge Panel
+  // DOM Elements - Verification / Challenge & Threat HUD
   const panelStateIdle = document.getElementById('panel-state-idle');
   const panelStateActive = document.getElementById('panel-state-active');
+  const panelStateThreat = document.getElementById('panel-state-threat');
+  const threatOriginFlag = document.getElementById('threat-origin-flag');
+  const threatOriginCity = document.getElementById('threat-origin-city');
+  const threatOriginIp = document.getElementById('threat-origin-ip');
+  const threatDestServer = document.getElementById('threat-dest-server');
   const activeChallengeType = document.getElementById('active-challenge-type');
   const activeChallengeUser = document.getElementById('active-challenge-user');
   const activeChallengeContent = document.getElementById('active-challenge-content');
+
+  // DOM Elements - Incoming Email Notification Toast & Modal
+  const mailToastContainer = document.getElementById('mail-toast-container');
+  const emailModalBackdrop = document.getElementById('email-modal-backdrop');
+  const btnCloseEmailModal = document.getElementById('btn-close-email-modal');
+  const emailModalTo = document.getElementById('email-modal-to');
+  const emailModalSubject = document.getElementById('email-modal-subject');
+  const emailModalDate = document.getElementById('email-modal-date');
+  const emailModalPasscode = document.getElementById('email-modal-passcode');
+  const emailModalApp = document.getElementById('email-modal-app');
+  const emailModalDevice = document.getElementById('email-modal-device');
+  const emailModalLoc = document.getElementById('email-modal-loc');
+  const emailModalIp = document.getElementById('email-modal-ip');
+  const btnModalUseCode = document.getElementById('btn-modal-use-code');
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
 
 
 
@@ -382,26 +411,195 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------------------------------------
-  // 6. Challenge & Verification Panel
+  // 6. Challenge & Verification Panel (Realism Upgrades)
   // -------------------------------------------------------------
+
+  // Country Flag Helper
+  function getCountryFlag(cc) {
+    if (!cc) return '🌐';
+    const flags = {
+      'IN': '🇮🇳', 'RU': '🇷🇺', 'US': '🇺🇸', 'GB': '🇬🇧',
+      'UK': '🇬🇧', 'DE': '🇩🇪', 'CN': '🇨🇳', 'SG': '🇸🇬',
+      'NL': '🇳🇱', 'FR': '🇫🇷', 'CA': '🇨🇦', 'AU': '🇦🇺', 'JP': '🇯🇵'
+    };
+    return flags[cc.toUpperCase().trim()] || '🌐';
+  }
+
+  // Slide-in Mail / Threat Notification Toast
+  function showMailToast({ type, email, otp, app, device, loc, ip }) {
+    if (!mailToastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = `mail-toast ${type === 'threat' ? 'mail-toast-threat' : ''}`;
+
+    const appName = app === 'bank' ? 'Apex Trust Bank' : 'Pulse Social';
+    const isThreat = type === 'threat';
+
+    toast.innerHTML = `
+      <div class="mail-toast-header">
+        <div class="toast-sender-badge">
+          ${isThreat ? '🚨' : '✉️'} ${isThreat ? 'DIGNITAS INTRUSION MITIGATOR' : 'DIGNITAS IDENTITY MAIL'}
+        </div>
+        <button class="toast-btn-close" title="Dismiss notification">✕</button>
+      </div>
+      <div class="mail-toast-body">
+        <div class="toast-subject">${isThreat ? '🚨 Intrusion Intercepted & Account Locked' : '🔐 Your Single-Use Sign-In Passcode'}</div>
+        <div class="toast-snippet">
+          ${isThreat
+            ? `Blocked suspicious access attempt on <strong>${escapeHtml(appName)}</strong> for <code>${escapeHtml(email)}</code> from IP <code>${escapeHtml(ip || '185.220.101.5')}</code>.`
+            : `Authentication challenge for <strong>${escapeHtml(appName)}</strong>. Enter the 6-digit code below to verify your login.`
+          }
+        </div>
+        ${!isThreat && otp ? `
+          <div class="toast-passcode-callout">
+            <span class="toast-passcode-value">${escapeHtml(otp)}</span>
+            <button class="toast-btn-copy" id="toast-btn-copy-action">📋 Copy Passcode</button>
+          </div>
+        ` : ''}
+      </div>
+      <div class="mail-toast-footer">
+        <span class="toast-time">Just now</span>
+        <div class="toast-actions-right">
+          ${!isThreat ? `<button class="toast-btn-view" id="toast-btn-view-action">✉️ View Email</button>` : `<a href="soc.html" class="toast-btn-view" style="text-decoration:none;">Inspect SOC →</a>`}
+        </div>
+      </div>
+    `;
+
+    // Close button
+    toast.querySelector('.toast-btn-close').addEventListener('click', () => {
+      toast.classList.add('hide');
+      setTimeout(() => toast.remove(), 300);
+    });
+
+    // Copy Passcode Action
+    if (!isThreat && otp) {
+      const copyBtn = toast.querySelector('#toast-btn-copy-action');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(otp).catch(() => {});
+          }
+          copyBtn.textContent = '✓ Copied & Filled!';
+          copyBtn.style.background = '#15803D';
+          fillAndSubmitOtp(otp);
+        });
+      }
+
+      const viewBtn = toast.querySelector('#toast-btn-view-action');
+      if (viewBtn) {
+        viewBtn.addEventListener('click', () => {
+          openEmailModal({ email, otp, app, device, loc, ip });
+        });
+      }
+    }
+
+    mailToastContainer.appendChild(toast);
+
+    // Auto dismiss after 14 seconds
+    setTimeout(() => {
+      if (toast.isConnected) {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 14000);
+  }
+
+  // Open Corporate Email Modal
+  let currentModalOtp = null;
+  function openEmailModal({ email, otp, app, device, loc, ip }) {
+    if (!emailModalBackdrop) return;
+    currentModalOtp = otp;
+    if (emailModalTo) emailModalTo.textContent = email || 'user@example.com';
+    if (emailModalPasscode) emailModalPasscode.textContent = otp || '849201';
+    if (emailModalApp) emailModalApp.textContent = app === 'bank' ? 'Apex Trust Bank' : 'Pulse Social Network';
+    if (emailModalDevice) emailModalDevice.textContent = device || 'Unknown Device';
+    if (emailModalLoc) emailModalLoc.textContent = loc || 'Delhi, India';
+    if (emailModalIp) emailModalIp.textContent = ip || '103.21.244.2';
+    if (emailModalDate) emailModalDate.textContent = `Today at ${new Date().toLocaleTimeString()} (Just now)`;
+    emailModalBackdrop.classList.remove('hidden');
+  }
+
+  function closeEmailModal() {
+    if (emailModalBackdrop) emailModalBackdrop.classList.add('hidden');
+  }
+
+  if (btnCloseEmailModal) {
+    btnCloseEmailModal.addEventListener('click', closeEmailModal);
+  }
+
+  if (emailModalBackdrop) {
+    emailModalBackdrop.addEventListener('click', (e) => {
+      if (e.target === emailModalBackdrop) closeEmailModal();
+    });
+  }
+
+  if (btnModalUseCode) {
+    btnModalUseCode.addEventListener('click', () => {
+      if (currentModalOtp) {
+        fillAndSubmitOtp(currentModalOtp);
+      }
+      closeEmailModal();
+    });
+  }
+
+  function fillAndSubmitOtp(otp) {
+    const digits = String(otp).split('');
+    const pinInputs = Array.from(document.querySelectorAll('.pin-digit'));
+    if (pinInputs.length > 0) {
+      pinInputs.forEach((input, idx) => {
+        input.value = digits[idx] || '';
+      });
+      submitOtpVerification(otp);
+    } else {
+      submitOtpVerification(otp);
+    }
+  }
+
   function handleChallengeDisplay(data, email) {
-    const isStepUp = data.requires_step_up || data.decision === 'step_up' || (data.action && data.action !== 'allow' && data.action !== 'block');
+    const score = Number.isFinite(data.score) ? data.score : (data.risk_score || 0);
+    const isBlock = data.action === 'block' || data.decision === 'restrict' || score >= 80;
+    const isStepUp = data.requires_step_up || data.decision === 'step_up' || (data.action && data.action !== 'allow' && !isBlock);
 
+    // Hide all state panels first
+    if (panelStateIdle) panelStateIdle.classList.add('hidden');
+    if (panelStateActive) panelStateActive.classList.add('hidden');
+    if (panelStateThreat) panelStateThreat.classList.add('hidden');
+
+    // Case 1: ATTACK / BLOCK SCENARIO (Threat Visualizer HUD)
+    if (isBlock) {
+      if (panelStateThreat) panelStateThreat.classList.remove('hidden');
+
+      const country = ctxCountry.value.trim() || data.prompt_details?.country || 'RU';
+      const city = ctxCity.value.trim() || data.prompt_details?.city || 'Moscow';
+      const ip = ctxIp.value.trim() || data.prompt_details?.ip_address || '185.220.101.5';
+      const flag = getCountryFlag(country);
+
+      if (threatOriginFlag) threatOriginFlag.textContent = flag;
+      if (threatOriginCity) threatOriginCity.textContent = `${city}, ${country}`;
+      if (threatOriginIp) threatOriginIp.textContent = `${ctxVpn.checked ? 'Tor Node: ' : 'IP: '}${ip}`;
+      if (threatDestServer) {
+        threatDestServer.textContent = `${currentApp === 'bank' ? 'Apex Trust Core' : 'Pulse Core'} (Delhi, IN)`;
+      }
+
+      // High-priority security alert toast
+      showMailToast({
+        type: 'threat',
+        email: email,
+        otp: null,
+        app: currentApp,
+        device: ctxDevice.value.trim() || 'dev-unknown',
+        loc: `${city}, ${country}`,
+        ip: ip
+      });
+
+      activeChallenge = null;
+      return;
+    }
+
+    // Case 2: ALLOW / LOW RISK (Frictionless login)
     if (!isStepUp) {
-      panelStateActive.classList.add('hidden');
-      panelStateIdle.classList.remove('hidden');
-
-      if (data.action === 'block') {
-        panelStateIdle.innerHTML = `
-          <div class="idle-icon-wrap" style="color: #DC2626; border-color: #FCA5A5;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-          </div>
-          <div class="idle-text-wrap">
-            <div class="idle-heading" style="color: #7F1D1D;">Intrusion Mitigated • Account Locked</div>
-            <div class="idle-sub">Intruder IP blacklisted. Access blocked until SOC administrator manually unlocks.</div>
-          </div>
-        `;
-      } else {
+      if (panelStateIdle) {
+        panelStateIdle.classList.remove('hidden');
         panelStateIdle.innerHTML = `
           <div class="idle-icon-wrap">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -416,45 +614,202 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Step-up is active!
-    panelStateIdle.classList.add('hidden');
-    panelStateActive.classList.remove('hidden');
+    // Case 3: STEP-UP CHALLENGE ACTIVE
+    if (panelStateActive) panelStateActive.classList.remove('hidden');
+    if (activeChallengeUser) activeChallengeUser.textContent = email;
 
-    activeChallengeUser.textContent = email;
+    const deviceId = ctxDevice.value.trim() || data.prompt_details?.device_id || 'dev-unknown';
+    const clientIp = ctxIp.value.trim() || data.prompt_details?.ip_address || '103.21.244.2';
+    const clientLoc = `${ctxCity.value.trim() || 'Delhi'}, ${ctxCountry.value.trim() || 'IN'}`;
+    const otpCode = data.prompt_details?.otp_code || '849201';
+
     activeChallenge = {
       email: email,
-      action: data.action,
-      device_id: ctxDevice.value.trim() || 'dev-unknown',
-      app_id: currentApp
+      action: data.action || data.step_up_type || 'email_otp',
+      device_id: deviceId,
+      app_id: currentApp,
+      otp_code: otpCode
     };
 
-    if (data.prompt_details || data.action === 'captcha' || data.action === 'email_otp') {
-      activeChallengeType.textContent = 'TRUSTED DEVICE PROMPT';
+    // SUB-CASE 3A: Cloudflare Turnstile CAPTCHA (Score 30-44)
+    if (data.action === 'captcha' || data.step_up_type === 'captcha') {
+      if (activeChallengeType) activeChallengeType.textContent = 'CLOUDFLARE TURNSTILE CAPTCHA';
       activeChallengeContent.innerHTML = `
-        <div class="challenge-body-prompt">
-          <div class="prompt-details-summary">
-            <div class="prompt-title-bold">Is this you signing in?</div>
-            <div class="prompt-context-snippet">Device: <strong>${escapeHtml(activeChallenge.device_id)}</strong> near ${escapeHtml(ctxCity.value)}, ${escapeHtml(ctxCountry.value)}</div>
+        <div class="turnstile-card" id="turnstile-widget" tabindex="0" role="button" aria-label="Verify you are human">
+          <div class="turnstile-checkbox" id="turnstile-box">
+            <span class="turnstile-spinner" id="turnstile-spin"></span>
+            <span class="turnstile-check" id="turnstile-mark">✓</span>
           </div>
-          <div class="prompt-action-btns">
-            <button class="btn-prompt-yes" id="btn-challenge-approve">✓ Yes, it's me</button>
-            <button class="btn-prompt-no" id="btn-challenge-deny">✕ No, lock</button>
+          <div class="turnstile-label-col">
+            <div class="turnstile-title" id="turnstile-text">Verify you are human</div>
+            <div class="turnstile-sub">Protected by Cloudflare Turnstile</div>
+          </div>
+          <div class="turnstile-logo">
+            <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+              <path d="M38.5 28.5c0-5.8-4.7-10.5-10.5-10.5-1.1 0-2.2.2-3.2.5C23.6 14.5 19.6 12 15 12c-6.6 0-12 5.4-12 12 0 .5 0 1 .1 1.5C1.3 26.6 0 28.6 0 31c0 3.3 2.7 6 6 6h32c3.3 0 6-2.7 6-6 0-1.1-.3-2.1-.8-3-.9-1.2-2.7-2-4.7-2z" fill="#F48120"/>
+              <path d="M29 37h10c2.8 0 5-2.2 5-5 0-.9-.2-1.7-.7-2.4-.7-1-2-1.6-3.8-1.6h-.5c-.6 0-1.1-.4-1.2-1-.8-4.8-4.9-8.5-9.8-8.5-.9 0-1.8.1-2.7.4-.6.2-1.2 0-1.6-.4-.8-.9-1.9-1.5-3.1-1.7 5.1 1.4 8.7 6 8.7 11.5v.7c0 .6.4 1 1 1h.7c1.3.1 2.3 1.1 2.3 2.4 0 1.4-1.1 2.5-2.5 2.5H29v2.1z" fill="#FAAD3F"/>
+            </svg>
+            <span>Cloudflare</span>
           </div>
         </div>
       `;
 
-      document.getElementById('btn-challenge-approve').addEventListener('click', () => submitPromptVerification(true));
-      document.getElementById('btn-challenge-deny').addEventListener('click', () => submitPromptVerification(false));
-    } else {
-      activeChallengeType.textContent = 'MFA PASSCODE';
+      const turnstileWidget = document.getElementById('turnstile-widget');
+      let verifying = false;
+
+      if (turnstileWidget) {
+        turnstileWidget.addEventListener('click', () => {
+          if (verifying) return;
+          verifying = true;
+          turnstileWidget.classList.add('verifying');
+          const text = document.getElementById('turnstile-text');
+          if (text) text.textContent = 'Evaluating browser challenge...';
+
+          setTimeout(() => {
+            turnstileWidget.classList.remove('verifying');
+            turnstileWidget.classList.add('verified');
+            if (text) text.textContent = 'Human Verification Complete';
+
+            setTimeout(() => {
+              submitOtpVerification('CAPTCHA');
+            }, 400);
+          }, 750);
+        });
+      }
+
+      return;
+    }
+
+    // SUB-CASE 3B: Segmented 6-Box Email OTP / Password Reset (Score 45-79)
+    if (data.action === 'email_otp' || data.action === 'otp_password_reset' || data.step_up_type === 'email_otp' || data.step_up_type === 'otp_password_reset') {
+      const isReset = data.action === 'otp_password_reset' || data.step_up_type === 'otp_password_reset';
+      if (activeChallengeType) {
+        activeChallengeType.textContent = isReset ? 'OTP & PASSWORD RESET REQUIRED' : '6-DIGIT EMAIL PASSCODE';
+      }
+
       activeChallengeContent.innerHTML = `
-        <div class="challenge-body-input">
-          <input type="text" id="input-stepup-code" placeholder="123456" maxlength="6" value="123456">
-          <button class="btn-challenge-submit" id="btn-submit-code">Verify Code</button>
+        <div class="otp-challenge-view">
+          <div class="otp-view-instruction">
+            Single-use verification passcode dispatched to <strong>${escapeHtml(email)}</strong>.
+          </div>
+          <div class="otp-pin-wrap" id="otp-pin-container">
+            <input type="text" class="pin-digit" maxlength="1" data-index="0" inputmode="numeric" autocomplete="one-time-code" autofocus>
+            <input type="text" class="pin-digit" maxlength="1" data-index="1" inputmode="numeric">
+            <input type="text" class="pin-digit" maxlength="1" data-index="2" inputmode="numeric">
+            <input type="text" class="pin-digit" maxlength="1" data-index="3" inputmode="numeric">
+            <input type="text" class="pin-digit" maxlength="1" data-index="4" inputmode="numeric">
+            <input type="text" class="pin-digit" maxlength="1" data-index="5" inputmode="numeric">
+          </div>
+          <div class="otp-actions-bar">
+            <button type="button" class="btn-otp-action" id="btn-open-email-preview">✉️ View Email Preview</button>
+            <button type="button" class="btn-otp-action btn-otp-verify-action" id="btn-submit-pin">Verify OTP →</button>
+          </div>
         </div>
       `;
-      document.getElementById('btn-submit-code').addEventListener('click', submitOtpVerification);
+
+      // Trigger incoming email notification toast
+      showMailToast({
+        type: 'otp',
+        email: email,
+        otp: otpCode,
+        app: currentApp,
+        device: deviceId,
+        loc: clientLoc,
+        ip: clientIp
+      });
+
+      // Wire up PIN input navigation
+      const pinInputs = Array.from(document.querySelectorAll('.pin-digit'));
+      if (pinInputs.length > 0) {
+        setTimeout(() => pinInputs[0].focus(), 150);
+
+        pinInputs.forEach((input, idx) => {
+          input.addEventListener('input', () => {
+            const val = input.value.replace(/[^0-9]/g, '');
+            input.value = val ? val[val.length - 1] : '';
+
+            if (input.value && idx < pinInputs.length - 1) {
+              pinInputs[idx + 1].focus();
+            }
+
+            // Check if all 6 filled
+            const entered = pinInputs.map(p => p.value).join('');
+            if (entered.length === 6) {
+              submitOtpVerification(entered);
+            }
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && idx > 0) {
+              pinInputs[idx - 1].focus();
+            } else if (e.key === 'Enter') {
+              const entered = pinInputs.map(p => p.value).join('');
+              if (entered.length > 0) submitOtpVerification(entered);
+            }
+          });
+
+          input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            if (text) {
+              const chars = text.slice(0, 6).split('');
+              chars.forEach((c, i) => {
+                if (pinInputs[i]) pinInputs[i].value = c;
+              });
+              const entered = pinInputs.map(p => p.value).join('');
+              if (entered.length === 6) {
+                submitOtpVerification(entered);
+              } else if (pinInputs[chars.length]) {
+                pinInputs[chars.length].focus();
+              }
+            }
+          });
+        });
+      }
+
+      // Button handlers
+      const btnOpenEmail = document.getElementById('btn-open-email-preview');
+      if (btnOpenEmail) {
+        btnOpenEmail.addEventListener('click', () => {
+          openEmailModal({
+            email: email,
+            otp: otpCode,
+            app: currentApp,
+            device: deviceId,
+            loc: clientLoc,
+            ip: clientIp
+          });
+        });
+      }
+
+      const btnSubmitPin = document.getElementById('btn-submit-pin');
+      if (btnSubmitPin) {
+        btnSubmitPin.addEventListener('click', () => {
+          const entered = pinInputs.map(p => p.value).join('');
+          submitOtpVerification(entered || otpCode);
+        });
+      }
+
+      return;
     }
+
+    // SUB-CASE 3C: Fallback Google Trusted Device Prompt
+    if (activeChallengeType) activeChallengeType.textContent = 'TRUSTED DEVICE PROMPT';
+    activeChallengeContent.innerHTML = `
+      <div class="challenge-body-prompt">
+        <div class="prompt-details-summary">
+          <div class="prompt-title-bold">Is this you signing in?</div>
+          <div class="prompt-context-snippet">Device: <strong>${escapeHtml(deviceId)}</strong> near ${escapeHtml(clientLoc)}</div>
+        </div>
+        <div class="prompt-action-btns">
+          <button class="btn-prompt-yes" id="btn-challenge-approve">✓ Yes, it's me</button>
+          <button class="btn-prompt-no" id="btn-challenge-deny">✕ No, lock</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-challenge-approve')?.addEventListener('click', () => submitPromptVerification(true));
+    document.getElementById('btn-challenge-deny')?.addEventListener('click', () => submitPromptVerification(false));
   }
 
   async function submitPromptVerification(approved) {
@@ -472,9 +827,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function submitOtpVerification() {
+  async function submitOtpVerification(codeOverride) {
     if (!activeChallenge) return;
-    const code = document.getElementById('input-stepup-code')?.value || '123456';
+    const code = (typeof codeOverride === 'string' && codeOverride.length > 0)
+      ? codeOverride
+      : (activeChallenge.otp_code || '849201');
+
     try {
       const res = await apiVerifyStepUp({
         email: activeChallenge.email,
@@ -678,7 +1036,9 @@ document.addEventListener('DOMContentLoaded', () => {
           Submit a login or click any demo scenario below to inspect security telemetry.
         </div>
       `;
-      handleChallengeDisplay({ requires_step_up: false, action: 'allow' }, 'alice@example.com');
+      if (mailToastContainer) mailToastContainer.innerHTML = '';
+      closeEmailModal();
+      handleChallengeDisplay({ requires_step_up: false, action: 'allow', score: 0 }, 'alice@example.com');
     } catch (err) {
       console.error('Reset error:', err);
     }

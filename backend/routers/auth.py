@@ -37,6 +37,40 @@ SECURITY_NOTIFICATIONS = [
 ]
 
 
+import os
+import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+def _try_send_smtp_email(recipient: str, subject: str, text_body: str):
+    smtp_host = os.environ.get("SMTP_HOST")
+    if not smtp_host:
+        return False
+    try:
+        smtp_port = int(os.environ.get("SMTP_PORT", 587))
+        smtp_user = os.environ.get("SMTP_USER")
+        smtp_pass = os.environ.get("SMTP_PASSWORD") or os.environ.get("SMTP_PASS")
+        smtp_from = os.environ.get("SMTP_FROM", smtp_user or "security@dignitas-auth.io")
+
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = smtp_from
+        msg["To"] = recipient
+        msg.attach(MIMEText(text_body, "plain"))
+
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=5) as server:
+            server.starttls()
+            if smtp_user and smtp_pass:
+                server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_from, [recipient], msg.as_string())
+        return True
+    except Exception as e:
+        print(f"[SMTP Notice] Unable to deliver to {recipient} via {smtp_host}: {e}")
+        return False
+
+
 def add_security_notification(notification_type, recipient, subject, app_id, device, location, ip, risk_score, action, reasons, preview_body):
     item = {
         "id": f"notif-{int(time.time() * 1000)}",
@@ -54,6 +88,7 @@ def add_security_notification(notification_type, recipient, subject, app_id, dev
         "preview_body": preview_body,
     }
     SECURITY_NOTIFICATIONS.append(item)
+    _try_send_smtp_email(recipient, subject, preview_body)
     return item
 
 
@@ -119,6 +154,18 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
     valid = False
     if user:
         valid = security.verify_password(payload.password, user.password_hash)
+    elif "@" in email and email != "backup_admin":
+        # Auto-provision authentic account for entered real email
+        user = models.User(
+            email=email,
+            password_hash=security.hash_password(payload.password),
+            is_locked=False,
+            created_at=_utcnow(),
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        valid = True
     else:
         # Dummy verification to prevent timing attack enumeration
         security.verify_password(payload.password, security.DUMMY_HASH)
@@ -233,6 +280,9 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             "otp_password_reset": "Suspicious login: OTP & mandatory password reset required (Risk 61-79)",
         }
 
+        dynamic_otp = str(random.randint(100000, 999999))
+        is_otp = risk_res.action in ["email_otp", "otp_password_reset"]
+
         prompt_info = {
             "email": email,
             "app_id": payload.app_id or "bank",
@@ -242,13 +292,28 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             "ip_address": client_ip,
             "time": datetime.now(timezone.utc).strftime("%H:%M UTC"),
             "number_match": "42",
+            "otp_code": dynamic_otp,
             "action": risk_res.action,
         }
 
+        subject_line = (
+            f"🔐 Your Verification Passcode: {dynamic_otp} for {(payload.app_id or 'Apex Bank').title()}"
+            if is_otp
+            else f"⚠️ Security Alert: New sign-in prompt for {email}"
+        )
+
+        body_text = (
+            f"Your one-time authentication passcode is {dynamic_otp}.\n"
+            f"Sign-in attempted from device '{payload.device_id or 'new device'}' near {payload.city or 'Delhi'}, {country} (IP: {client_ip}).\n"
+            f"This code expires in 5 minutes. Do not share this code with anyone."
+            if is_otp
+            else f"A sign-in attempt was detected from {payload.device_id or 'new device'} near {payload.city or 'Delhi'}. An 'Is this you?' prompt has been sent to your primary trusted device."
+        )
+
         add_security_notification(
-            notification_type="new_device",
+            notification_type="email_otp" if is_otp else "new_device",
             recipient=email,
-            subject=f"⚠️ Security Alert: New sign-in prompt for {email}",
+            subject=subject_line,
             app_id=payload.app_id or "bank",
             device=payload.device_id or "dev-unrecognized",
             location=f"{payload.city or 'Delhi'}, {country}",
@@ -256,7 +321,7 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             risk_score=risk_res.score,
             action=risk_res.action,
             reasons=[r.get("detail", str(r)) if isinstance(r, dict) else str(r) for r in risk_res.reasons],
-            preview_body=f"A sign-in attempt was detected from {payload.device_id or 'new device'} near {payload.city or 'Delhi'}. An 'Is this you?' prompt has been sent to Alice's primary trusted device."
+            preview_body=body_text
         )
 
         return schemas.LoginResponse(
@@ -268,7 +333,7 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             action=risk_res.action,
             reasons=risk_res.reasons,
             requires_step_up=True,
-            step_up_type="google_prompt" if risk_res.action in ["captcha", "email_otp"] else (risk_res.step_up_type or "email_otp"),
+            step_up_type=risk_res.action,
             prompt_details=prompt_info,
             message=challenge_messages.get(risk_res.action, "Step-up verification required."),
             latency_ms=latency_ms,

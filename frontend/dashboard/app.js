@@ -11,11 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeChallenge = null;
   let lastScore = 0;
 
-  // DOM Elements - Header Navigation
-  const tabGateway = document.getElementById('tab-gateway');
-  const tabSoc = document.getElementById('tab-soc');
-  const viewGateway = document.getElementById('view-gateway');
-  const viewSoc = document.getElementById('view-soc');
+  // DOM Elements - Header Navigation & Telemetry
   const globalLatencyVal = document.getElementById('global-latency-val');
   const btnTopReset = document.getElementById('btn-top-reset');
   const btnDockReset = document.getElementById('btn-dock-reset');
@@ -65,41 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const activeChallengeUser = document.getElementById('active-challenge-user');
   const activeChallengeContent = document.getElementById('active-challenge-content');
 
-  // DOM Elements - SOC Operations
-  const statTotal = document.getElementById('stat-total');
-  const statBlocked = document.getElementById('stat-blocked');
-  const statChallenged = document.getElementById('stat-challenged');
-  const statAllowed = document.getElementById('stat-allowed');
-  const statLatency = document.getElementById('stat-latency');
-  const statHoneytoken = document.getElementById('stat-honeytoken');
-  const ledgerTbody = document.getElementById('ledger-tbody');
-  const btnRefreshLedger = document.getElementById('btn-refresh-ledger');
-  const ledgerFilters = document.querySelectorAll('.ledger-filter');
-  const inputLockEmail = document.getElementById('input-lock-email');
-  const btnDoLock = document.getElementById('btn-do-lock');
-  const btnDoUnlock = document.getElementById('btn-do-unlock');
-  const lockFeedback = document.getElementById('lock-feedback');
 
-  // -------------------------------------------------------------
-  // 1. Navigation & App Switching
-  // -------------------------------------------------------------
-  function switchView(target) {
-    if (target === 'soc') {
-      tabGateway.classList.remove('active');
-      tabSoc.classList.add('active');
-      viewGateway.classList.remove('active');
-      viewSoc.classList.add('active');
-      refreshSocData();
-    } else {
-      tabSoc.classList.remove('active');
-      tabGateway.classList.add('active');
-      viewSoc.classList.remove('active');
-      viewGateway.classList.add('active');
-    }
-  }
-
-  tabGateway.addEventListener('click', () => switchView('gateway'));
-  tabSoc.addEventListener('click', () => switchView('soc'));
 
   function setCustomerApp(app) {
     currentApp = app;
@@ -641,9 +603,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sc = scenarios[num];
     if (!sc) return;
 
-    // Switch to Gateway view if on SOC
-    switchView('gateway');
-
     // Set Customer App
     setCustomerApp(sc.app);
 
@@ -720,7 +679,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
       handleChallengeDisplay({ requires_step_up: false, action: 'allow' }, 'alice@example.com');
-      refreshSocData();
     } catch (err) {
       console.error('Reset error:', err);
     }
@@ -729,137 +687,6 @@ document.addEventListener('DOMContentLoaded', () => {
   btnTopReset.addEventListener('click', handleDemoReset);
   btnDockReset.addEventListener('click', handleDemoReset);
 
-  // -------------------------------------------------------------
-  // 8. SOC Operations & Real-Time Event Ledger
-  // -------------------------------------------------------------
-  async function refreshSocData() {
-    try {
-      // 1. Fetch Stats
-      const statsRes = await fetch('/api/dashboard/stats');
-      if (statsRes.ok) {
-        const stats = await statsRes.json();
-        statTotal.textContent = stats.total_events || 0;
-        statBlocked.textContent = stats.blocked_count || 0;
-        statChallenged.textContent = stats.challenged_count || 0;
-        statAllowed.textContent = stats.allowed_count || 0;
-        statLatency.textContent = `${stats.average_latency_ms || 9.2} ms`;
-        statHoneytoken.textContent = stats.honeytoken_hits || 0;
-      }
-
-      // 2. Fetch Events
-      const url = currentFilter === 'all' ? '/api/dashboard/events?limit=30' : `/api/dashboard/events?app_id=${currentFilter}&limit=30`;
-      const eventsRes = await fetch(url);
-      if (eventsRes.ok) {
-        const events = await eventsRes.json();
-        renderLedgerTable(events);
-      }
-    } catch (err) {
-      console.error('Error refreshing SOC data:', err);
-    }
-  }
-
-  function renderLedgerTable(events) {
-    if (!events || events.length === 0) {
-      ledgerTbody.innerHTML = `
-        <tr>
-          <td colspan="8" class="table-empty">No authentication events recorded yet.</td>
-        </tr>
-      `;
-      return;
-    }
-
-    ledgerTbody.innerHTML = events.map(ev => {
-      const timeStr = ev.timestamp ? new Date(ev.timestamp).toLocaleTimeString() : '--:--';
-      const appBadge = ev.app_id === 'social' ? 'Pulse Social' : 'Apex Bank';
-      const score = ev.score ?? 0;
-
-      let tagClass = 'tag-allow';
-      let tagText = 'ALLOW';
-      if (ev.action === 'block' || ev.decision === 'restrict' || score >= 80) {
-        tagClass = 'tag-block';
-        tagText = 'BLOCK';
-      } else if (ev.action !== 'allow' || score >= 30) {
-        tagClass = 'tag-stepup';
-        tagText = (ev.action || 'CHALLENGE').toUpperCase();
-      }
-
-      const reasonsSnippet = (ev.reasons || []).map(r => {
-        const p = typeof r.points === 'number' ? `+${r.points} ` : '';
-        const s = r.signal || r.detail || JSON.stringify(r);
-        return `<span style="font-weight:600;">${escapeHtml(p)}${escapeHtml(s)}</span>`;
-      }).join(', ') || 'Baseline pass';
-
-      const vpnBadge = ev.is_vpn ? ' <span style="color:#DC2626; font-weight:700;">[VPN]</span>' : '';
-
-      return `
-        <tr>
-          <td style="font-family: var(--font-mono);">${timeStr}</td>
-          <td><strong>${appBadge}</strong></td>
-          <td style="font-family: var(--font-mono);">${escapeHtml(ev.email_attempted || '')}</td>
-          <td>${escapeHtml(ev.city || 'Unknown')}, ${escapeHtml(ev.country || '')}${vpnBadge}</td>
-          <td style="font-family: var(--font-mono); font-size: 0.68rem;">${escapeHtml(ev.device_id || '')}</td>
-          <td class="table-score">${score}</td>
-          <td><span class="table-tag ${tagClass}">${tagText}</span></td>
-          <td style="font-size: 0.68rem; color: var(--ink-secondary);">${reasonsSnippet}</td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  btnRefreshLedger.addEventListener('click', refreshSocData);
-
-  ledgerFilters.forEach(btn => {
-    btn.addEventListener('click', () => {
-      ledgerFilters.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter;
-      refreshSocData();
-    });
-  });
-
-  // Emergency Account Lock / Unlock Controls
-  btnDoLock.addEventListener('click', async () => {
-    const email = inputLockEmail.value.trim();
-    if (!email) return;
-    try {
-      const res = await fetch(`/api/dashboard/user/${encodeURIComponent(email)}/lock`, { method: 'POST' });
-      if (res.ok) {
-        lockFeedback.textContent = `Account ${email} locked.`;
-        lockFeedback.style.color = '#DC2626';
-        refreshSocData();
-      }
-    } catch (err) {
-      lockFeedback.textContent = 'Error locking account.';
-    }
-  });
-
-  btnDoUnlock.addEventListener('click', async () => {
-    const email = inputLockEmail.value.trim();
-    if (!email) return;
-    try {
-      const res = await fetch(`/api/dashboard/user/${encodeURIComponent(email)}/unlock`, { method: 'POST' });
-      if (res.ok) {
-        lockFeedback.textContent = `Account ${email} unlocked.`;
-        lockFeedback.style.color = '#16A34A';
-        refreshSocData();
-      }
-    } catch (err) {
-      lockFeedback.textContent = 'Error unlocking account.';
-    }
-  });
-
-  // Utility: HTML Escaping
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
   // Initial Boot
   updateTelemetrySummary();
-  refreshSocData();
 });

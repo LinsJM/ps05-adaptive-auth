@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIGNITAS — Security Operations Center (SOC)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-checkpoint soc-page">
+
+  <!-- ================= TOP CHECKPOINT BAR ================= -->
+  <header class="checkpoint-header">
+    <div class="header-brand">
+      <div class="brand-caliper-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <path d="M9 3v18"/>
+          <path d="M15 9l-3 3 3 3"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title">DIGNITAS <span class="brand-tag">SOC MONITOR</span></div>
+        <div class="brand-sub">Enterprise Threat Intelligence & Audit Ledger</div>
+      </div>
+    </div>
+
+    <!-- Navigation Link Back to Login Gateway -->
+    <nav class="nav-modes">
+      <a href="index.html" class="mode-tab-link" id="link-to-gateway" title="Return to Customer Login & Live Decision Gateway">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        ← Back to Login & Decision Gateway
+      </a>
+    </nav>
+
+    <!-- Right Gateway Telemetry -->
+    <div class="header-status">
+      <div class="latency-indicator">
+        <span class="status-dot online" id="soc-status-dot"></span>
+        <span class="latency-label">Live Stream:</span>
+        <strong class="latency-val" id="soc-stream-status">Active (2s sync)</strong>
+      </div>
+      <button class="btn-reset-top" id="btn-soc-reset" title="Reset all demo users and events to clean baseline" onclick="window.handleSocReset && window.handleSocReset()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+        Reset State
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= SUB-HEADER STATUS BAR ================= -->
+  <div class="telemetry-bar">
+    <div class="telemetry-summary">
+      <span class="telemetry-meta-label">Audit Scope:</span>
+      <span class="telemetry-meta-val" id="soc-scope-summary">Cross-App Correlation • Apex Bank & Pulse Social • Retention Window: 30 Days</span>
+    </div>
+    <div class="soc-auto-sync-tag">
+      <span class="status-dot online"></span> Real-Time Polling Active
+    </div>
+  </div>
+
+  <!-- ================= MAIN SOC STAGE CONTAINER ================= -->
+  <main class="main-stage soc-main-stage">
+    <div class="soc-workspace">
+
+      <!-- Metrics Cards Row -->
+      <div class="soc-metrics-strip">
+        <div class="soc-metric-tile">
+          <span class="metric-lbl">Total Evaluated</span>
+          <div class="metric-num" id="stat-total">0</div>
+          <span class="metric-meta">Across Bank & Social</span>
+        </div>
+        <div class="soc-metric-tile tile-danger">
+          <span class="metric-lbl">Critical Blocked</span>
+          <div class="metric-num text-danger" id="stat-blocked">0</div>
+          <span class="metric-meta">Score 80–100 (Lockouts)</span>
+        </div>
+        <div class="soc-metric-tile tile-warning">
+          <span class="metric-lbl">Challenged</span>
+          <div class="metric-num text-warning" id="stat-challenged">0</div>
+          <span class="metric-meta">Score 30–79 (Step-Up)</span>
+        </div>
+        <div class="soc-metric-tile tile-success">
+          <span class="metric-lbl">Frictionless</span>
+          <div class="metric-num text-success" id="stat-allowed">0</div>
+          <span class="metric-meta">Score 0–29 (Allow)</span>
+        </div>
+        <div class="soc-metric-tile">
+          <span class="metric-lbl">Average Latency</span>
+          <div class="metric-num text-accent" id="stat-latency">-- ms</div>
+          <span class="metric-meta">SLA Target &lt; 100ms</span>
+        </div>
+        <div class="soc-metric-tile tile-purple">
+          <span class="metric-lbl">Honeytoken Hits</span>
+          <div class="metric-num text-purple" id="stat-honeytoken">0</div>
+          <span class="metric-meta">backup_admin traps</span>
+        </div>
+      </div>
+
+      <!-- SOC Columns -->
+      <div class="soc-columns">
+        
+        <!-- Left: Real-Time Event Ledger -->
+        <div class="soc-ledger-card">
+          <div class="ledger-header">
+            <div class="ledger-header-left">
+              <h2>Real-Time Authentication Event Stream</h2>
+              <div class="ledger-filters">
+                <button class="ledger-filter active" data-filter="all">All Apps</button>
+                <button class="ledger-filter" data-filter="bank">Apex Bank</button>
+                <button class="ledger-filter" data-filter="social">Pulse Social</button>
+              </div>
+            </div>
+            <button class="btn-refresh-ledger" id="btn-refresh-ledger">↻ Sync Feed</button>
+          </div>
+
+          <div class="ledger-table-wrap">
+            <table class="ledger-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>App</th>
+                  <th>Target Account</th>
+                  <th>Context & Location</th>
+                  <th>Device</th>
+                  <th>Score</th>
+                  <th>Action</th>
+                  <th>Explainable Reasons & Points</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-tbody">
+                <tr>
+                  <td colspan="8" class="table-empty">Loading authentication stream...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Account Emergency Controls & Policy Matrix -->
+        <div class="soc-side-card">
+          <div class="sub-card">
+            <h3>Emergency Account Security</h3>
+            <p class="sub-desc">Manual administrative account lockdown</p>
+            <div class="lock-form">
+              <input type="email" id="input-lock-email" value="alice@example.com" placeholder="user@example.com">
+              <div class="lock-btns">
+                <button class="btn-lock" id="btn-do-lock">Lock Account</button>
+                <button class="btn-unlock" id="btn-do-unlock">Unlock</button>
+              </div>
+              <div class="lock-feedback" id="lock-feedback"></div>
+            </div>
+          </div>
+
+          <div class="sub-card policy-card">
+            <h3>Active 5-Tier Policy Matrix</h3>
+            <div class="policy-rows">
+              <div class="p-row row-allow">
+                <span class="p-range">0–29</span>
+                <strong class="p-action">ALLOW</strong>
+                <span class="p-desc">Frictionless pass</span>
+              </div>
+              <div class="p-row row-captcha">
+                <span class="p-range">30–44</span>
+                <strong class="p-action">CAPTCHA</strong>
+                <span class="p-desc">Light friction</span>
+              </div>
+              <div class="p-row row-otp">
+                <span class="p-range">45–60</span>
+                <strong class="p-action">EMAIL OTP</strong>
+                <span class="p-desc">Step-up MFA</span>
+              </div>
+              <div class="p-row row-reset">
+                <span class="p-range">61–79</span>
+                <strong class="p-action">OTP + RESET</strong>
+                <span class="p-desc">MFA & PW reset</span>
+              </div>
+              <div class="p-row row-block">
+                <span class="p-range">80–100</span>
+                <strong class="p-action">BLOCK & LOCK</strong>
+                <span class="p-desc">Account lockout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= BOTTOM DEMO CONTROLS BAR (SCENARIOS 1–8) ================= -->
+  <footer class="demo-controls-dock">
+    <div class="controls-label-group">
+      <div class="controls-title">DEMO SCENARIOS</div>
+      <div class="controls-hint">Keys 1–8</div>
+    </div>
+
+    <div class="scenario-buttons-strip">
+      <button class="btn-scenario sc-1" data-scenario="1" id="btn-sc-1" title="Shortcut key: 1" onclick="window.triggerScenario && window.triggerScenario(1)">
+        <span class="sc-key">1</span>
+        <span class="sc-name">Familiar</span>
+        <span class="sc-meta">0 pts • Allow</span>
+      </button>
+
+      <button class="btn-scenario sc-2" data-scenario="2" id="btn-sc-2" title="Shortcut key: 2" onclick="window.triggerScenario && window.triggerScenario(2)">
+        <span class="sc-key">2</span>
+        <span class="sc-name">New Device</span>
+        <span class="sc-meta">35 pts • Step-Up</span>
+      </button>
+
+      <button class="btn-scenario sc-3" data-scenario="3" id="btn-sc-3" title="Shortcut key: 3" onclick="window.triggerScenario && window.triggerScenario(3)">
+        <span class="sc-key">3</span>
+        <span class="sc-name">Tor 3 AM</span>
+        <span class="sc-meta">100 pts • Block</span>
+      </button>
+
+      <button class="btn-scenario sc-4" data-scenario="4" id="btn-sc-4" title="Shortcut key: 4" onclick="window.triggerScenario && window.triggerScenario(4)">
+        <span class="sc-key">4</span>
+        <span class="sc-name">Brute Force</span>
+        <span class="sc-meta">30 pts • Cooldown</span>
+      </button>
+
+      <button class="btn-scenario sc-5" data-scenario="5" id="btn-sc-5" title="Shortcut key: 5" onclick="window.triggerScenario && window.triggerScenario(5)">
+        <span class="sc-key">5</span>
+        <span class="sc-name">Cross-App</span>
+        <span class="sc-meta">40 pts • Correlated</span>
+      </button>
+
+      <button class="btn-scenario sc-6" data-scenario="6" id="btn-sc-6" title="Shortcut key: 6" onclick="window.triggerScenario && window.triggerScenario(6)">
+        <span class="sc-key">6</span>
+        <span class="sc-name">Honeytoken</span>
+        <span class="sc-meta">100 pts • Flag IP</span>
+      </button>
+
+      <button class="btn-scenario sc-7" data-scenario="7" id="btn-sc-7" title="Shortcut key: 7" onclick="window.triggerScenario && window.triggerScenario(7)">
+        <span class="sc-key">7</span>
+        <span class="sc-name">Adapted</span>
+        <span class="sc-meta">0 pts • Trusted</span>
+      </button>
+
+      <button class="btn-scenario sc-8" data-scenario="8" id="btn-sc-8" title="Shortcut key: 8" onclick="window.triggerScenario && window.triggerScenario(8)">
+        <span class="sc-key">8</span>
+        <span class="sc-name">Velocity</span>
+        <span class="sc-meta">70 pts • Travel</span>
+      </button>
+    </div>
+
+    <div class="dock-reset-wrap">
+      <button class="btn-dock-reset" id="btn-dock-reset" title="Reset all demo users and events" onclick="window.handleSocReset && window.handleSocReset()">
+        ↺ Reset
+      </button>
+    </div>
+  </footer>
+
+  <script src="soc.js"></script>
+</body>
+</html>

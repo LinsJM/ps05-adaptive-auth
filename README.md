@@ -4,7 +4,6 @@
 
 A login system that gives risky sign-ins a second look instead of a rejection. It scores the context of every login (device, country, time of day, recent failures) against the user's own history, then responds in proportion: no friction for familiar logins, a one-time code for unusual ones, and a short cooldown for repeated failures.
 
-Landing page: https://claude.ai/artifact/JsFzXbZsNUD9aCM7hiYPPN
 
 ## Why
 

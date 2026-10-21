@@ -28,41 +28,66 @@ DIGNITAS is live and accessible from any desktop laptop, tablet, or smartphone:
 
 ## 📱 Mobile Compatibility & Compilation
 
-DIGNITAS is fully responsive and touch-optimized:
-- **Mobile Browsers**: Judges can open `https://adaptive-auth-two.vercel.app/` directly on iPhone Safari, iPad, or Android Chrome.
-- **Adaptive Touch Controls**: Scenario buttons (1–8) are sized with minimum 44×44px touch targets with horizontal scroll-snap.
-- **Responsive Phone Sim**: On mobile screens ($\le 680\text{px}$), the iPhone 15 Pro simulator automatically converts into an elegant bottom-sheet modal drawer.
+DIGNITAS is fully responsive, touch-optimized, and compile-free for mobile devices:
+- **Zero-Compile Mobile Access**: Judges can open `https://adaptive-auth-two.vercel.app/` directly on iPhone Safari, iPad, or Android Chrome with zero native compilation needed.
+- **Adaptive Touch Controls**: Scenario buttons (1–8) are sized with minimum 44×46px touch targets with horizontal scroll-snap.
+- **Responsive Phone Sim**: On mobile screens ($\le 680\text{px}$), the iPhone 15 Pro simulator automatically converts into an elegant bottom-sheet modal drawer (`width: min(320px, 92vw)`).
 - **Vertical Stack Workspace**: The dual-column workspace seamlessly cascades vertically on smartphones for effortless thumb navigation.
 
 ---
 
-## 🏆 Hackathon Evaluation Defense Matrix
+## 🛠️ How We Created This (The Complete Engineering Journey)
 
-This table maps directly to the three judging criteria:
+DIGNITAS was architected and built from the ground up to solve the real-world operational challenges of **Problem Statement PS05**. Here is our end-to-end engineering methodology across six distinct development phases:
 
-### 1. 💻 Prototype Demonstration (Working Prototype & Features)
-- **Live Interactive Gateway**: Judges can log in as `alice@example.com` or `bob@example.com` and observe instantaneous risk calculation.
-- **8 Pre-Seeded Attack Scenarios**: One-click execution of real-world threats (brute force bursts, impossible travel, Tor exit nodes, honeytokens).
+```mermaid
+graph TD
+    A[Phase 1: Threat Modeling & PS05 Discovery] --> B[Phase 2: Mathematical Risk Scoring Engine]
+    B --> C[Phase 3: Cryptography & SQLite ACID Layer]
+    C --> D[Phase 4: Frontend & On-Screen Smartphone Simulator]
+    D --> E[Phase 5: Real-Time SOC & Telemetry Ledger]
+    E --> F[Phase 6: Serverless Deployment & Mobile Optimization]
+```
+
+### Phase 1: Problem Definition & Threat Modeling
+- **The 2FA Paradox**: Legacy MFA systems enforce OTP challenges indiscriminately on every login. This causes severe user fatigue, drop-offs, and social-engineering vulnerability (e.g. MFA fatigue push attacks). Conversely, static username/password systems leave organizations defenseless against credential stuffing.
+- **The Core Objective**: Engineer an intelligent security gateway that calculates a dynamic risk score ($0$ to $100$) in under $10\text{ms}$ at the moment of authentication, enforcing zero friction for legitimate logins while escalating graduated defenses against attackers.
+
+### Phase 2: Mathematical Risk Heuristics & Explainability Engine
+- **Why Not Black-Box Deep Learning?** Many teams default to training complex machine learning classifiers. However, under banking and enterprise compliance (including **GDPR Article 22: Right to Explanation**), an AI system *must* be capable of explaining why an individual was challenged or blocked. Black-box weights cannot provide verifiable legal audit trails.
+- **Deterministic Heuristic Equation**:
+  $$R = \min\left(100, \max\left(0, \sum_{i} (w_i \cdot s_i) - B_{\text{trusted}}\right)\right)$$
+  Where $s_i \in \{0, 1\}$ represents the presence of an anomaly signal, $w_i$ represents the penalty weight, and $B_{\text{trusted}}$ is a mitigation discount applied when verified hardware signatures match.
+- **Calibrated Penalty Weights**:
+  - *Unrecognized Hardware Signature*: $+45\text{ pts}$ (Device Trust mismatch).
+  - *Tor Exit Node / Anonymizing VPN*: $+60\text{ pts}$ (Known proxy threat).
+  - *Off-Hours Anomaly ($>3\text{h}$ from habitual baseline)*: $+10\text{ pts}$.
+  - *Rapid Failed Password Burst ($5\text{ in } <2\text{m}$)*: $+30\text{ pts}$.
+  - *Cross-App Threat Correlation*: $+35\text{ pts}$ (Account attacked on sister platform within last 15 mins).
+  - *Impossible Travel Velocity ($>900\text{ km/h}$)*: $+45\text{ pts}$.
+  - *Honeytoken Decoy Account Hit (`backup_admin`)*: $+100\text{ pts}$ (Instant hard block).
+
+### Phase 3: Cryptographic Foundations & Data Architecture
+- **Argon2id Password Hashing**: Standard SHA-256 and bcrypt are susceptible to parallelized GPU/ASIC dictionary attacks. DIGNITAS implements **Argon2id** (winner of the Password Hashing Competition) with a 64MB memory cost, rendering brute-force cracking mathematically infeasible.
+- **SQLite ACID Persistence**: Built with relational foreign-key integrity in Write-Ahead Logging (WAL) mode across four core tables: `users`, `login_events`, `known_devices`, and `flagged_ips`.
+- **Ephemeral Step-Up Tokens**: HMAC-SHA256 tokens with strict 5-minute time-to-live (TTL) bounds and one-time verification protection.
+
+### Phase 4: Frontend Development & On-Screen Smartphone Simulator
+- **Zero-Build Vanilla Architecture**: Created using modern semantic HTML5, Vanilla CSS3, and JavaScript without requiring `npm run build` or heavyweight node runtime dependencies in production.
+- **Interactive iPhone 15 Pro Simulator**: Built an in-browser smartphone emulator featuring Apple Dynamic Island animations, realistic lock-screen push banners, Web Audio API ringtones, and interactive "Yes, it's me" / "No, it's not me" push verification.
 - **Dual-Mode Outbound Relay**:
-  1. *Real Inboxes*: Authenticated TLS SMTP relay (`smtp.gmail.com:587`) dispatches live emails.
-  2. *On-Screen Simulator*: Built-in iPhone 15 Pro with Dynamic Island, lock-screen push notifications, and Web Audio API chime.
-- **SOC Threat Telemetry & Relational SQL Explorer**: Real-time inspection of `users`, `login_events`, `known_devices`, and `flagged_ips`.
+  - *Mode A (Live Inbox)*: Authenticated TLS SMTP relay (`smtp.gmail.com:587`) dispatches live OTPs and breach advisories to real user email addresses.
+  - *Mode B (Zero-Config Simulator)*: When external SMTP credentials are not configured, the gateway seamlessly defaults to the on-screen iPhone simulator with zero configuration.
 
-### 2. 💡 Project Explanation (Approach, Implementation & Challenges Faced)
-- **Explainable Heuristic Math vs Black-Box ML**:
-  - *Why not black-box ML?* Neural networks cannot explain why a user was blocked under banking audit compliance (GDPR Article 22). DIGNITAS implements deterministic, transparent penalty math ($R = \sum w_i \cdot s_i$) returning human-readable justifications.
-- **Technical Architecture**:
-  - Python 3.12, FastAPI ASGI, Argon2id memory-hard hashing (64MB memory cost), SQLite in WAL mode.
-- **Key Technical Challenges Faced & Overcome**:
-  1. *Sub-100ms Latency Target*: Resolved via in-memory heuristic pipelines and indexed SQLite queries, achieving **8.67ms average latency** (11x faster than SLA).
-  2. *Serverless Read-Only Filesystems*: SQLite requires write access. Resolved by implementing automatic `/tmp` transactional mirroring when deployed in Vercel Serverless Lambda.
-  3. *Cross-Application Threat Correlation vs GDPR*: Banking (`Apex Bank`) and Social (`Pulse Social`) share threat intelligence via privacy-preserving cryptographic hashes without exposing PII.
-  4. *Serverless ASGI Path Preservation*: Resolved via canonical Vercel `builds` + `routes` configuration proxying clean URLs.
+### Phase 5: Security Operations Center (SOC) & Telemetry Pipeline
+- **Real-Time Audit Stream**: Every decision, latency measurement, signal breakdown, and geolocation is permanently recorded in `adaptive_auth.db`.
+- **Administrative Kill-Switches**: One-click emergency account lock and unlock buttons for security analysts.
+- **Interactive Relational SQL Inspector**: Directly view, filter, and inspect raw SQL table rows (`users`, `login_events`, `known_devices`, `flagged_ips`) within the browser.
 
-### 3. 🏆 Evaluation & Feedback (Functionality, Innovation & Implementation)
-- **Functionality**: 100% detection rate across all 8 threat vectors with **0% false positive rate** on familiar baseline logins.
-- **Innovation**: Honeytoken decoy traps (`backup_admin`), impossible travel velocity calculation ($v = d / \Delta t > 900\text{ km/h}$), and interactive on-screen smartphone simulator.
-- **Implementation Quality**: Self-contained zero-build deployment (~300KB total static assets, no node_modules required in production), containerized with Docker, and deployed serverless.
+### Phase 6: Cloud Deployment & Serverless Resilience
+- **Serverless Read-Only Filesystem Resolution**: Vercel Serverless Functions execute in a read-only environment where standard SQLite writes crash. We engineered an automated transactional mirror that copies the baseline database to `/tmp/adaptive_auth.db` on cold start, ensuring persistent write operations.
+- **Canonical ASGI Routing**: Configured Vercel `builds` + `routes` to proxy all incoming HTTP traffic directly to FastAPI's ASGI router, ensuring clean URLs (`/landing/`, `/dashboard/`, `/docs`) work without path-stripping 404 errors.
+- **Multi-Layout Fallback**: Embedded static assets inside `backend/static/` so the application runs completely self-contained (~300KB UI) whether deployed from the repository root or just the backend directory.
 
 ---
 
@@ -92,6 +117,32 @@ Press keyboard hotkeys **1 to 8** in the [Interactive Gateway](https://adaptive-
 | **6** | Honeytoken Trap (`backup_admin`) | `Apex Bank` | `100` | **BLOCK & BLACKLIST** (Decoy account hit; IP flagged in DB) |
 | **7** | Adapted Baseline (Post-OTP) | `Apex Bank` | `0` | **ALLOW** (Hardware now verified and trusted) |
 | **8** | Impossible Travel Velocity | `Apex Bank` | `70` | **QUARANTINE** (Delhi $\to$ London in 15 mins, $v > 20,000\text{ km/h}$) |
+
+---
+
+## 🏆 Hackathon Evaluation Defense Matrix
+
+This table maps directly to the three official judging criteria:
+
+### 1. 💻 Prototype Demonstration (Working Prototype & Features)
+- **Live Interactive Gateway**: Judges can log in as `alice@example.com` or `bob@example.com` and observe instantaneous risk calculation.
+- **8 Pre-Seeded Attack Scenarios**: One-click execution of real-world threats with hotkeys 1 to 8.
+- **Dual-Mode Outbound Relay**: Live TLS SMTP relay + Interactive on-screen iPhone 15 Pro simulator with Dynamic Island.
+- **SOC Threat Telemetry & Relational SQL Explorer**: Real-time inspection of `users`, `login_events`, `known_devices`, and `flagged_ips`.
+
+### 2. 💡 Project Explanation (Approach, Implementation & Challenges Faced)
+- **Explainable Heuristic Math vs Black-Box ML**: Transparent, deterministic penalty weights complying with GDPR Article 22 Right to Explanation.
+- **Technical Architecture**: Python 3.12, FastAPI ASGI, Argon2id memory-hard hashing, SQLite in WAL mode.
+- **Challenges Faced & Overcome**:
+  1. *Sub-100ms Latency Target*: Achieved **8.67ms average latency** (11x faster than target SLA).
+  2. *Serverless Read-Only Filesystems*: Resolved by automated `/tmp` transactional SQLite database sync.
+  3. *Cross-App Correlation vs GDPR*: Resolved by salted one-way hashes and 30-day automated TTL retention purge.
+  4. *Serverless ASGI Path Preservation*: Resolved via canonical Vercel `builds` + `routes` configuration.
+
+### 3. 🏆 Evaluation & Feedback (Functionality, Innovation & Implementation)
+- **Functionality**: 100% detection rate across all 8 threat vectors with **0% false positive rate** on familiar baseline logins.
+- **Innovation**: Honeytoken decoy traps (`backup_admin`), impossible travel velocity calculation, and interactive on-screen smartphone simulator.
+- **Implementation Quality**: Self-contained zero-build deployment (~300KB total static assets), containerized with Docker, and deployed serverless.
 
 ---
 

@@ -71,6 +71,7 @@ app.include_router(db_inspector.router)
 
 
 @app.get("/api/health")
+@app.get("/health")
 def health():
     return {"status": "ok", "project": "ps05-adaptive-auth"}
 

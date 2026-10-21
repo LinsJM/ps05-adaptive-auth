@@ -50,6 +50,9 @@
         <span class="delivery-pulse-dot" id="delivery-dot"></span>
         <span class="delivery-mode-text" id="delivery-mode-text">RELAY: SIMULATOR</span>
       </div>
+      <button class="btn-header-credits" id="btn-open-credits" title="View Team Dignitas Authors & Architecture Credits">
+        👥 Credits
+      </button>
       <button class="btn-header-phone" id="btn-toggle-phone" title="Toggle Judge's Smartphone Simulator (iPhone 15 Pro)">
         📱 Phone Sim
       </button>
@@ -805,6 +808,60 @@
 
       <!-- Bottom Home Indicator -->
       <div class="phone-home-indicator"></div>
+    </div>
+  </div>
+
+  <!-- ================= 👥 TEAM DIGNITAS CREDITS MODAL ================= -->
+  <div class="credits-modal-overlay hidden" id="credits-modal-overlay">
+    <div class="credits-modal-box">
+      <div class="credits-modal-header">
+        <div class="credits-modal-title">
+          <span>👥</span> Team Dignitas • PS05 Architecture Credits
+        </div>
+        <button class="credits-modal-close" id="btn-close-credits" title="Close Credits">✕</button>
+      </div>
+
+      <p style="font-size:0.83rem; color:#94A3B8; margin-bottom:18px; line-height:1.5;">
+        Adaptive Authentication & Suspicious Login Detection Gateway engineered for Hackathon Problem Statement PS05.
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.35); border-radius:12px; padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="color:#F8FAFC; font-size:0.95rem;">S. Niten Varshan</strong>
+            <span style="background:rgba(16,185,129,0.2); color:#34D399; font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:4px; font-family:'JetBrains Mono',monospace;">TEAM LEADER</span>
+          </div>
+          <div style="font-size:0.78rem; color:#E2E8F0; font-weight:600; margin-bottom:3px;">Frontend, Backend, and Security Engine Architecture</div>
+          <div style="font-size:0.72rem; color:#94A3B8; line-height:1.4;">Lead designer of the 5-tier adaptive risk heuristics, sub-10ms scoring algorithms, real-time reactive phone simulator, and full-stack gateway.</div>
+        </div>
+
+        <div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(148, 163, 184, 0.15); border-radius:12px; padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="color:#F8FAFC; font-size:0.95rem;">Avinash</strong>
+            <span style="background:rgba(148,163,184,0.15); color:#CBD5E1; font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:4px; font-family:'JetBrains Mono',monospace;">TESTER / QA</span>
+          </div>
+          <div style="font-size:0.78rem; color:#E2E8F0; font-weight:600; margin-bottom:3px;">Security Testing & Anomaly Validation</div>
+          <div style="font-size:0.72rem; color:#94A3B8; line-height:1.4;">Testing attack anomaly vectors, verifying Tor exit node detection, honeytoken trap auditing, and edge-case validation.</div>
+        </div>
+
+        <div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(148, 163, 184, 0.15); border-radius:12px; padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="color:#F8FAFC; font-size:0.95rem;">Lins</strong>
+            <span style="background:rgba(148,163,184,0.15); color:#CBD5E1; font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:4px; font-family:'JetBrains Mono',monospace;">FOUNDATION</span>
+          </div>
+          <div style="font-size:0.78rem; color:#E2E8F0; font-weight:600; margin-bottom:3px;">Foundation & Backend Architecture</div>
+          <div style="font-size:0.72rem; color:#94A3B8; line-height:1.4;">Core FastAPI setup, relational database schemas, and foundational environment configuration.</div>
+        </div>
+
+        <div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(148, 163, 184, 0.15); border-radius:12px; padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <strong style="color:#F8FAFC; font-size:0.95rem;">Dev</strong>
+            <span style="background:rgba(148,163,184,0.15); color:#CBD5E1; font-size:0.65rem; font-weight:700; padding:2px 8px; border-radius:4px; font-family:'JetBrains Mono',monospace;">TESTER / QA</span>
+          </div>
+          <div style="font-size:0.78rem; color:#E2E8F0; font-weight:600; margin-bottom:3px;">Testing, Telemetry & Scenario Verification</div>
+          <div style="font-size:0.72rem; color:#94A3B8; line-height:1.4;">Live demo scenario audits, brute-force burst validation, and client telemetry stress testing.</div>
+        </div>
+      </div>
     </div>
   </div>
 

@@ -1421,3 +1421,182 @@ body.landing-page {
     display: none;
   }
 }
+
+@media (max-width: 640px) {
+  .nav-container {
+    padding: 10px 14px;
+  }
+  .brand-pill {
+    display: none;
+  }
+  .btn-nav-soc {
+    display: none;
+  }
+  .btn-nav-primary {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+  }
+  .hero-section {
+    padding: 80px 14px 40px;
+  }
+  .hero-title {
+    font-size: 1.85rem;
+    line-height: 1.18;
+  }
+  .hero-lead {
+    font-size: 0.95rem;
+  }
+  .hero-badges-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+  .simulator-mockup {
+    padding: 14px;
+  }
+  .sim-terminal-screen {
+    padding: 10px;
+    font-size: 0.75rem;
+  }
+  .sim-controls-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .footer-container {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  .footer-links {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .credits-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ================= TEAM DIGNITAS CREDITS SECTION ================= */
+.team-credits-section {
+  margin-top: 48px;
+  padding-top: 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+.credits-header-group {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.credits-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #A5B4FC;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.credits-heading {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.credits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.credit-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 14px;
+  padding: 18px 20px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.credit-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(30, 41, 59, 0.7);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.credit-card-leader {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.8) 100%);
+}
+
+.credit-card-leader:hover {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.credit-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.credit-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #F8FAFC;
+  letter-spacing: -0.01em;
+}
+
+.credit-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.credit-pill-leader {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.credit-pill-member {
+  background: rgba(148, 163, 184, 0.12);
+  color: #CBD5E1;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.credit-role {
+  font-size: 0.82rem;
+  color: #94A3B8;
+  line-height: 1.45;
+}
+
+.credit-role strong {
+  color: #E2E8F0;
+}
+

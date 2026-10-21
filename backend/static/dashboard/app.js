@@ -1939,6 +1939,32 @@ document.addEventListener('DOMContentLoaded', () => {
   btnTopReset.addEventListener('click', handleDemoReset);
   btnDockReset.addEventListener('click', handleDemoReset);
 
+  // Credits Modal Handlers
+  const btnOpenCredits = document.getElementById('btn-open-credits');
+  const btnCloseCredits = document.getElementById('btn-close-credits');
+  const creditsModalOverlay = document.getElementById('credits-modal-overlay');
+
+  if (btnOpenCredits && creditsModalOverlay) {
+    btnOpenCredits.addEventListener('click', () => {
+      creditsModalOverlay.classList.remove('hidden');
+    });
+  }
+
+  if (btnCloseCredits && creditsModalOverlay) {
+    btnCloseCredits.addEventListener('click', () => {
+      creditsModalOverlay.classList.add('hidden');
+    });
+  }
+
+  if (creditsModalOverlay) {
+    creditsModalOverlay.addEventListener('click', (e) => {
+      if (e.target === creditsModalOverlay) {
+        creditsModalOverlay.classList.add('hidden');
+      }
+    });
+  }
+
   // Initial Boot
   updateTelemetrySummary();
 });
+

@@ -2303,6 +2303,172 @@ input, select, textarea {
   }
 }
 
+@media (max-width: 680px) {
+  .checkpoint-header {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .header-brand {
+    gap: 8px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .header-status {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .latency-indicator {
+    display: none;
+  }
+
+  .delivery-mode-pill {
+    display: none;
+  }
+
+  .btn-header-credits, .btn-header-phone, .btn-header-smtp, .btn-reset-top {
+    font-size: 0.72rem;
+    padding: 6px 8px;
+  }
+
+  .scenario-buttons-strip {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 6px 4px 10px;
+    gap: 8px;
+    width: 100%;
+    scrollbar-width: thin;
+  }
+
+  .btn-scenario {
+    flex: 0 0 auto;
+    min-width: 110px;
+    min-height: 46px;
+    scroll-snap-align: start;
+    padding: 6px 10px;
+  }
+
+  .phone-simulator-drawer {
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 8px !important;
+    width: auto !important;
+  }
+
+  .phone-simulator-drawer.hidden {
+    transform: translate(-50%, 110%) !important;
+  }
+
+  .phone-chassis {
+    width: min(320px, 92vw) !important;
+    height: min(530px, 80vh) !important;
+  }
+}
+
+/* ================= CREDITS BUTTON & MODAL ================= */
+.btn-header-credits {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background: #1E293B;
+  color: #F8FAFC;
+  border: 1px solid #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-header-credits:hover {
+  background: #0F172A;
+  border-color: #6366F1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
+.credits-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.credits-modal-overlay.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.credits-modal-box {
+  background: #0F172A;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  padding: 24px 28px;
+  max-width: 620px;
+  width: 100%;
+  color: #F8FAFC;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.15);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.credits-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.credits-modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.credits-modal-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #94A3B8;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.credits-modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+}
+
+
 /* ==========================================================================
    REALISM ENHANCEMENTS: CLOUDFLARE TURNSTILE, 6-BOX PIN, THREAT HUD,
    EMAIL TOAST NOTIFICATIONS & CORPORATE HTML EMAIL MODAL

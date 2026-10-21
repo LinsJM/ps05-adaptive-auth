@@ -118,6 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setCustomerApp(app) {
     currentApp = app;
+    const policyBadge = document.getElementById('policy-badge');
+    const policyDetail = document.getElementById('policy-detail');
+    const appPolicyBanner = document.getElementById('app-policy-banner');
+
     if (app === 'social') {
       pillBank.classList.remove('active');
       pillSocial.classList.add('active');
@@ -126,6 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
       appShell.classList.add('app-social');
       appHeadingText.textContent = 'Pulse Social Network';
       appSubheadText.textContent = 'User Social Identity Gateway';
+
+      if (policyBadge && policyDetail && appPolicyBanner) {
+        policyBadge.innerHTML = '⚡ SOCIAL ENGAGEMENT-BALANCED';
+        policyDetail.textContent = 'High Tolerance • Invisible Turnstile Proof-of-Work • Active Session Alerts';
+        appPolicyBanner.style.background = 'rgba(124, 58, 237, 0.2)';
+        appPolicyBanner.style.borderColor = 'rgba(167, 139, 250, 0.35)';
+      }
     } else {
       pillSocial.classList.remove('active');
       pillBank.classList.add('active');
@@ -134,6 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
       appShell.classList.remove('app-social');
       appHeadingText.textContent = 'Apex Trust Bank';
       appSubheadText.textContent = 'Client Online Financial Portal';
+
+      if (policyBadge && policyDetail && appPolicyBanner) {
+        policyBadge.innerHTML = '🏛️ BANK ZERO-TRUST';
+        policyDetail.textContent = 'Low Tolerance • Wire Lock on Unknown Endpoints • Out-of-Band Phone Verify';
+        appPolicyBanner.style.background = 'rgba(30, 58, 138, 0.25)';
+        appPolicyBanner.style.borderColor = 'rgba(59, 130, 246, 0.35)';
+      }
     }
   }
 
@@ -393,7 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return {
           points: typeof r.points === 'number' ? r.points : 0,
           signal: r.signal || 'RISK_SIGNAL',
-          detail: r.detail || JSON.stringify(r)
+          detail: r.detail || JSON.stringify(r),
+          category: r.category || null
         };
       } else {
         // String format parsing
@@ -403,7 +422,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return {
           points: pts,
           signal: 'TELEMETRY_ANOMALY',
-          detail: str
+          detail: str,
+          category: null
         };
       }
     });
@@ -422,11 +442,17 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (item.points === 0) ptsClass = 'pts-zero';
 
       const signStr = item.points >= 0 ? `+${item.points}` : `${item.points}`;
+      const categoryTag = item.category
+        ? `<span class="reason-category-tag" style="display:inline-block; font-size:0.67rem; font-weight:700; background:rgba(59, 130, 246, 0.15); border:1px solid rgba(59, 130, 246, 0.35); padding:1px 6px; border-radius:4px; margin-left:6px; color:#93C5FD;">${escapeHtml(item.category)}</span>`
+        : '';
 
       row.innerHTML = `
         <div class="reason-points-badge ${ptsClass}">${signStr} pts</div>
         <div class="reason-content">
-          <div class="reason-signal">${escapeHtml(item.signal.toUpperCase())}</div>
+          <div class="reason-signal" style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+            <span>${escapeHtml(item.signal.toUpperCase())}</span>
+            ${categoryTag}
+          </div>
           <div class="reason-detail">${escapeHtml(item.detail)}</div>
         </div>
       `;
@@ -755,13 +781,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deliveryMode) setPhoneDeliveryMode(deliveryMode);
 
     const appDisplayName = app === 'bank' ? 'Apex Trust Bank' : 'Pulse Social';
-    const isThreat = action === 'block' || score >= 80;
-    const isQuarantine = action === 'quarantine_verify' || action === 'otp_password_reset' || score >= 60;
-    const isNewDevice = !isThreat && !isQuarantine && (action === 'email_otp' || score >= 45);
+    const isResetReq = action === 'password_reset_request' || deliveryMode === 'password_reset_request' || anomaly === 'password_reset_request';
+    const isThreat = !isResetReq && (action === 'block' || score >= 80);
+    const isQuarantine = !isResetReq && (action === 'quarantine_verify' || action === 'otp_password_reset' || score >= 60);
+    const isNewDevice = !isResetReq && !isThreat && !isQuarantine && (action === 'email_otp' || score >= 45);
+
+    const btnPhoneResetAction = document.getElementById('btn-phone-reset-action');
 
     // 1. Lock screen Push Banner
     if (pushTitle) {
-      if (isThreat) {
+      if (isResetReq) {
+        pushTitle.textContent = `🔐 Password Recovery Request`;
+      } else if (isThreat) {
         pushTitle.textContent = `🚨 Critical Alert: Sign-In Blocked!`;
       } else if (isQuarantine) {
         pushTitle.textContent = `⚠️ Security Alert: Session Quarantined`;
@@ -771,11 +802,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (pushOtpHighlight) {
-      pushOtpHighlight.textContent = isNewDevice ? currentPhoneOtp : 'ALERT';
+      pushOtpHighlight.textContent = (isNewDevice || isResetReq) ? currentPhoneOtp : 'ALERT';
     }
 
     if (pushBody) {
-      if (isThreat) {
+      if (isResetReq) {
+        pushBody.innerHTML = `Password recovery requested for <strong>${escapeHtml(lastTargetEmail)}</strong>. PIN: <strong class="push-code-highlight">${escapeHtml(currentPhoneOtp)}</strong>. Tap to reset.`;
+      } else if (isThreat) {
         pushBody.innerHTML = `Intruder attempted sign-in with your password from <strong>${escapeHtml(loc || 'Moscow, RU')}</strong> (IP: ${escapeHtml(lastAttackerIp)}). Your credentials may be compromised!`;
       } else if (isQuarantine) {
         pushBody.innerHTML = `High-speed location jump detected from <strong>${escapeHtml(loc)}</strong> (IP: ${escapeHtml(lastAttackerIp)}). Out-of-band authorization required.`;
@@ -793,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (phoneSpecIpEl) phoneSpecIpEl.textContent = lastAttackerIp;
     const phoneSpecAnomalyEl = document.getElementById('phone-spec-anomaly');
     if (phoneSpecAnomalyEl) {
-      phoneSpecAnomalyEl.textContent = anomaly || (isThreat ? 'Compromised Password / Malicious Proxy (+95 pts)' : (isQuarantine ? 'Impossible Velocity Travel (+70 pts)' : 'Hardware Baseline Mismatch (+45 pts)'));
+      phoneSpecAnomalyEl.textContent = anomaly || (isResetReq ? 'Self-Service Password Reset (+0 pts)' : (isThreat ? 'Compromised Password / Malicious Proxy (+95 pts)' : (isQuarantine ? 'Impossible Velocity Travel (+70 pts)' : 'Hardware Baseline Mismatch (+45 pts)')));
     }
 
     const phonePromptBox = document.getElementById('phone-prompt-box');
@@ -808,8 +841,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const phoneCorpBadge = document.getElementById('phone-corp-badge');
     const phoneGmailSubject = document.getElementById('phone-gmail-subject');
 
-    if (isThreat || isQuarantine) {
+    if (isResetReq) {
+      // Password Reset Mode
+      if (phoneCorpTitle) phoneCorpTitle.textContent = 'DIGNITAS RECOVERY';
+      if (phoneCorpBadge) {
+        phoneCorpBadge.textContent = 'PASSWORD RESET';
+        phoneCorpBadge.style.background = '#2563EB';
+      }
+      if (phoneGmailSubject) phoneGmailSubject.textContent = '🔐 Password Reset Authorization Code';
+      if (phoneLeadText) {
+        phoneLeadText.textContent = 'A self-service password reset was initiated for your account. Use your 6-digit PIN below or reset your password on this device:';
+      }
+      if (phoneOtpBox) phoneOtpBox.classList.remove('hidden');
+      if (gmailOtpDigits) gmailOtpDigits.textContent = String(currentPhoneOtp).split('').join(' ');
+      if (phonePromptBox) phonePromptBox.classList.add('hidden');
+      if (btnPhoneAutofillEl) btnPhoneAutofillEl.classList.add('hidden');
+      if (btnPhoneResetAction) btnPhoneResetAction.classList.remove('hidden');
+      if (phoneThreatCard) phoneThreatCard.classList.add('hidden');
+    } else if (isThreat || isQuarantine) {
       // Threat Mode
+      if (btnPhoneResetAction) btnPhoneResetAction.classList.add('hidden');
       if (phoneCorpTitle) phoneCorpTitle.textContent = 'DIGNITAS THREAT RADAR';
       if (phoneCorpBadge) {
         phoneCorpBadge.textContent = isThreat ? 'CRITICAL BLOCK' : 'QUARANTINE';
@@ -845,6 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } else {
       // New Device Mode (Tier 3)
+      if (btnPhoneResetAction) btnPhoneResetAction.classList.add('hidden');
       if (phoneCorpTitle) phoneCorpTitle.textContent = 'DIGNITAS IDENTITY';
       if (phoneCorpBadge) {
         phoneCorpBadge.textContent = 'NEW DEVICE';
@@ -986,6 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Wire up phone buttons on load
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-phone-change-pwd')?.addEventListener('click', openPhonePasswordReset);
+    document.getElementById('btn-phone-reset-action')?.addEventListener('click', openPhonePasswordReset);
     document.getElementById('btn-phone-block-ip')?.addEventListener('click', blacklistAttackerIp);
     document.getElementById('btn-phone-approve-quarantine')?.addEventListener('click', approveQuarantineSession);
     document.getElementById('btn-reset-back')?.addEventListener('click', () => {
@@ -994,6 +1047,135 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('btn-phone-submit-reset')?.addEventListener('click', submitPhonePasswordReset);
   });
+
+  // -------------------------------------------------------------
+  // 5C. Self-Service Forgot Password Modal Handlers
+  // -------------------------------------------------------------
+  const btnForgotPassword = document.getElementById('btn-forgot-password');
+  const forgotModalBackdrop = document.getElementById('forgot-modal-backdrop');
+  const btnCloseForgotModal = document.getElementById('btn-close-forgot-modal');
+  const btnCancelForgot = document.getElementById('btn-cancel-forgot');
+  const forgotModalBodyStep1 = document.getElementById('forgot-modal-body-step1');
+  const forgotModalBodyStep2 = document.getElementById('forgot-modal-body-step2');
+  const inputForgotEmail = document.getElementById('input-forgot-email');
+  const inputRecoveryPin = document.getElementById('input-recovery-pin');
+  const inputRecoveryNewpass = document.getElementById('input-recovery-newpass');
+  const btnSendForgotPin = document.getElementById('btn-send-forgot-pin');
+  const btnSubmitRecoveryNewpass = document.getElementById('btn-submit-recovery-newpass');
+  const forgotStatusFeedback = document.getElementById('forgot-status-feedback');
+  const forgotStep2Feedback = document.getElementById('forgot-step2-feedback');
+
+  function openForgotModal() {
+    if (forgotModalBackdrop) {
+      forgotModalBackdrop.classList.remove('hidden');
+      if (forgotModalBodyStep1) forgotModalBodyStep1.classList.remove('hidden');
+      if (forgotModalBodyStep2) forgotModalBodyStep2.classList.add('hidden');
+      if (btnSendForgotPin) {
+        btnSendForgotPin.classList.remove('hidden');
+        btnSendForgotPin.disabled = false;
+        btnSendForgotPin.textContent = 'Send Recovery PIN →';
+      }
+      if (btnSubmitRecoveryNewpass) btnSubmitRecoveryNewpass.classList.add('hidden');
+      if (inputForgotEmail && inputEmail) {
+        inputForgotEmail.value = inputEmail.value.trim() || 'alice@example.com';
+      }
+      if (forgotStatusFeedback) forgotStatusFeedback.innerHTML = '';
+      if (forgotStep2Feedback) forgotStep2Feedback.innerHTML = '';
+    }
+  }
+
+  function closeForgotModal() {
+    if (forgotModalBackdrop) forgotModalBackdrop.classList.add('hidden');
+  }
+
+  if (btnForgotPassword) btnForgotPassword.addEventListener('click', openForgotModal);
+  if (btnCloseForgotModal) btnCloseForgotModal.addEventListener('click', closeForgotModal);
+  if (btnCancelForgot) btnCancelForgot.addEventListener('click', closeForgotModal);
+
+  if (btnSendForgotPin) {
+    btnSendForgotPin.addEventListener('click', async () => {
+      const email = inputForgotEmail ? inputForgotEmail.value.trim() : '';
+      if (!email) {
+        if (forgotStatusFeedback) forgotStatusFeedback.innerHTML = '<span style="color:#DC2626;">Please enter an email address.</span>';
+        return;
+      }
+      try {
+        btnSendForgotPin.disabled = true;
+        btnSendForgotPin.textContent = 'Dispatching PIN...';
+        const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, app_id: currentApp })
+        });
+        const data = await res.json();
+        btnSendForgotPin.disabled = false;
+        btnSendForgotPin.textContent = 'Send Recovery PIN →';
+
+        triggerPhoneSimulatorAlert({
+          email: email,
+          otp: data.otp_preview || '849201',
+          app: currentApp,
+          device: 'Self-Service Recovery',
+          loc: 'Account Security Center',
+          ip: 'Client Reset Session',
+          deliveryMode: 'password_reset_request',
+          score: 0,
+          action: 'password_reset_request',
+          anomaly: 'password_reset_request'
+        });
+
+        if (forgotModalBodyStep1) forgotModalBodyStep1.classList.add('hidden');
+        if (forgotModalBodyStep2) forgotModalBodyStep2.classList.remove('hidden');
+        if (btnSendForgotPin) btnSendForgotPin.classList.add('hidden');
+        if (btnSubmitRecoveryNewpass) btnSubmitRecoveryNewpass.classList.remove('hidden');
+        if (inputRecoveryPin && data.otp_preview) {
+          inputRecoveryPin.value = data.otp_preview;
+        }
+      } catch (err) {
+        btnSendForgotPin.disabled = false;
+        btnSendForgotPin.textContent = 'Send Recovery PIN →';
+        if (forgotStatusFeedback) forgotStatusFeedback.innerHTML = `<span style="color:#DC2626;">Error: ${escapeHtml(err.message)}</span>`;
+      }
+    });
+  }
+
+  if (btnSubmitRecoveryNewpass) {
+    btnSubmitRecoveryNewpass.addEventListener('click', async () => {
+      const email = inputForgotEmail ? inputForgotEmail.value.trim() : '';
+      const newPass = inputRecoveryNewpass ? inputRecoveryNewpass.value.trim() : '';
+      if (!newPass || newPass.length < 6) {
+        if (forgotStep2Feedback) forgotStep2Feedback.innerHTML = '<span style="color:#DC2626;">Password must be at least 6 characters.</span>';
+        return;
+      }
+      try {
+        btnSubmitRecoveryNewpass.disabled = true;
+        btnSubmitRecoveryNewpass.textContent = 'Securing Account...';
+        const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            new_password: newPass,
+            reason: 'Self-service forgot password verification'
+          })
+        });
+        const data = await res.json();
+        btnSubmitRecoveryNewpass.disabled = false;
+        btnSubmitRecoveryNewpass.textContent = 'Set New Password';
+        if (data.success) {
+          if (inputPassword) inputPassword.value = newPass;
+          closeForgotModal();
+          alert(`✓ Password successfully reset for ${email}! You can now sign in with your new password.`);
+        } else {
+          if (forgotStep2Feedback) forgotStep2Feedback.innerHTML = `<span style="color:#DC2626;">${escapeHtml(data.message || 'Reset failed')}</span>`;
+        }
+      } catch (err) {
+        btnSubmitRecoveryNewpass.disabled = false;
+        btnSubmitRecoveryNewpass.textContent = 'Set New Password';
+        if (forgotStep2Feedback) forgotStep2Feedback.innerHTML = `<span style="color:#DC2626;">Error: ${escapeHtml(err.message)}</span>`;
+      }
+    });
+  }
 
   // -------------------------------------------------------------
   // 5B. Target Enrollment (Judge Account) & SMTP Modal Handlers

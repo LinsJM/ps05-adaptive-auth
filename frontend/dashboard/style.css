@@ -4060,5 +4060,12 @@ input, select, textarea {
   background: #1D4ED8 !important;
 }
 
+.link-forgot-password:hover {
+  color: #93C5FD !important;
+  text-decoration: underline;
+}
 
-
+.btn-phone-reset-action:hover {
+  background: #1D4ED8 !important;
+  transform: translateY(-1px);
+}

@@ -368,6 +368,8 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             message="Access Denied: High-risk intrusion blocked. Source IP blacklisted and password compromise alert dispatched.",
             latency_ms=latency_ms,
             app_id=payload.app_id or "bank",
+            primary_threat_vector=risk_res.primary_threat_vector,
+            app_policy=risk_res.app_policy,
         )
 
     # 2. STEP-UP MFA REQUIRED (Tier 2: CAPTCHA; Tier 3: Email OTP; Tier 4: Session Quarantine)
@@ -464,6 +466,8 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             message=challenge_messages.get(risk_res.action, "Step-up verification required."),
             latency_ms=latency_ms,
             app_id=payload.app_id or "bank",
+            primary_threat_vector=risk_res.primary_threat_vector,
+            app_policy=risk_res.app_policy,
         )
 
     # 3. INVALID CREDENTIALS (Only checked when no step-up is pending)
@@ -497,6 +501,8 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
             message="Incorrect email or password",
             latency_ms=latency_ms,
             app_id=payload.app_id or "bank",
+            primary_threat_vector=risk_res.primary_threat_vector,
+            app_policy=risk_res.app_policy,
         )
 
 
@@ -551,6 +557,8 @@ def login(payload: schemas.LoginRequest, request: Request, db: Session = Depends
         message="Authentication successful. Frictionless access granted.",
         latency_ms=latency_ms,
         app_id=payload.app_id or "bank",
+        primary_threat_vector=risk_res.primary_threat_vector,
+        app_policy=risk_res.app_policy,
     )
 
 
@@ -1008,4 +1016,48 @@ def blacklist_ip(payload: schemas.BlacklistIpRequest, db: Session = Depends(get_
     return {
         "success": True,
         "message": f"IP address {clean_ip} has been permanently blacklisted in SQLite."
+    }
+
+
+@router.post("/api/auth/forgot-password")
+def forgot_password(payload: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """Handles self-service forgot password requests.
+    Generates a secure 6-digit recovery OTP and dispatches out-of-band email notification to phone sim & SMTP."""
+    email = payload.email.strip().lower()
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        return {
+            "success": True,
+            "message": f"If an account exists for {email}, recovery instructions and a 6-digit PIN have been sent.",
+            "otp_preview": None
+        }
+
+    recovery_otp = str(random.randint(100000, 999999))
+    subject = f"🔐 Password Reset Request for {email}"
+    body = (
+        f"A password reset was requested for your account ({email}).\n\n"
+        f"Your 6-digit recovery authorization code is: {recovery_otp}\n\n"
+        f"If you made this request, enter this code on the reset screen or use the interactive reset link on your smartphone to create a new password.\n\n"
+        f"If you did NOT request this, someone may be attempting to access your account."
+    )
+
+    add_security_notification(
+        notification_type="password_reset_request",
+        recipient=email,
+        subject=subject,
+        app_id=payload.app_id or "bank",
+        device="Self-Service Portal",
+        location="Account Recovery",
+        ip="Client Self-Service",
+        risk_score=0,
+        action="allow",
+        reasons=["User initiated account password recovery"],
+        preview_body=body,
+        otp_code=recovery_otp,
+    )
+
+    return {
+        "success": True,
+        "message": f"Password recovery instructions sent to {email}. Check your phone simulator or inbox.",
+        "otp_preview": recovery_otp,
     }

@@ -29,6 +29,34 @@ MIN_LOGINS_FOR_HOUR = 5     # cold-start rule: need history before judging hours
 HOUR_TOLERANCE = 3          # hours either side of a usual login time
 
 
+# 5 Distinct Threat Vectors in Login Security (Banking & Social Media)
+THREAT_CATEGORIES = {
+    # 1. Credential Replay & Leaks (Compromised Secrets)
+    "honeytoken": "1. Credential Replay & Leaks",
+    "breached_credential": "1. Credential Replay & Leaks",
+    "account_locked": "1. Credential Replay & Leaks",
+
+    # 2. Automated & High-Velocity Threats (Bots & Brute Force)
+    "repeated_failures": "2. Automated & Bot Velocity",
+    "credential_stuffing": "2. Automated & Bot Velocity",
+
+    # 3. Device & Environment Posture Threats
+    "new_device": "3. Device & Environment Posture",
+    "untrusted_hardware": "3. Device & Environment Posture",
+
+    # 4. Network & Geolocation Anomalies (Impossible Travel)
+    "new_country": "4. Network & Location Anomalies",
+    "impossible_travel": "4. Network & Location Anomalies",
+    "vpn_tor_proxy": "4. Network & Location Anomalies",
+    "flagged_ip": "4. Network & Location Anomalies",
+
+    # 5. Behavioral Anomalies & Session Hijacking
+    "unusual_hour": "5. Behavioral & Biometrics",
+    "abrupt_change": "5. Behavioral & Biometrics",
+    "cross_app_threat": "5. Behavioral & Biometrics",
+}
+
+
 @dataclass
 class RiskResult:
     score: int
@@ -37,6 +65,8 @@ class RiskResult:
     action: str = "allow"  # allow / captcha / email_otp / otp_password_reset / block (Brief policy)
     requires_step_up: bool = False
     step_up_type: Optional[str] = None
+    primary_threat_vector: Optional[str] = None
+    app_policy: Optional[dict] = None
 
     def reasons_json(self) -> str:
         return json.dumps(self.reasons)
@@ -120,7 +150,23 @@ def evaluate(
     clean_email = email.strip().lower()
 
     def add(signal: str, points: int, detail: str):
-        reasons.append({"signal": signal, "points": points, "detail": detail})
+        cat = THREAT_CATEGORIES.get(signal, "5. Behavioral & Biometrics")
+        reasons.append({"signal": signal, "points": points, "detail": detail, "category": cat})
+
+    if app_id == "bank":
+        policy_info = {
+            "profile": "Apex Bank Zero-Trust Policy",
+            "risk_tolerance": "Low Friction Tolerance (Strict Fraud Prevention)",
+            "primary_goal": "Prevent unauthorized financial loss, wire fraud, and regulatory breach",
+            "fallback_action": "Hard block, freeze credentials, or out-of-band banking app prompt",
+        }
+    else:
+        policy_info = {
+            "profile": "Pulse Social Engagement-Preserving Policy",
+            "risk_tolerance": "High Friction Tolerance (Optimizes Engagement & Rapid Access)",
+            "primary_goal": "Prevent spam botnets, brand impersonation, and mass account theft",
+            "fallback_action": "Step-up OTP challenge, self-service recovery, or invisible Turnstile CAPTCHA",
+        }
 
     # 1. HONEYTOKEN TRAP: backup_admin
     if clean_email == "backup_admin":
@@ -142,7 +188,9 @@ def evaluate(
             reasons=reasons,
             action="block",
             requires_step_up=False,
-            step_up_type=None
+            step_up_type=None,
+            primary_threat_vector="1. Credential Replay & Leaks",
+            app_policy=policy_info,
         )
 
     # 2. ACCOUNT LOCKED STATUS
@@ -154,7 +202,9 @@ def evaluate(
             reasons=reasons,
             action="block",
             requires_step_up=False,
-            step_up_type=None
+            step_up_type=None,
+            primary_threat_vector="1. Credential Replay & Leaks",
+            app_policy=policy_info,
         )
 
     # 3. FLAGGED IP CHECK
@@ -297,11 +347,23 @@ def evaluate(
     else:
         decision = "allow"
 
+    # Calculate primary threat vector
+    if reasons:
+        category_sums = {}
+        for r in reasons:
+            c = r.get("category", "5. Behavioral & Biometrics")
+            category_sums[c] = category_sums.get(c, 0) + r.get("points", 0)
+        primary_threat = max(category_sums.items(), key=lambda x: x[1])[0]
+    else:
+        primary_threat = "Frictionless / Habitual Baseline"
+
     return RiskResult(
         score=score,
         decision=decision,
         reasons=reasons,
         action=action,
         requires_step_up=requires_step_up,
-        step_up_type=step_up_type
+        step_up_type=step_up_type,
+        primary_threat_vector=primary_threat,
+        app_policy=policy_info,
     )

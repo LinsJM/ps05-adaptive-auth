@@ -140,6 +140,16 @@
               </div>
             </div>
 
+            <!-- Adaptive App Threat & Friction Profile Banner -->
+            <div class="app-policy-banner" id="app-policy-banner" style="display:flex; align-items:center; justify-content:space-between; background:rgba(30, 58, 138, 0.25); border:1px solid rgba(59, 130, 246, 0.35); border-radius:8px; padding:6px 10px; margin-bottom:14px; font-size:0.75rem;">
+              <span class="policy-badge" id="policy-badge" style="font-weight:800; color:#93C5FD; display:flex; align-items:center; gap:5px;">
+                🏛️ BANK ZERO-TRUST
+              </span>
+              <span class="policy-detail" id="policy-detail" style="color:#CBD5E1; font-size:0.7rem;">
+                Low Tolerance • Wire Lock on Unknown Endpoints • Out-of-Band Phone Verify
+              </span>
+            </div>
+
             <!-- Authentic Login Form Card -->
             <div class="app-login-card">
               <div class="app-brand-row">
@@ -169,6 +179,15 @@
                 <div class="input-field">
                   <label for="input-password">Account Password</label>
                   <input type="password" id="input-password" value="Password123!" autocomplete="current-password" required>
+                </div>
+
+                <div class="login-sub-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:0.78rem;">
+                  <label class="remember-label" style="display:flex; align-items:center; gap:6px; color:#94A3B8; cursor:pointer;">
+                    <input type="checkbox" id="check-remember" checked style="accent-color:#2563EB;"> Remember Device
+                  </label>
+                  <button type="button" class="link-forgot-password" id="btn-forgot-password" style="background:none; border:none; color:#60A5FA; font-size:0.78rem; font-weight:600; cursor:pointer; text-decoration:underline;">
+                    Forgot password?
+                  </button>
                 </div>
 
                 <button type="submit" class="btn-primary-signin" id="btn-app-signin">
@@ -572,6 +591,55 @@
     </div>
   </div>
 
+  <!-- ================= 🔐 SELF-SERVICE FORGOT PASSWORD MODAL ================= -->
+  <div class="email-modal-backdrop hidden" id="forgot-modal-backdrop">
+    <div class="smtp-dialog" style="max-width: 440px;">
+      <div class="smtp-modal-header">
+        <div class="smtp-modal-title">
+          <span>🔐</span> Self-Service Password Recovery
+        </div>
+        <button class="btn-close-modal" id="btn-close-forgot-modal" title="Close modal">✕</button>
+      </div>
+
+      <div class="smtp-modal-body" id="forgot-modal-body-step1">
+        <div class="target-explainer-banner" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #93C5FD;">
+          Enter your registered email address. DIGNITAS will dispatch a secure 6-digit recovery PIN to your Phone Simulator and secondary email channel.
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-forgot-email">Account Identifier / Email</label>
+          <input type="email" id="input-forgot-email" placeholder="alice@example.com" value="alice@example.com">
+        </div>
+
+        <div id="forgot-status-feedback" style="font-size: 0.76rem; font-weight: 600; padding: 4px 0;"></div>
+      </div>
+
+      <div class="smtp-modal-body hidden" id="forgot-modal-body-step2">
+        <div class="target-explainer-banner" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #6EE7B7;">
+          ✓ Recovery code dispatched! Check your Phone Simulator notification.
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-recovery-pin">6-Digit Recovery PIN</label>
+          <input type="text" id="input-recovery-pin" placeholder="e.g. 849201" maxlength="6" style="font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; letter-spacing: 3px; text-align: center;">
+        </div>
+
+        <div class="smtp-form-group">
+          <label for="input-recovery-newpass">New Secure Password</label>
+          <input type="password" id="input-recovery-newpass" placeholder="Enter new password (min 6 characters)">
+        </div>
+
+        <div id="forgot-step2-feedback" style="font-size: 0.76rem; font-weight: 600; padding: 4px 0;"></div>
+      </div>
+
+      <div class="smtp-modal-footer">
+        <button type="button" class="btn-modal-cancel" id="btn-cancel-forgot">Cancel</button>
+        <button type="button" class="btn-modal-submit" id="btn-send-forgot-pin">Send Recovery PIN &rarr;</button>
+        <button type="button" class="btn-modal-submit hidden" id="btn-submit-recovery-newpass">Set New Password</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= 📱 JUDGE'S SMARTPHONE SIMULATOR (IPHONE 15 PRO) ================= -->
   <div class="phone-simulator-drawer hidden" id="phone-simulator-drawer">
     <div class="phone-chassis">
@@ -679,6 +747,11 @@
             <!-- Auto-Fill Bridge Button -->
             <button class="btn-phone-autofill" id="btn-phone-autofill" style="margin-top:8px;">
               📋 Auto-Fill Passcode on Laptop
+            </button>
+
+            <!-- In-Phone Password Reset Action Button (shown when password_reset_request arrives) -->
+            <button type="button" class="btn-phone-reset-action hidden" id="btn-phone-reset-action" style="margin-top:8px; width:100%; padding:9px; background:#2563EB; color:#FFF; border:none; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer;">
+              🔑 Reset Password on Phone &rarr;
             </button>
           </div>
 

@@ -56,6 +56,8 @@ class LoginResponse(BaseModel):
     message: Optional[str] = "Authentication successful"
     latency_ms: Optional[float] = 0.0
     app_id: Optional[str] = "bank"
+    primary_threat_vector: Optional[str] = None
+    app_policy: Optional[dict] = None
 
 
 class StepUpVerifyRequest(BaseModel):
@@ -73,6 +75,11 @@ class PromptVerifyRequest(BaseModel):
     app_id: str = "bank"
     approved: bool
     new_password: Optional[str] = None
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+    app_id: Optional[str] = "bank"
 
 
 class PasswordResetRequest(BaseModel):

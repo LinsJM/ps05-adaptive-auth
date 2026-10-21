@@ -62,21 +62,40 @@ Test health: `curl http://localhost:8000/api/health`
 
 ---
 
-## Option 3: Free Cloud Deployment (Render.com)
+## Option 3: Free Serverless Deployment (Vercel)
+
+You can deploy DIGNITAS directly to Vercel in 60 seconds with zero server management:
+
+### Method A: Deploying from the Repository Root (Recommended)
+1. In Vercel, click **Add New... > Project** and import `ps05-adaptive-auth` (or your fork).
+2. Keep **Root Directory** as `./` (default).
+3. Framework Preset: **Other**.
+4. Click **Deploy**. Vercel will automatically read `vercel.json`, route API traffic to `api/index.py`, and serve the static landing page and interactive gateway.
+
+### Method B: Deploying with Root Directory set to `backend`
+If you imported only the `backend` folder on Vercel:
+1. In Vercel Project Settings, **Root Directory** is set to `backend`.
+2. Vercel reads `backend/vercel.json` and runs `backend/api/index.py`.
+3. The embedded frontend inside `backend/static/` automatically serves `/landing/` and `/dashboard/`.
+4. The root `/` cleanly opens the landing showcase without any 404 error.
+
+---
+
+## Option 4: Free Cloud Deployment (Render.com)
 
 1. Fork or push your repo to GitHub: `https://github.com/LinsJM/ps05-adaptive-auth`
 2. Go to [Render.com](https://render.com) and click **New + > Web Service**.
 3. Connect your GitHub repository.
 4. Set the following settings (or Render will auto-detect from `render.yaml`):
    - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r backend/requirements.txt`
-   - **Start Command**: `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - **Build Command**: `pip install -r requirements.txt || pip install -r backend/requirements.txt`
+   - **Start Command**: `python -c "import os; os.chdir('backend') if os.path.isdir('backend') else None; import uvicorn; uvicorn.run('main:app', host='0.0.0.0', port=int(os.getenv('PORT', 8000)))"`
    - **Health Check Path**: `/api/health`
-5. Click **Create Web Service**. Your app will be live at `https://dignitas-adaptive-auth.onrender.com` in ~2 minutes!
+5. Click **Create Web Service**. Your app will be live in ~2 minutes!
 
 ---
 
-## Option 4: Cloud Deployment (Railway.app / Fly.io)
+## Option 5: Cloud Deployment (Railway.app / Fly.io)
 
 ### Railway:
 1. Go to [Railway.app](https://railway.app), click **New Project > Deploy from GitHub repo**.

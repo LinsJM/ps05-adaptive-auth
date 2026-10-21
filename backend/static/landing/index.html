@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIGNITAS — PS05 Adaptive Authentication & Threat Intelligence Gateway</title>
+  <meta name="description" content="Adaptive Authentication and Suspicious Login Detection Gateway. Zero-friction access for legitimate users, sub-10ms explainable risk scoring, and graduated 5-tier threat mitigation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="landing-page">
+
+  <!-- ================= TRANSLUCENT 3D AMBIENT SCENE & ORBS ================= -->
+  <div class="ambient-3d-scene" aria-hidden="true">
+    <div class="ambient-orb orb-1" id="orb-1" data-speed="0.12"></div>
+    <div class="ambient-orb orb-2" id="orb-2" data-speed="-0.18"></div>
+    <div class="ambient-orb orb-3" id="orb-3" data-speed="0.22"></div>
+    <div class="ambient-orb orb-4" id="orb-4" data-speed="-0.14"></div>
+    <div class="ambient-3d-grid" id="ambient-grid"></div>
+  </div>
+
+  <!-- Top Scroll Reading Progress Indicator -->
+  <div class="scroll-progress-line" id="scroll-progress-line"></div>
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <div class="brand-group">
+        <a href="#hero" class="brand-link">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <path d="M9 3v18"/>
+              <path d="M15 9l-3 3 3 3"/>
+            </svg>
+          </div>
+          <div class="brand-title-wrap">
+            <span class="brand-title">DIGNITAS</span>
+            <span class="brand-pill">PS05 GATEWAY</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#problem" class="nav-link">Problem PS05</a>
+        <a href="#solution" class="nav-link">Solution Matrix</a>
+        <a href="#policy" class="nav-link">5-Tier Policy</a>
+        <a href="#simulator" class="nav-link">Interactive Simulator</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+        <a href="#scenarios" class="nav-link">Live Scenarios</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="../dashboard/soc.html" class="btn-nav-soc" title="Open Security Operations Center & ACID SQL Explorer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
+          SOC Threat Feed
+        </a>
+        <a href="../dashboard/index.html" class="btn-nav-primary" title="Launch Interactive Gateway Demo">
+          <span>🚀 Launch Live Gateway</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section class="hero-section" id="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-grid-overlay"></div>
+
+    <div class="hero-container">
+      <!-- Left Column: Problem Statement & Value Prop -->
+      <div class="hero-content reveal-3d">
+        <div class="hero-eyebrow">
+          <span class="pulsing-radar-dot"></span>
+          <span>PROBLEM STATEMENT PS05 SOLVED • ZERO-FRICTION SECURITY</span>
+        </div>
+
+        <h1 class="hero-title">
+          Zero Friction for Real Users.<br>
+          <span class="gradient-text">Immediate Defense</span> Against Stolen Credentials.
+        </h1>
+
+        <p class="hero-subtitle">
+          Passwords alone are broken. Stolen databases, credential stuffing, and botnets bypass traditional login forms. 
+          <strong>DIGNITAS</strong> evaluates client telemetry in <strong>&lt;10 milliseconds</strong> — dynamically adapting between Frictionless Pass, Cloudflare CAPTCHA, Step-Up OTP, and Instant Threat Lockdown.
+        </p>
+
+        <div class="hero-badges-row">
+          <div class="hero-stat-badge">
+            <span class="stat-number">&lt; 8.5 ms</span>
+            <span class="stat-label">Decision Latency</span>
+          </div>
+          <div class="hero-stat-badge">
+            <span class="stat-number">5-Tier</span>
+            <span class="stat-label">Graduated Response</span>
+          </div>
+          <div class="hero-stat-badge">
+            <span class="stat-number">100%</span>
+            <span class="stat-label">Explainable Scoring</span>
+          </div>
+          <div class="hero-stat-badge">
+            <span class="stat-number">ACID SQL</span>
+            <span class="stat-label">Immutable Telemetry</span>
+          </div>
+        </div>
+
+        <div class="hero-cta-cluster">
+          <a href="../dashboard/index.html" class="btn-hero-primary" id="btn-hero-launch">
+            <span>🚀 Launch Live Gateway Demo</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a href="../dashboard/soc.html" class="btn-hero-secondary">
+            <span>🛡️ Inspect SOC Audit Feed</span>
+          </a>
+          <a href="#problem" class="btn-hero-outline">
+            <span>Problem Statement PS05 ↓</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Live Risk Calculator Widget -->
+      <div class="hero-widget-col">
+        <div class="interactive-calculator-card floating-3d tilt-card" id="hero-simulator-widget">
+          <div class="calc-header">
+            <div class="calc-header-title">
+              <span class="calc-dot"></span>
+              <strong>LIVE RISK CALCULATOR</strong>
+              <span class="calc-tag">INTERACTIVE PREVIEW</span>
+            </div>
+            <div class="calc-latency">
+              <span>LATENCY:</span> <strong>7.4 ms</strong>
+            </div>
+          </div>
+
+          <div class="calc-body">
+            <p class="calc-prompt">Toggle client signals below to watch the gateway score anomalies in real time:</p>
+
+            <div class="calc-toggles-grid">
+              <label class="calc-toggle-item" id="toggle-lbl-device">
+                <input type="checkbox" id="calc-toggle-device">
+                <span class="toggle-switch"></span>
+                <div class="toggle-text">
+                  <strong class="toggle-title">Unrecognized Device</strong>
+                  <span class="toggle-desc">Hardware ID mismatch (+45 pts)</span>
+                </div>
+              </label>
+
+              <label class="calc-toggle-item" id="toggle-lbl-tor">
+                <input type="checkbox" id="calc-toggle-tor">
+                <span class="toggle-switch"></span>
+                <div class="toggle-text">
+                  <strong class="toggle-title">Tor Exit Node / VPN</strong>
+                  <span class="toggle-desc">Anonymized proxy network (+25 pts)</span>
+                </div>
+              </label>
+
+              <label class="calc-toggle-item" id="toggle-lbl-hours">
+                <input type="checkbox" id="calc-toggle-hours">
+                <span class="toggle-switch"></span>
+                <div class="toggle-text">
+                  <strong class="toggle-title">Off-Hours Anomaly</strong>
+                  <span class="toggle-desc">Sign-in at 3:00 AM UTC (+10 pts)</span>
+                </div>
+              </label>
+
+              <label class="calc-toggle-item" id="toggle-lbl-attempts">
+                <input type="checkbox" id="calc-toggle-attempts">
+                <span class="toggle-switch"></span>
+                <div class="toggle-text">
+                  <strong class="toggle-title">Repeated Failed Attempts</strong>
+                  <span class="toggle-desc">Fast repeated tries / Bot presence (+35 pts)</span>
+                </div>
+              </label>
+
+              <label class="calc-toggle-item" id="toggle-lbl-honey">
+                <input type="checkbox" id="calc-toggle-honey">
+                <span class="toggle-switch"></span>
+                <div class="toggle-text">
+                  <strong class="toggle-title text-danger">Honeytoken Trap Account</strong>
+                  <span class="toggle-desc">Targeting <code>backup_admin</code> (+100 pts)</span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Dynamic Decision Gauge Inside Hero -->
+            <div class="calc-result-box">
+              <div class="calc-score-row">
+                <div class="calc-score-left">
+                  <span class="calc-score-label">CALCULATED RISK SCORE:</span>
+                  <div class="calc-score-value">
+                    <span id="hero-calc-score">0</span>
+                    <span class="calc-score-denom">/100</span>
+                  </div>
+                </div>
+                <div class="calc-badge-wrap">
+                  <span class="calc-decision-badge badge-allow" id="hero-calc-badge">ALLOW (0–29)</span>
+                  <span class="calc-action-desc" id="hero-calc-desc">Frictionless pass approved</span>
+                </div>
+              </div>
+
+              <!-- Segmented Bar -->
+              <div class="calc-meter-track">
+                <div class="calc-meter-needle" id="hero-calc-needle" style="left: 0%;"></div>
+                <div class="calc-seg seg-allow" title="0-29: Allow"></div>
+                <div class="calc-seg seg-captcha" title="30-44: Captcha"></div>
+                <div class="calc-seg seg-otp" title="45-59: Email OTP & Device Trust"></div>
+                <div class="calc-seg seg-quarantine" title="60-79: Session Quarantine"></div>
+                <div class="calc-seg seg-block" title="80-100: Block"></div>
+              </div>
+            </div>
+
+            <a href="../dashboard/index.html" class="btn-test-in-gateway" id="btn-calc-gateway-link">
+              <span>Execute This Scenario in Live Gateway →</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PROBLEM STATEMENT PS05 DEEP-DIVE ================= -->
+  <section class="section-problem" id="problem">
+    <div class="section-container">
+      <div class="section-header-center reveal-3d">
+        <span class="section-eyebrow">PROBLEM STATEMENT PS05</span>
+        <h2 class="section-title">The Flaw in Traditional Authentication</h2>
+        <p class="section-lead">
+          Why passwords alone fail against modern attackers, and why static 2FA drives legitimate users away.
+        </p>
+      </div>
+
+      <div class="problem-cards-grid">
+        <div class="problem-card tilt-card reveal-3d" data-stagger="0">
+          <div class="problem-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="problem-card-title">1. Credential Stuffing & Breaches</h3>
+          <p class="problem-card-text">
+            Attackers rarely crack encryption. They take 2.4 billion credentials from public dark-web breaches and test them against corporate logins via automated botnets. A standard password form cannot distinguish between a real employee and a bot script.
+          </p>
+          <div class="problem-tag">PS05 VULNERABILITY</div>
+        </div>
+
+        <div class="problem-card tilt-card reveal-3d" data-stagger="1">
+          <div class="problem-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+          </div>
+          <h3 class="problem-card-title">2. Rigid MFA Causes Fatigue</h3>
+          <p class="problem-card-text">
+            Forcing an SMS OTP or authenticator prompt on every single sign-in creates 40%+ friction. Users suffer "MFA Fatigue", mindlessly approving malicious prompts or abandoning transactions entirely. Security must be frictionless when safe.
+          </p>
+          <div class="problem-tag">USER FRICTION DILEMMA</div>
+        </div>
+
+        <div class="problem-card tilt-card reveal-3d" data-stagger="2">
+          <div class="problem-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3 class="problem-card-title">3. Black-Box / Opaque Decisions</h3>
+          <p class="problem-card-text">
+            Most commercial adaptive systems output vague "risk detected" errors with zero explainability. SOC analysts cannot determine why a user was blocked, and developers cannot audit the weights or correlate telemetry with SQL databases.
+          </p>
+          <div class="problem-tag">AUDITABILITY GAP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SOLUTION MATRIX ================= -->
+  <section class="section-solution" id="solution">
+    <div class="section-container">
+      <div class="section-header-center reveal-3d">
+        <span class="section-eyebrow">DIGNITAS ARCHITECTURAL ADVANTAGE</span>
+        <h2 class="section-title">Traditional Auth vs. DIGNITAS PS05 Gateway</h2>
+        <p class="section-lead">A direct, quantifiable comparison of security postures.</p>
+      </div>
+
+      <div class="matrix-table-wrap tilt-card reveal-3d">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th class="col-metric">Security & Architectural Metric</th>
+              <th class="col-legacy">Legacy Authentication</th>
+              <th class="col-dignitas">DIGNITAS Adaptive Gateway (PS05)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Legitimate User Friction</strong></td>
+              <td class="text-neg">High: 2FA required on 100% of logins</td>
+              <td class="text-pos">Zero: 95% of safe sessions pass frictionlessly in &lt;10ms</td>
+            </tr>
+            <tr>
+              <td><strong>Credential Stuffing Mitigation</strong></td>
+              <td class="text-neg">Vulnerable: Valid passwords pass freely</td>
+              <td class="text-pos">Active: Catches hardware mismatch (+35 pts) & Tor (+40 pts)</td>
+            </tr>
+            <tr>
+              <td><strong>Decision Explainability</strong></td>
+              <td class="text-neg">None: Binary Pass / Fail status</td>
+              <td class="text-pos">100% Transparent: Itemized mathematical points per signal</td>
+            </tr>
+            <tr>
+              <td><strong>Graduated Mitigation</strong></td>
+              <td class="text-neg">Binary: Either Allow or Full Block</td>
+              <td class="text-pos">5-Tier: Allow &rarr; Turnstile &rarr; OTP &amp; Trust &rarr; Quarantine &rarr; Block &amp; Advisory</td>
+            </tr>
+            <tr>
+              <td><strong>Deception & Honeypot Defenses</strong></td>
+              <td class="text-neg">Absent: Decoys treated as real users</td>
+              <td class="text-pos">Automated: Honeytoken <code>backup_admin</code> auto-blacklists IP</td>
+            </tr>
+            <tr>
+              <td><strong>SOC & Audit Storage</strong></td>
+              <td class="text-neg">Ephemeral / Volatile log files</td>
+              <td class="text-pos">Relational SQLite ACID DB with live explorer & search</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 5-TIER GRADUATED POLICY ================= -->
+  <section class="section-policy" id="policy">
+    <div class="section-container">
+      <div class="section-header-center reveal-3d">
+        <span class="section-eyebrow">GRADUATED MITIGATION ENGINE</span>
+        <h2 class="section-title">The 5-Tier Adaptive Security Policy</h2>
+        <p class="section-lead">
+          DIGNITAS rejects the binary "Allow / Block" model in favor of proportional challenge escalation.
+        </p>
+      </div>
+
+      <div class="tiers-grid">
+        <!-- Tier 1 -->
+        <div class="tier-card tier-card-allow tilt-card reveal-3d" data-stagger="0">
+          <div class="tier-header">
+            <span class="tier-badge">TIER 1 (0–29 PTS)</span>
+            <span class="tier-action-name">ALLOW</span>
+          </div>
+          <h3 class="tier-title">Frictionless Passage</h3>
+          <p class="tier-desc">
+            Known hardware ID, familiar domestic IP address, and regular login hours. User receives instant access with zero MFA fatigue.
+          </p>
+          <div class="tier-footer-metric">Latency: ~4.5 ms • JWT Generated</div>
+        </div>
+
+        <!-- Tier 2 -->
+        <div class="tier-card tier-card-captcha tilt-card reveal-3d" data-stagger="1">
+          <div class="tier-header">
+            <span class="tier-badge">TIER 2 (30–44 PTS)</span>
+            <span class="tier-action-name">CAPTCHA</span>
+          </div>
+          <h3 class="tier-title">Human Verification</h3>
+          <p class="tier-desc">
+            Repeated login attempts or mild anomaly. Enforces Cloudflare Turnstile to stop automated headless scripts without requiring email OTP.
+          </p>
+          <div class="tier-footer-metric">Friction: ~2s • Headless Bot Intercepted</div>
+        </div>
+
+        <!-- Tier 3 -->
+        <div class="tier-card tier-card-otp tilt-card reveal-3d" data-stagger="2">
+          <div class="tier-header">
+            <span class="tier-badge">TIER 3 (45–59 PTS)</span>
+            <span class="tier-action-name">EMAIL OTP</span>
+          </div>
+          <h3 class="tier-title">Step-Up MFA & Device Enrollment</h3>
+          <p class="tier-desc">
+            Unrecognized hardware mismatch (45–59 pts). Out-of-band 6-digit passcode sent to trusted email/phone. Crucially includes: <em>"Trust this device for 30 days?"</em>. Upon verification, device fingerprint is stored in SQLite <code>known_devices</code> so future sign-ins pass frictionlessly at Tier 1.
+          </p>
+          <div class="tier-footer-metric">iPhone Simulator Chime / Live SMTP • Baseline Enrolled</div>
+        </div>
+
+        <!-- Tier 4 -->
+        <div class="tier-card tier-card-quarantine tilt-card reveal-3d" data-stagger="3">
+          <div class="tier-header">
+            <span class="tier-badge">TIER 4 (60–79 PTS)</span>
+            <span class="tier-action-name">QUARANTINE</span>
+          </div>
+          <h3 class="tier-title">Session Quarantine & Out-of-Band Approval</h3>
+          <p class="tier-desc">
+            Impossible velocity travel, Tor node sign-in, or high-threat anomaly (60–79 pts). Eliminates dangerous in-band password changes. Session is quarantined; an urgent Security Verification / Magic Approval Link is dispatched directly to the user's registered inbox.
+          </p>
+          <div class="tier-footer-metric">Out-of-Band Email Approval • Remote Hijack Blocked</div>
+        </div>
+
+        <!-- Tier 5 -->
+        <div class="tier-card tier-card-block tilt-card reveal-3d" data-stagger="4">
+          <div class="tier-header">
+            <span class="tier-badge">TIER 5 (80–100 PTS)</span>
+            <span class="tier-action-name">BLOCK</span>
+          </div>
+          <h3 class="tier-title">Intrusion Lockdown & Compromised Password Advisory Email</h3>
+          <p class="tier-desc">
+            Hit on Honeytoken decoy (<code>backup_admin</code>), threat watchlist IP, or 3+ repeated brute-force attacks (80–100 pts). Automated 403 Hard Block, attacking IP blacklisted in SQLite <code>flagged_ips</code>, and immediate Compromised Password Alert Email dispatched with one-click direct password reset link.
+          </p>
+          <div class="tier-footer-metric">Blacklisted in flagged_ips SQL Table • Reset Email Sent</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ARCHITECTURE & SECURITY ================= -->
+  <section class="section-architecture" id="architecture">
+    <div class="section-container">
+      <div class="section-header-center reveal-3d">
+        <span class="section-eyebrow">ENTERPRISE DEFENSE-IN-DEPTH</span>
+        <h2 class="section-title">Technical Architecture & Cryptography</h2>
+        <p class="section-lead">
+          Built with FastAPI, Argon2id, SQLite ACID transactions, and sub-10ms explainable math.
+        </p>
+      </div>
+
+      <div class="arch-pillars-grid">
+        <div class="arch-pillar-card tilt-card reveal-3d" data-stagger="0">
+          <div class="pillar-icon">🔒</div>
+          <h3 class="pillar-title">Argon2id Memory-Hard Hashing</h3>
+          <p class="pillar-desc">
+            Standard SHA-256 and bcrypt are vulnerable to GPU brute-forcing. DIGNITAS implements Argon2id with 64MB memory cost, completely neutralizing ASIC attacks.
+          </p>
+        </div>
+
+        <div class="arch-pillar-card tilt-card reveal-3d" data-stagger="1">
+          <div class="pillar-icon">🍯</div>
+          <h3 class="pillar-title">Honeytoken Deception Strategy</h3>
+          <p class="pillar-desc">
+            Decoy accounts like <code>backup_admin</code> are seeded into forms. Attackers attempting dictionary attacks on this account trigger instant +100 risk and automated IP blacklisting.
+          </p>
+        </div>
+
+        <div class="arch-pillar-card tilt-card reveal-3d" data-stagger="2">
+          <div class="pillar-icon">📱</div>
+          <h3 class="pillar-title">Dual-Mode Outbound Relay</h3>
+          <p class="pillar-desc">
+            Fully authenticated TLS SMTP relay (`smtp.gmail.com:587`) for live inboxes, accompanied by the built-in on-screen iPhone 15 Pro simulator with Web Audio API chime.
+          </p>
+        </div>
+
+        <div class="arch-pillar-card tilt-card reveal-3d" data-stagger="3">
+          <div class="pillar-icon">🗄️</div>
+          <h3 class="pillar-title">Immutable SQLite Telemetry</h3>
+          <p class="pillar-desc">
+            Every login attempt, decision latency, risk score, and signal breakdown is permanently written to <code>adaptive_auth.db</code>, accessible via the dedicated SOC Explorer.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LIVE SCENARIOS SHOWCASE ================= -->
+  <section class="section-scenarios" id="scenarios">
+    <div class="section-container">
+      <div class="section-header-center reveal-3d">
+        <span class="section-eyebrow">EVALUATION BENCHMARK</span>
+        <h2 class="section-title">8 Pre-Seeded Attack Scenarios</h2>
+        <p class="section-lead">
+          Judges can execute all 8 scenarios with one click in the interactive gateway.
+        </p>
+      </div>
+
+      <div class="scenarios-compact-grid">
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="0">
+          <span class="scen-num">1</span>
+          <div class="scen-meta">
+            <strong>Familiar Login</strong>
+            <span>Alice on trusted laptop • 0 pts • ALLOW</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="1">
+          <span class="scen-num">2</span>
+          <div class="scen-meta">
+            <strong>New Device Mismatch</strong>
+            <span>Unrecognized laptop • 35 pts • EMAIL OTP</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="2">
+          <span class="scen-num">3</span>
+          <div class="scen-meta">
+            <strong>Tor Exit Node at 3 AM</strong>
+            <span>Moscow Tor IP + Off-hours • 100 pts • BLOCK</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="3">
+          <span class="scen-num">4</span>
+          <div class="scen-meta">
+            <strong>Brute Force Velocity</strong>
+            <span>Rapid attempts • 30 pts • COOLDOWN / CAPTCHA</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="4">
+          <span class="scen-num">5</span>
+          <div class="scen-meta">
+            <strong>Cross-App Stuffing</strong>
+            <span>Bob on Pulse Social • 40 pts • CORRELATED</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="5">
+          <span class="scen-num">6</span>
+          <div class="scen-meta">
+            <strong>Honeytoken Decoy</strong>
+            <span>backup_admin trap • 100 pts • IP BLACKLISTED</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="6">
+          <span class="scen-num">7</span>
+          <div class="scen-meta">
+            <strong>Adapted Baseline</strong>
+            <span>Hardware verified & trusted • 0 pts • ALLOW</span>
+          </div>
+        </div>
+        <div class="scenario-mini-item tilt-card reveal-3d" data-stagger="7">
+          <span class="scen-num">8</span>
+          <div class="scen-meta">
+            <strong>Impossible Velocity Travel</strong>
+            <span>Delhi to London in 10 mins • 70 pts • RESET</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BOTTOM CALL TO ACTION ================= -->
+  <section class="section-cta" id="launch">
+    <div class="section-container">
+      <div class="cta-card tilt-card reveal-3d">
+        <div class="cta-glow"></div>
+        <div class="cta-content">
+          <span class="cta-badge">EXPERIENCE DIGNITAS LIVE</span>
+          <h2 class="cta-heading">Ready to inspect the live defense gateway?</h2>
+          <p class="cta-sub">
+            Launch the interactive checkpoint to enroll live targets, test attack anomalies, and view real SQLite audit records in the Security Operations Center.
+          </p>
+          <div class="cta-btn-group">
+            <a href="../dashboard/index.html" class="btn-cta-launch">
+              <span>🚀 Launch Interactive Gateway Demo</span>
+            </a>
+            <a href="../dashboard/soc.html" class="btn-cta-soc">
+              <span>🛡️ Open Security Operations (SOC Feed)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <div class="footer-brand">DIGNITAS <span class="footer-tag">PS05 GATEWAY</span></div>
+        <p class="footer-copy">Adaptive Authentication & Suspicious Login Detection. Built for Hackathon Excellence.</p>
+      </div>
+      <div class="footer-links">
+        <a href="../dashboard/index.html">Live Gateway</a>
+        <a href="../dashboard/soc.html">SOC Telemetry</a>
+        <a href="#problem">Problem PS05</a>
+        <a href="#policy">5-Tier Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

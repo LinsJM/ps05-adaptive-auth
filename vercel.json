@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api",
+      "destination": "/api/index.py"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index.py"
     },
@@ -11,6 +15,10 @@
     },
     {
       "source": "/openapi.json",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/redoc",
       "destination": "/api/index.py"
     },
     {
@@ -32,6 +40,10 @@
     {
       "source": "/",
       "destination": "/frontend/landing/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.py"
     }
   ]
 }
